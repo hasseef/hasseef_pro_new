@@ -1,215 +1,451 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>منصة حصيف | نموذج تشغيلي موحد</title>
-  <meta name="description" content="منصة حصيف - نموذج واجهة موحّد للحسابات والخدمات والتكاملات التنموية وفق رؤية 2030" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>منصة حصيف | نموذج واجهة موحّدة</title>
+  <meta name="description" content="النسخة البرمجية (ملف واحد) لواجهة منصة حصيف مع الوضع الليلي، مؤشرات أداء حية، شعارات الشركاء، حساب الإمارة، وحسابات الشركاء الاستراتيجيين، وربط التواصل." />
+
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    :root{
-      --brand:#0ea5a4; /* teal-500 fallback */
-      --brand-dark:#0f766e; /* teal-700 */
-      --brand-emerald:#059669; /* emerald-600 */
-      --accent:#ca8a04; /* yellow-600 (ذهبي) */
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            hasseef: {
+              /* Brand palette from identity (light & logo-friendly) */
+              green: '#5AA044',
+              greenSoft: '#F2FAEC',
+              gold: '#F8BE43',
+              goldSoft: '#FFF7E5',
+              dark: '#222222',
+              gray: '#6B7280',
+              graySoft: '#F7F9FC'
+            }
+          },
+          boxShadow: {
+            soft: '0 10px 30px rgba(0,0,0,0.08)'
+          },
+          fontFamily: {
+            cairo: ['Cairo', 'system-ui', 'ui-sans-serif']
+          }
+        }
+      }
     }
-    html{scroll-behavior:smooth}
-    body{font-family:"Tajawal", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"}
-    .glass{backdrop-filter:saturate(160%) blur(10px); background:rgba(255,255,255,.65)}
-    .gold-gradient{background:linear-gradient(90deg,#fef3c7,#fde68a,#facc15,#f59e0b)}
-    .brand-gradient{background:linear-gradient(120deg,#10b981,#0ea5a4,#0f766e)}
-    .hero-pattern{background-image: radial-gradient(closest-side, rgba(16,185,129,.15), rgba(16,185,129,0) 90%)}
-    .section{scroll-margin-top:96px}
+  </script>
+  <!-- Google Font (Cairo) -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    html { scroll-behavior: smooth; }
+    .container { max-width: 1200px; }
+    /* ====== Dark mode overrides (gentle/dim to preserve logo clarity) ====== */
+    html.dark body { background-color: #0b1220; color: #e5e7eb; }
+    html.dark .bg-white { background-color: #0f1629 !important; }
+    html.dark .border { border-color: rgba(255,255,255,0.12) !important; }
+    html.dark .text-hasseef-gray { color: #cbd5e1 !important; }
+    html.dark header { background-color: rgba(15,22,41,0.8) !important; }
+    html.dark .bg-hasseef-graySoft { background-color: rgba(255,255,255,0.06) !important; }
+    html.dark .bg-hasseef-greenSoft { background-color: rgba(46,200,166,0.16) !important; }
+    html.dark .bg-hasseef-goldSoft { background-color: rgba(231,198,106,0.15) !important; }
+  </style>
+  <style>
+    html { scroll-behavior: smooth; }
+    .container { max-width: 1200px; }
+    /* Dark mode (kept subtle) */
+    html.dark body { background-color: #101418; color: #1f2937; }
+    html.dark .bg-white { background-color: #fdfdfd !important; }
+    html.dark .border { border-color: rgba(0,0,0,0.08) !important; }
+    html.dark header { background-color: rgba(255,255,255,0.85) !important; }
+    html.dark .bg-hasseef-graySoft { background-color: #F2F6FB !important; }
+    html.dark .bg-hasseef-greenSoft { background-color: #F4FBF2 !important; }
+    html.dark .bg-hasseef-goldSoft { background-color: #FFF8E9 !important; }
+
+    /* High-contrast mode */
+    html.hc * { outline: 1.5px dashed rgba(0,0,0,0.25); outline-offset: 2px; }
+    html.hc a, html.hc button { text-decoration: underline; }
+
+    /* Loader */
+    #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; z-index: 70; }
+    #loader .dot { width: 10px; height: 10px; border-radius: 9999px; background: #5AA044; margin: 0 4px; animation: b 1s infinite alternate; }
+    #loader .dot:nth-child(2){ animation-delay: .15s }
+    #loader .dot:nth-child(3){ animation-delay: .3s }
+    @keyframes b { from{ transform: translateY(0) } to { transform: translateY(-8px) } }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-  <!-- NAVBAR -->
-  <header class="fixed top-0 inset-x-0 z-50">
-    <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
-      <div class="flex items-center justify-between rounded-2xl glass shadow-md px-4 py-2">
-        <a href="#home" class="flex items-center gap-3">
-          <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl brand-gradient text-white font-black shadow-md">ح</span>
-          <span class="font-extrabold text-lg tracking-wide text-slate-800">منصة حصيف</span>
+<body class=\"font-cairo text-hasseef-dark bg-white\">
+  <div id=\"loader\"><div class=\"dot\"></div><div class=\"dot\"></div><div class=\"dot\"></div></div>
+  <!-- ====== Header / Navbar ====== -->
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-hasseef-graySoft">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between py-3">
+        <a href="#home" class="flex items-center gap-2">
+          <img src=\"assets/hasseef.png\" alt=\"حصيف\" class=\"h-9 w-auto\"/> <span class=\"font-extrabold text-lg tracking-wide\">منصة حصيف</span>
         </a>
-        <div class="hidden md:flex items-center gap-6 text-sm font-medium">
-          <a href="#about" class="hover:text-emerald-700">عن المنصة</a>
-          <a href="#accounts" class="hover:text-emerald-700">الحسابات</a>
-          <a href="#services" class="hover:text-emerald-700">الخدمات والصلاحيات</a>
-          <a href="#map" class="hover:text-emerald-700">الخرائط والمؤشرات</a>
-          <a href="#insights" class="hover:text-emerald-700">الرسوم البيانية</a>
-          <a href="#management" class="hover:text-emerald-700">إدارة المنصة</a>
-          <a href="#pricing" class="hover:text-emerald-700">الاشتراكات</a>
-          <a href="#sponsors" class="hover:text-emerald-700">الرعاة</a>
-          <a href="#partners" class="hover:text-emerald-700">الشركاء</a>
-          <a href="#support" class="hover:text-emerald-700">الدعم والمقترحات</a>
-        </div>
-        <div class="flex items-center gap-2">
-          <a href="https://hasseef.github.io/Hasseef_new/#account-funder" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white text-sm px-4 py-2 hover:bg-slate-800 transition shadow">
-            <span>عرض توضيحي</span>
-          </a>
-          <button id="menuBtn" class="md:hidden inline-flex items-center justify-center rounded-xl border border-slate-200 p-2 bg-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+        <nav class="hidden md:flex items-center gap-6 text-sm">
+          <a href="#about" class="hover:text-hasseef-green">عن المنصة</a>
+          <a href="#accounts" class="hover:text-hasseef-green">الحسابات</a>
+          <a href="#mgmt" class="hover:text-hasseef-green">إدارة المنصة</a>
+          <a href="#pricing" class="hover:text-hasseef-green">الاشتراكات</a>
+          <a href="#sponsors" class="hover:text-hasseef-green">الرعاة</a>
+          <a href="#stories" class="hover:text-hasseef-green">قصص نجاح</a>
+          <a href="#contact" class="hover:text-hasseef-green">تواصل</a>
+          <button id="themeToggle" type="button" class="ms-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border" title="الوضع الليلي">
+            <span class="text-xs">الوضع</span>
+            <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8-9h1M3 12H2m14.95 6.364l.707.707M5.343 6.343l-.707-.707m12.021 0l.707-.707M5.343 17.657l-.707.707"/></svg>
           </button>
-        </div>
+        <button id=\"hcToggle\" type=\"button\" class=\"ms-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border\" title=\"وضع تباين مرتفع\">
+            <span class=\"text-xs\">تباين</span>
+          </button>
+        </nav>
+        <button id="menuBtn" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border text-hasseef-dark">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
       </div>
-      <div id="mobileMenu" class="md:hidden hidden mt-2 rounded-2xl glass shadow divide-y divide-white/40">
-        <a href="#about" class="block px-4 py-3">عن المنصة</a>
-        <a href="#accounts" class="block px-4 py-3">الحسابات</a>
-        <a href="#services" class="block px-4 py-3">الخدمات والصلاحيات</a>
-        <a href="#map" class="block px-4 py-3">الخرائط والمؤشرات</a>
-        <a href="#insights" class="block px-4 py-3">الرسوم البيانية</a>
-        <a href="#management" class="block px-4 py-3">إدارة المنصة</a>
-        <a href="#pricing" class="block px-4 py-3">الاشتراكات</a>
-        <a href="#sponsors" class="block px-4 py-3">الرعاة</a>
-        <a href="#partners" class="block px-4 py-3">الشركاء</a>
-        <a href="#support" class="block px-4 py-3">الدعم والمقترحات</a>
-      </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ABOUT -->
-  <section id="about" class="section py-16">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-12 gap-8 items-start">
-        <div class="md:col-span-7">
-          <h2 class="text-2xl md:text-3xl font-black text-slate-900">عن منصة حصيف</h2>
-          <p class="mt-4 text-slate-700 leading-8">منصة حصيف هي جزء من مبادرة تلبية، وُلدت من حائل بدعم كريم من سمو أمير المنطقة وسمو نائبه. تقدم المنصة تكاملًا بين القطاعات عبر حسابات متخصصة، مع لوحات تحليل وربط علمي من الجامعات، ونوافذ للتمويل والمنح والاستثمار، وتقارير أثر وشفافية عالية.</p>
-          <ul class="mt-6 space-y-3 text-slate-700">
-            <li class="flex items-start gap-3"><span class="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-600"></span><span>ربط المشاريع والأحداث ببرامج وأهداف رؤية 2030.</span></li>
-            <li class="flex items-start gap-3"><span class="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-600"></span><span>تحفيز المسؤولية الاجتماعية للشركات عبر فرص منح ورعاية تجارية.</span></li>
-            <li class="flex items-start gap-3"><span class="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-600"></span><span>آلية سهلة وآمنة للتبرعات والاستثمار والاشتراك.</span></li>
-            <li class="flex items-start gap-3"><span class="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-600"></span><span>تقارير أداء ولوحات ذكاء تُظهر الأثر وعدد المستفيدين والفرص.</span></li>
-          </ul>
-        </div>
-        <div class="md:col-span-5">
-          <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
-            <h3 class="font-extrabold text-lg">مزايا سريعة</h3>
-            <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div class="rounded-2xl border border-slate-200 p-4">تحويل رقمي للمنشآت (ERP)</div>
-              <div class="rounded-2xl border border-slate-200 p-4">محفظة مالية للمنح والاستثمار</div>
-              <div class="rounded-2xl border border-slate-200 p-4">تكامل API بين الحسابات</div>
-              <div class="rounded-2xl border border-slate-200 p-4">قياس أثر وتقارير شفافة</div>
-            </div>
-            <div class="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-900">
-              تم اعتماد نسخة أولية ضمن برنامج وطني لتقنية المعلومات (MVPLAB) ويخدم أكثر من 400 منشأة.
-            </div>
-          </div>
+      <div id="mobileNav" class="hidden md:hidden pb-3">
+        <div class="grid gap-2 text-sm">
+          <a href="#about" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">عن المنصة</a>
+          <a href="#accounts" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">الحسابات</a>
+          <a href="#mgmt" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">إدارة المنصة</a>
+          <a href="#pricing" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">الاشتراكات</a>
+          <a href="#sponsors" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">الرعاة</a>
+          <a href="#stories" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">قصص نجاح</a>
+          <a href="#contact" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">تواصل</a>
+          <button id="themeToggleMobile" class="mt-2 px-3 py-2 rounded-xl border">تبديل الوضع</button>
         </div>
       </div>
     </div>
-  </section>
+  </header>
 
-  <!-- ACCOUNTS -->
-  <section id="accounts" class="section py-16 bg-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex items-end justify-between gap-4">
+  <!-- ====== Hero ====== -->
+  <section id="home" class="relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none select-none" aria-hidden="true">
+      <div class="absolute -left-24 -top-24 w-96 h-96 rounded-full bg-hasseef-greenSoft blur-3xl"></div>
+      <div class="absolute -right-24 -bottom-24 w-96 h-96 rounded-full bg-hasseef-goldSoft blur-3xl"></div>
+    </div>
+    <div class="container mx-auto px-4 py-16 md:py-24">
+      <div class="grid md:grid-cols-2 gap-10 items-center">
         <div>
-          <h2 class="text-2xl md:text-3xl font-black">الحسابات</h2>
-          <p class="mt-2 text-slate-600">ستة حسابات أساسية + حساب الشركاء الاستراتيجيين. اختر بطاقة للحالة التفصيلية.</p>
+          <h1 class="text-3xl md:text-5xl font-extrabold leading-tight">
+            منصة وطنية للتكامل التنموي
+            <span class="text-hasseef-green">— حصيف</span>
+          </h1>
+          <p class="mt-4 text-hasseef-gray leading-relaxed">
+            نموذج عمل مبتكر يمكّن الأفراد والقطاعات والجامعات والجهات الحكومية والمانحين من التعاون الذكي لتحقيق مستهدفات رؤية المملكة 2030 عبر أدوات علمية وتنفيذية عملية.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href="#accounts" class="px-5 py-3 rounded-xl bg-hasseef-green text-white font-semibold shadow-soft">ابدأ من الحساب المناسب</a>
+            <a href="https://hasseef.github.io/Hasseef_new/#account-funder" class="px-5 py-3 rounded-xl border font-semibold hover:bg-hasseef-graySoft" target="_blank" rel="noopener">مرجع الهوية البصرية</a>
+          </div>
+          <div class="mt-6 text-xs text-hasseef-gray">
+            * هذه نسخة ملف واحد (index.html) قابلة للرفع على GitHub — للمراجعة والعرض.
+          </div>
         </div>
         <div class="relative">
-          <input id="accountSearch" type="search" placeholder="ابحث عن حساب..." class="w-64 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"/>
+          <div class="rounded-3xl border bg-white shadow-soft p-6">
+            <div class="grid grid-cols-3 gap-4">
+              <div class=\"col-span-3 flex items-center justify-between gap-3\"><div class=\"text-sm font-bold\">لوحات مؤشرات حية</div><div class=\"flex items-center gap-2 text-xs\"><label for=\"kpiProfile\">منظور:</label><select id=\"kpiProfile\" class=\"rounded-lg border px-2 py-1\"><option value=\"national\">وطني</option><option value=\"hail\">منطقة حائل</option><option value=\"private\">القطاع الخاص</option><option value=\"nonprofit\">القطاع غير الربحي</option></select></div></div>
+              <div class="rounded-2xl bg-hasseef-graySoft p-4">
+                <div class="text-xs text-hasseef-gray">التوظيف</div>
+                <div class="text-2xl font-extrabold"><span id="kpi-employment">+18%</span></div>
+              </div>
+              <div class="rounded-2xl bg-hasseef-graySoft p-4">
+                <div class="text-xs text-hasseef-gray">التكامل</div>
+                <div class="text-2xl font-extrabold"><span id="kpi-integration">92%</span></div>
+              </div>
+              <div class="rounded-2xl bg-hasseef-graySoft p-4">
+                <div class="text-xs text-hasseef-gray">المشاريع</div>
+                <div class="text-2xl font-extrabold"><span id="kpi-projects">1,240</span></div>
+              </div>
+              <div class="col-span-3 rounded-2xl bg-hasseef-goldSoft p-4">
+                <div class="text-xs text-hasseef-gray">محاذاة أهداف رؤية 2030</div>
+                <div class="flex items-center gap-2 mt-1 w-full">
+                  <div id="bar-1" class="h-2 rounded bg-hasseef-green" style="width:66%"></div>
+                  <div id="bar-2" class="h-2 rounded bg-emerald-300" style="width:17%"></div>
+                  <div id="bar-3" class="h-2 rounded bg-emerald-100" style="width:17%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== About ====== -->
+  <section id="about" class="py-16 md:py-24 bg-hasseef-graySoft">
+    <div class="container mx-auto px-4">
+      <div class="grid md:grid-cols-2 gap-10 items-start">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-extrabold">عن المنصة</h2>
+          <p class="mt-4 text-hasseef-gray leading-relaxed">
+            مبادرة تنموية انطلقت من منطقة حائل بدعم من القيادة، كاستجابة مجتمعية واعية لتحقيق مستهدفات رؤية المملكة 2030. تمكّن المنصة أصحاب الحلول من المشاركة، وتربط المشاريع بالجهات ذات العلاقة، وتوفر أدوات قياس الأداء والشفافية، مع لوحات مؤشرات وتقارير ديناميكية.
+          </p>
+          <ul class="mt-4 space-y-2 text-hasseef-dark/80">
+            <li class="flex gap-2 items-start">
+              <span class="mt-1 inline-block w-2 h-2 rounded-full bg-hasseef-green"></span>
+              ربط المشاريع بأهداف الرؤية (الاستراتيجية – الفرعية – التفصيلية).
+            </li>
+            <li class="flex gap-2 items-start">
+              <span class="mt-1 inline-block w-2 h-2 rounded-full bg-hasseef-green"></span>
+              تقارير المسؤولية الاجتماعية للشركات وربطها بالجهات الحكومية.
+            </li>
+            <li class="flex gap-2 items-start">
+              <span class="mt-1 inline-block w-2 h-2 rounded-full bg-hasseef-green"></span>
+              آلية آمنة وسهلة للتبرعات والتمويل والاستثمار عبر الإنترنت.
+            </li>
+          </ul>
+        </div>
+        <div class="rounded-3xl border bg-white p-6 shadow-soft">
+          <h3 class="font-bold text-lg">نطاق الحسابات المستهدفة</h3>
+          <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+            <div class="p-3 rounded-xl bg-hasseef-greenSoft">الأفراد</div>
+            <div class="p-3 rounded-xl bg-hasseef-greenSoft">القطاع الخاص</div>
+            <div class="p-3 rounded-xl bg-hasseef-greenSoft">القطاع غير الربحي</div>
+            <div class="p-3 rounded-xl bg-hasseef-greenSoft">الجامعات</div>
+            <div class="p-3 rounded-xl bg-hasseef-greenSoft">الحكومة</div>
+            <div class="p-3 rounded-xl bg-hasseef-greenSoft">المانحون</div>
+          </div>
+          <div class="mt-6 text-xs text-hasseef-gray">
+            * تشمل هذه النسخة ربطًا بالشركاء الاستراتيجيين (مركز أداء، المركز الوطني لتنمية القطاع غير الربحي، وزارة الاقتصاد والتخطيط، وزارة المالية، وزارة الداخلية، وزارة الثقافة، وغيرها).
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Accounts ====== -->
+  <section id="accounts" class="py-16 md:py-24">
+    <div class="container mx-auto px-4">
+      <div class="flex items-end justify-between gap-6">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-extrabold">الحسابات والخدمات الأساسية</h2>
+          <p class="mt-2 text-hasseef-gray">اختر الحساب لاستعراض الخدمات والصلاحيات وروابط التكامل.</p>
+        </div>
+        <div class="hidden md:flex items-center gap-2 text-xs text-hasseef-gray">
+          <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-hasseef-goldSoft">هوية موحّدة</span>
+          <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-hasseef-greenSoft">تكامل بيني</span>
         </div>
       </div>
 
-      <div id="accountGrid" class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- Card template repeated with data-account attribute for filtering -->
-        <button data-account="الأفراد" class="account-card text-start rounded-2xl border border-slate-200 bg-white p-5 hover:border-emerald-500 hover:shadow-md transition">
+      <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Emirate Account (new) -->
+        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="emirate">
+          <div class="flex items-center justify-between">
+            <h3 class="font-extrabold">حساب الإمارة</h3>
+            <span class="text-xs px-2 py-1 rounded bg-hasseef-goldSoft">إشراف مناطقي</span>
+          </div>
+          <p class="mt-2 text-sm text-hasseef-gray">استعراض مشاريع المنطقة، اعتماد الفعاليات، متابعة الفرص، والتكامل مع الشركاء.</p>
+          <ul class="mt-4 text-sm space-y-2">
+            <li>• لوحة مبادرات ومشاريع المنطقة</li>
+            <li>• متابعة الوظائف والتدريب والتطوع</li>
+            <li>• تقارير مؤشرات إقليمية وربط بالجهات</li>
+          </ul>
+          <div class="mt-4 flex gap-2">
+            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-emirate">عرض التفاصيل</button>
+            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
+          </div>
+        </div>
+
+        <!-- Other accounts -->
+        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="individual">
           <div class="flex items-center justify-between">
             <h3 class="font-extrabold">حساب الأفراد</h3>
-            <span class="text-xs rounded-full bg-emerald-50 text-emerald-700 px-3 py-1">مبادراتي</span>
+            <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">مبادراتي</span>
           </div>
-          <p class="mt-2 text-sm text-slate-600">إدراج مبادرات ومشاريع، التقديم على فرص، محفظة التبرع/الاستثمار، التطوع والتدريب.</p>
-        </button>
+          <p class="mt-2 text-sm text-hasseef-gray">إدراج مبادرة وفق نموذج اللبنات التسعة وربطها ببرامج وأهداف الرؤية.</p>
+          <ul class="mt-4 text-sm space-y-2">
+            <li>• إدراج المبادرات والمشاريع</li>
+            <li>• تتبع القبول والاعتماد</li>
+            <li>• الالتحاق بالفرص (وظائف، تدريب، تطوع)</li>
+          </ul>
+          <div class="mt-4 flex gap-2">
+            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-individual">عرض التفاصيل</button>
+            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
+          </div>
+        </div>
 
-        <button data-account="القطاع الخاص" class="account-card text-start rounded-2xl border border-slate-200 bg-white p-5 hover:border-emerald-500 hover:shadow-md transition">
+        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="private">
           <div class="flex items-center justify-between">
             <h3 class="font-extrabold">حساب القطاع الخاص</h3>
-            <span class="text-xs rounded-full bg-yellow-50 text-yellow-700 px-3 py-1">مسؤولية اجتماعية</span>
+            <span class="text-xs px-2 py-1 rounded bg-hasseef-goldSoft">تقارير المسؤولية</span>
           </div>
-          <p class="mt-2 text-sm text-slate-600">فرص منح ورعاية تجارية، تقارير أثر، ربط بالجهات الحكومية، لوحة التزامات CSR.</p>
-        </button>
+          <p class="mt-2 text-sm text-hasseef-gray">تقارير المسؤولية الاجتماعية وربط دعم المشاريع بالجهات الحكومية.</p>
+          <ul class="mt-4 text-sm space-y-2">
+            <li>• فرص منح ورعاية</li>
+            <li>• تقارير الأثر والتوافق مع الرؤية</li>
+            <li>• إدارة المحفظة والشهادات</li>
+          </ul>
+          <div class="mt-4 flex gap-2">
+            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-private">عرض التفاصيل</button>
+            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
+          </div>
+        </div>
 
-        <button data-account="القطاع غير الربحي" class="account-card text-start rounded-2xl border border-slate-200 bg-white p-5 hover:border-emerald-500 hover:shadow-md transition">
+        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="nonprofit">
           <div class="flex items-center justify-between">
             <h3 class="font-extrabold">حساب القطاع غير الربحي</h3>
-            <span class="text-xs rounded-full bg-emerald-50 text-emerald-700 px-3 py-1">طلب تمويل</span>
+            <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">حوكمة وأثر</span>
           </div>
-          <p class="mt-2 text-sm text-slate-600">طرح مشاريع وبرامج، جذب متبرعين ومستثمرين، إدارة المتطوعين، قياس أثر.</p>
-        </button>
+          <p class="mt-2 text-sm text-hasseef-gray">فرص التمويل، إدارة المشاريع، قياس الأداء، وجذب المتطوعين.</p>
+          <ul class="mt-4 text-sm space-y-2">
+            <li>• نشر الفرص (وظائف/تطوع/تدريب)</li>
+            <li>• تمويل واستثمار ومتابعة الأداء</li>
+            <li>• تقارير للجهات الشريكة</li>
+          </ul>
+          <div class="mt-4 flex gap-2">
+            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-nonprofit">عرض التفاصيل</button>
+            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
+          </div>
+        </div>
 
-        <button data-account="الجامعات" class="account-card text-start rounded-2xl border border-slate-200 bg-white p-5 hover:border-emerald-500 hover:shadow-md transition">
+        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="university">
           <div class="flex items-center justify-between">
             <h3 class="font-extrabold">حساب الجامعات</h3>
-            <span class="text-xs rounded-full bg-slate-100 text-slate-700 px-3 py-1">تعزيز علمي</span>
+            <span class="text-xs px-2 py-1 rounded bg-hasseef-goldSoft">تعزيز علمي</span>
           </div>
-          <p class="mt-2 text-sm text-slate-600">تعزيز علمي للمشاريع، شراكات بحثية واستشارية، فرص تدريب وتوظيف.</p>
-        </button>
+          <p class="mt-2 text-sm text-hasseef-gray">تعزيز علمي للمشاريع، شراكات، فرص تدريب تعاوني، ودور استشاري.</p>
+          <ul class="mt-4 text-sm space-y-2">
+            <li>• اعتماد علمي وتقييم المشاريع</li>
+            <li>• تسويق البرامج والبحوث</li>
+            <li>• إدارة مرافق للإيجار والاستثمار</li>
+          </ul>
+          <div class="mt-4 flex gap-2">
+            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-university">عرض التفاصيل</button>
+            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
+          </div>
+        </div>
 
-        <button data-account="الحكومة" class="account-card text-start rounded-2xl border border-slate-200 bg-white p-5 hover:border-emerald-500 hover:shadow-md transition">
+        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="government">
           <div class="flex items-center justify-between">
             <h3 class="font-extrabold">حساب الحكومة</h3>
-            <span class="text-xs rounded-full bg-slate-100 text-slate-700 px-3 py-1">حلول</span>
+            <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">تحسين الفاعلية</span>
           </div>
-          <p class="mt-2 text-sm text-slate-600">طلب حلول تكاملية، اعتماد الفعاليات، تقارير المناطق، متابعة المؤشرات.</p>
-        </button>
+          <p class="mt-2 text-sm text-hasseef-gray">إدارة المبادرات الحكومية وربطها بأهداف الرؤية واعتماد الفعاليات.</p>
+          <ul class="mt-4 text-sm space-y-2">
+            <li>• إدارة المبادرات والفعاليات</li>
+            <li>• طلب حلول من القطاعات المختلفة</li>
+            <li>• تقارير الأداء والتكامل الإقليمي</li>
+          </ul>
+          <div class="mt-4 flex gap-2">
+            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-government">عرض التفاصيل</button>
+            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
+          </div>
+        </div>
 
-        <button data-account="المانحين" class="account-card text-start rounded-2xl border border-slate-200 bg-white p-5 hover:border-emerald-500 hover:shadow-md transition">
+        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="funder">
           <div class="flex items-center justify-between">
             <h3 class="font-extrabold">حساب المانحين</h3>
-            <span class="text-xs rounded-full bg-yellow-50 text-yellow-700 px-3 py-1">محفظة مانح</span>
+            <span class="text-xs px-2 py-1 rounded bg-hasseef-goldSoft">محفظة وتمويل</span>
           </div>
-          <p class="mt-2 text-sm text-slate-600">ملف مانح، فرص منح حسب المعايير، تقارير، محفظة ومؤشرات أداء.</p>
-        </button>
-
-        <button data-account="الشركاء الاستراتيجيون" class="account-card text-start rounded-2xl border border-slate-200 bg-white p-5 hover:border-emerald-500 hover:shadow-md transition">
-          <div class="flex items-center justify-between">
-            <h3 class="font-extrabold">حساب الشركاء الاستراتيجيين</h3>
-            <span class="text-xs rounded-full bg-emerald-50 text-emerald-700 px-3 py-1">تمكين</span>
+          <p class="mt-2 text-sm text-hasseef-gray">فرص المنح، محفظة المانح، تقارير، وقياس الأثر للمشاريع الممولة.</p>
+          <ul class="mt-4 text-sm space-y-2">
+            <li>• استعراض الفرص وفق المعايير</li>
+            <li>• متابعة الأثر والمؤشرات</li>
+            <li>• تقارير رقابية وشهادات</li>
+          </ul>
+          <div class="mt-4 flex gap-2">
+            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-funder">عرض التفاصيل</button>
+            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
           </div>
-          <p class="mt-2 text-sm text-slate-600">تمكين الجهات الوطنية (مركز أداء، NCDC، منشآت، الوزارات) بواجهات بيانات ومؤشرات.</p>
-        </button>
+        </div>
       </div>
 
-      <!-- Modal for account details -->
-      <div id="accountModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/40" data-close></div>
-        <div class="relative max-w-3xl w-full rounded-3xl bg-white p-6 shadow-2xl border border-slate-200">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h3 id="modalTitle" class="text-xl font-extrabold">عنوان الحساب</h3>
-              <p id="modalSub" class="mt-1 text-slate-600 text-sm">وصف موجز للحساب.</p>
-            </div>
-            <button class="rounded-xl border border-slate-200 p-2 hover:bg-slate-50" data-close>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 1 0-1.06-1.06L10 8.94 6.28 5.22Z"/></svg>
-            </button>
-          </div>
+      <!-- Strategic Partners logos -->
+      <div class="mt-12">
+        <h3 class="font-extrabold text-lg mb-4">الشركاء الاستراتيجيون</h3>
+        <div class=\"grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-sm items-center\">
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10\" src=\"assets/vision2030.png\" alt=\"Vision 2030\"/></div>
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10\" src=\"assets/hasseef.png\" alt=\"Hasseef\"/></div>
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10\" src=\"assets/talbiya.png\" alt=\"Talbiya Initiative\"/></div>
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10 opacity-60\" src=\"https://via.placeholder.com/160x40?text=NPOC\" alt=\"المركز الوطني لتنمية القطاع غير الربحي\"/></div>
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10 opacity-60\" src=\"https://via.placeholder.com/160x40?text=Adaa\" alt=\"مركز أداء\"/></div>
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10 opacity-60\" src=\"https://via.placeholder.com/160x40?text=Partners\" alt=\"Partners\"/></div>
+        </div></div>
+          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=Adaa" alt="مركز أداء"/><div class="sr-only">مركز أداء</div></div>
+          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MEP" alt="وزارة الاقتصاد والتخطيط"/><div class="sr-only">وزارة الاقتصاد والتخطيط</div></div>
+          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MOF" alt="وزارة المالية"/><div class="sr-only">وزارة المالية</div></div>
+          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MOI" alt="وزارة الداخلية"/><div class="sr-only">وزارة الداخلية</div></div>
+          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MOC" alt="وزارة الثقافة"/><div class="sr-only">وزارة الثقافة</div></div>
+        </div>
+      </div>
 
-          <div class="mt-5 grid md:grid-cols-12 gap-6">
-            <div class="md:col-span-7 space-y-4">
-              <div class="rounded-2xl border border-slate-200 p-4">
-                <h4 class="font-bold">الخدمات الأساسية</h4>
-                <ul id="modalServices" class="mt-2 text-sm text-slate-700 list-disc pr-5 space-y-1"></ul>
-              </div>
-              <div class="rounded-2xl border border-slate-200 p-4">
-                <h4 class="font-bold">الصلاحيات</h4>
-                <ul id="modalPerms" class="mt-2 text-sm text-slate-700 list-disc pr-5 space-y-1"></ul>
-              </div>
+      <!-- Strategic partner accounts (new) -->
+      <div class="mt-10">
+        <h3 class="font-extrabold text-lg mb-4">حسابات الشركاء الاستراتيجيين</h3>
+        <div class=\"grid md:grid-cols-2 lg:grid-cols-3 gap-6\">
+          <div class=\"rounded-2xl border p-6\">
+            <div class=\"flex items-center justify-between\">
+              <h4 class=\"font-bold\">حساب المركز الوطني لتنمية القطاع غير الربحي</h4>
+              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
             </div>
-            <div class="md:col-span-5 space-y-4">
-              <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                <h4 class="font-bold text-emerald-900">الربط والتكامل</h4>
-                <p id="modalApi" class="mt-2 text-sm text-emerald-900">بنية API رمزية توضح نقاط الربط مع بقية الحسابات.</p>
-              </div>
-              <div class="rounded-2xl border border-yellow-200 bg-yellow-50 p-4">
-                <h4 class="font-bold text-yellow-900">قيمة مضافة</h4>
-                <p id="modalValue" class="mt-2 text-sm text-yellow-900">كيف يضيف الحساب قيمة ضمن المنصة.</p>
-              </div>
+            <p class=\"mt-2 text-sm text-hasseef-gray\">متابعة دعم القطاع، تقارير الأثر، وتكامل موافقات البرامج.</p>
+            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-npoc\">عرض التفاصيل</button></div>
+          </div></h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
             </div>
+            <p class="mt-2 text-sm text-hasseef-gray">متابعة دعم القطاع، تقارير الأثر، وتكامل موافقات البرامج.</p>
+          </div>
+          <div class=\"rounded-2xl border p-6\">
+            <div class=\"flex items-center justify-between\">
+              <h4 class=\"font-bold\">حساب مركز أداء</h4>
+              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
+            </div>
+            <p class=\"mt-2 text-sm text-hasseef-gray\">مؤشرات الأداء الوطني للمشاريع وتكامل القياس.</p>
+            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-adaa\">عرض التفاصيل</button></div>
+          </div></h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
+            </div>
+            <p class="mt-2 text-sm text-hasseef-gray">مؤشرات الأداء الوطني للمشاريع وتكامل القياس.</p>
+          </div>
+          <div class=\"rounded-2xl border p-6\">
+            <div class=\"flex items-center justify-between\">
+              <h4 class=\"font-bold\">حساب وزارة الاقتصاد والتخطيط</h4>
+              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
+            </div>
+            <p class=\"mt-2 text-sm text-hasseef-gray\">مواءمة المبادرات مع الخطط الاقتصادية ومتابعة المؤشرات.</p>
+            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-mep\">عرض التفاصيل</button></div>
+          </div></h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
+            </div>
+            <p class="mt-2 text-sm text-hasseef-gray">مواءمة المبادرات مع الخطط الاقتصادية ومتابعة المؤشرات.</p>
+          </div>
+          <div class=\"rounded-2xl border p-6\">
+            <div class=\"flex items-center justify-between\">
+              <h4 class=\"font-bold\">حساب وزارة المالية</h4>
+              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
+            </div>
+            <p class=\"mt-2 text-sm text-hasseef-gray\">إشراف مالي وتقارير الامتثال للمشاريع المدعومة.</p>
+            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-mof\">عرض التفاصيل</button></div>
+          </div></h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
+            </div>
+            <p class="mt-2 text-sm text-hasseef-gray">إشراف مالي وتقارير الامتثال للمشاريع المدعومة.</p>
+          </div>
+          <div class=\"rounded-2xl border p-6\">
+            <div class=\"flex items-center justify-between\">
+              <h4 class=\"font-bold\">حساب وزارة الداخلية</h4>
+              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
+            </div>
+            <p class=\"mt-2 text-sm text-hasseef-gray\">تكامل مناطقي مع إمارات المناطق ومؤشرات السلامة.</p>
+            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-moi\">عرض التفاصيل</button></div>
+          </div></h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
+            </div>
+            <p class="mt-2 text-sm text-hasseef-gray">تكامل مناطقي مع إمارات المناطق ومؤشرات السلامة.</p>
+          </div>
+          <div class=\"rounded-2xl border p-6\">
+            <div class=\"flex items-center justify-between\">
+              <h4 class=\"font-bold\">حساب وزارة الثقافة</h4>
+              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
+            </div>
+            <p class=\"mt-2 text-sm text-hasseef-gray\">متابعة المشاريع الثقافية والفعاليات.</p>
+            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-moc\">عرض التفاصيل</button></div>
+          </div></h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
+            </div>
+            <p class="mt-2 text-sm text-hasseef-gray">متابعة المشاريع الثقافية والفعاليات.</p>
           </div>
         </div>
       </div>
@@ -217,606 +453,651 @@
     </div>
   </section>
 
-  <!-- MAP & REGIONAL KPIs -->
-  <section id="map" class="section py-16 bg-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl md:text-3xl font-black">الخرائط والمؤشرات (نسخة تفاعلية مبسطة)</h2>
-      <p class="mt-2 text-slate-600">اختَر منطقة لعرض مؤشرات تنموية مرتبطة بالحسابات. (يمكن استبدال المخطط بـ SVG/GeoJSON لاحقًا)</p>
-      <div class="mt-8 grid lg:grid-cols-3 gap-6">
-        <div class="rounded-3xl border border-slate-200 bg-white p-6 lg:col-span-2">
-          <div class="rounded-2xl border border-slate-200 bg-gradient-to-tr from-emerald-50 to-slate-50 p-6 h-[360px] flex items-center justify-center">
-            <div class="text-center">
-              <div class="text-sm text-slate-500">خريطة مكانية — نسخة تجريبية</div>
-              <div class="mt-2 text-xl font-bold"><span id="regionTitle">منطقة حائل</span></div>
-              <div class="mt-4 grid grid-cols-3 gap-3">
-                <div class="rounded-xl bg-white border border-slate-200 p-4"><div class="text-xs text-slate-500">وظائف</div><div id="kpiJobs" class="text-2xl font-black text-emerald-700">—</div></div>
-                <div class="rounded-xl bg-white border border-slate-200 p-4"><div class="text-xs text-slate-500">منح</div><div id="kpiGrants" class="text-2xl font-black text-emerald-700">—</div></div>
-                <div class="rounded-xl bg-white border border-slate-200 p-4"><div class="text-xs text-slate-500">متطوعون</div><div id="kpiVols" class="text-2xl font-black text-emerald-700">—</div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="rounded-3xl border border-slate-200 bg-white p-6">
-          <h3 class="font-bold">اختر المنطقة</h3>
-          <div id="regionList" class="mt-3 grid grid-cols-2 gap-2 text-sm"></div>
-          <div class="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-emerald-900 text-xs">ملاحظة: عند تزويدنا بملف SVG جغرافي للمناطق، سنستبدل لوحة الاختيار بخريطة تفاعلية كاملة.</div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- ====== Platform Management ====== -->
+  <section id="mgmt" class="py-16 md:py-24 bg-hasseef-greenSoft/50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-2xl md:text-3xl font-extrabold">إدارة المنصة والدعم الفني</h2>
+      <p class="mt-2 text-hasseef-gray">لوحة موحّدة للمشرف مع قنوات دعم ومقترحات تحسين من المستخدمين.</p>
 
-  <!-- SERVICES & PERMISSIONS (overview) -->
-  <section id="services" class="section py-16">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl md:text-3xl font-black">الخدمات والصلاحيات (نظرة عامة)</h2>
-      <p class="mt-2 text-slate-600">تمثيل موجز لأبرز الخدمات المشتركة عبر الحسابات مع آلية صلاحيات واضحة.</p>
-
-      <div class="mt-8 grid md:grid-cols-2 gap-6">
-        <div class="rounded-3xl border border-slate-200 bg-white p-6">
-          <h3 class="font-extrabold">خدمات مشتركة</h3>
-          <ul class="mt-3 text-sm text-slate-700 space-y-2">
-            <li>إدارة المبادرات/المشاريع (إنشاء، تعديل، متابعة، إغلاق).</li>
-            <li>محفظة مالية (تبرع، استثمار، اشتراك، رعاية) مع سجلات ومعاملات.</li>
-            <li>فرص (وظائف، تدريب، تطوع، منح، فعاليات) مع ترشيح ذكي.</li>
-            <li>تقارير ومؤشرات أداء وربط بأهداف الرؤية.</li>
-            <li>مراسلات وإشعارات مركزية، وإدارة ملفات وشهادات.</li>
+      <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="rounded-2xl border bg-white p-5">
+          <h4 class="font-bold">لوحة المشرف العام</h4>
+          <ul class="mt-3 text-sm space-y-2 text-hasseef-gray">
+            <li>• إدارة الحسابات والصلاحيات</li>
+            <li>• تقارير إجمالية ولوحات مؤشرات</li>
+            <li>• إدارة المحتوى والصفحات</li>
           </ul>
         </div>
-        <div class="rounded-3xl border border-slate-200 bg-white p-6">
-          <h3 class="font-extrabold">طبقات الصلاحيات</h3>
-          <ul class="mt-3 text-sm text-slate-700 space-y-2">
-            <li>مالك الحساب: جميع الصلاحيات بما فيها الربط والتكامل.</li>
-            <li>مدير: إدارة المحتوى والموافقات والتقارير.</li>
-            <li>مشغّل: تنفيذ ومتابعة دون تغيير الإعدادات العليا.</li>
-            <li>مراقب: عرض التقارير والمؤشرات فقط.</li>
-            <li>زائر: وصول محدود للعرض العام.</li>
+        <div class="rounded-2xl border bg-white p-5">
+          <h4 class="font-bold">نظام الإشعارات</h4>
+          <ul class="mt-3 text-sm space-y-2 text-hasseef-gray">
+            <li>• موافقات واعتمادات</li>
+            <li>• أحداث مهمة ومهل زمنية</li>
+            <li>• تنبيهات تكامل API</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl border bg-white p-5">
+          <h4 class="font-bold">الدعم الفني</h4>
+          <ul class="mt-3 text-sm space-y-2 text-hasseef-gray">
+            <li>• تذاكر دعم ومتابعة الحالة</li>
+            <li>• قاعدة معرفة وإرشادات</li>
+            <li>• تصنيف المقترحات حسب الأثر</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl border bg-white p-5">
+          <h4 class="font-bold">واجهات التكامل (محاكاة)</h4>
+          <ul class="mt-3 text-sm space-y-2 text-hasseef-gray">
+            <li>• OAuth 2.0 / Webhooks</li>
+            <li>• REST API موثّق</li>
+            <li>• قوالب تبادل بيانات JSON</li>
           </ul>
         </div>
       </div>
 
-      <div class="mt-6 rounded-3xl border border-slate-200 bg-emerald-50 p-6 text-emerald-900">
-        <p class="text-sm">ملاحظة: تتسع البنية للتخصيص لكل حساب حتى 4 مستويات للخدمة، وفق النموذج المعتمد سابقًا.</p>
+      <!-- Feedback Form -->
+      <div class="mt-10 rounded-3xl border bg-white p-6 shadow-soft">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h4 class="font-bold">اقترح تحسينًا</h4>
+            <p class="text-sm text-hasseef-gray">صوّت على الأفكار وشاركنا مقترحاتك لتحسين تجربة المنصة.</p>
+          </div>
+          <a href="#contact" class="px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm">أرسل اقتراحًا</a>
+        </div>
+
+        <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="ideas">
+          <div class="rounded-xl border p-4">
+            <div class="text-sm font-bold">دعم لوحة للمؤشرات الإقليمية</div>
+            <p class="mt-1 text-xs text-hasseef-gray">عرض المقارنات بين المناطق وإبراز الشركات الأكثر مساهمة.</p>
+            <div class="mt-3 flex items-center gap-2 text-xs">
+              <button class="vote px-3 py-1 rounded-full border" data-v="1">+ تصويت</button>
+              <span class="count text-hasseef-gray">12</span>
+            </div>
+          </div>
+          <div class="rounded-xl border p-4">
+            <div class="text-sm font-bold">تحسين تجربة الأجهزة الذكية</div>
+            <p class="mt-1 text-xs text-hasseef-gray">تحسين عناصر اللمس وتقليل خطوات الوصول للخدمة.</p>
+            <div class="mt-3 flex items-center gap-2 text-xs">
+              <button class="vote px-3 py-1 rounded-full border" data-v="1">+ تصويت</button>
+              <span class="count text-hasseef-gray">27</span>
+            </div>
+          </div>
+          <div class="rounded-xl border p-4">
+            <div class="text-sm font-bold">إضافة وضع ليلي</div>
+            <p class="mt-1 text-xs text-hasseef-gray">تحسين الوصولية وتوفير استهلاك الطاقة.</p>
+            <div class="mt-3 flex items-center gap-2 text-xs">
+              <button class="vote px-3 py-1 rounded-full border" data-v="1">+ تصويت</button>
+              <span class="count text-hasseef-gray">8</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- INSIGHTS / CHARTS -->
-  <section id="insights" class="section py-16">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl md:text-3xl font-black">الرسوم البيانية الحية</h2>
-      <p class="mt-2 text-slate-600">تمثيل بصري لمؤشرات الأثر والمشاركة — قابل للتوصيل بمصادر بيانات حقيقية لاحقًا.</p>
-      <div class="mt-8 grid lg:grid-cols-2 gap-6">
-        <div class="rounded-3xl border border-slate-200 bg-white p-6">
-          <h3 class="font-bold">توزيع فرص المنح حسب الحساب</h3>
-          <canvas id="chartGrants" height="220"></canvas>
+  <!-- ====== Pricing (Subscriptions) ====== -->
+  <section id="pricing" class="py-16 md:py-24">
+    <div class="container mx-auto px-4">
+      <div class="text-center">
+        <h2 class="text-2xl md:text-3xl font-extrabold">خطط الاشتراك لكل حساب</h2>
+        <p class="mt-2 text-hasseef-gray">أساسي – متقدم – متميز. جميع الخطط قابلة للتوسّع.</p>
+      </div>
+
+      <div class="mt-10 grid md:grid-cols-3 gap-6">
+        <div class="rounded-3xl border p-6">
+          <div class="text-sm font-bold text-hasseef-gray">أساسي</div>
+          <div class="mt-1 text-3xl font-extrabold">مجاني</div>
+          <ul class="mt-4 text-sm space-y-2">
+            <li>• الوصول للخدمات الأساسية</li>
+            <li>• نموذج اللبنات التسعة</li>
+            <li>• حساب واحد</li>
+          </ul>
+          <a href="#contact" class="mt-6 inline-block px-4 py-2 rounded-xl border">جرّبه الآن</a>
         </div>
-        <div class="rounded-3xl border border-slate-200 bg-white p-6">
-          <h3 class="font-bold">اتجاه نمو المشاركات (12 شهرًا)</h3>
-          <canvas id="chartGrowth" height="220"></canvas>
+        <div class="rounded-3xl border p-6 bg-hasseef-goldSoft">
+          <div class="text-sm font-bold text-hasseef-gray">متقدم</div>
+          <div class="mt-1 text-3xl font-extrabold">299 ر.س / شهر</div>
+          <ul class="mt-4 text-sm space-y-2">
+            <li>• تكاملات API محدودة</li>
+            <li>• تقارير ولوحات مؤشرات</li>
+            <li>• دعم فني قياسي</li>
+          </ul>
+          <a href="#contact" class="mt-6 inline-block px-4 py-2 rounded-xl bg-hasseef-green text-white">ابدأ الآن</a>
+        </div>
+        <div class="rounded-3xl border p-6">
+          <div class="text-sm font-bold text-hasseef-gray">متميز</div>
+          <div class="mt-1 text-3xl font-extrabold">مخصص</div>
+          <ul class="mt-4 text-sm space-y-2">
+            <li>• تكاملات متقدمة</li>
+            <li>• دعم مخصص وSLA</li>
+            <li>• تخصيص الهوية والخصائص</li>
+          </ul>
+          <a href="#contact" class="mt-6 inline-block px-4 py-2 rounded-xl border">اطلب عرض سعر</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- MANAGEMENT -->
-  <section id="management" class="section py-16 bg-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex items-end justify-between gap-4">
+  <!-- ====== Sponsors Tiers ====== -->
+  <section id="sponsors" class="py-16 md:py-24 bg-hasseef-graySoft">
+    <div class="container mx-auto px-4">
+      <div class="text-center">
+        <h2 class="text-2xl md:text-3xl font-extrabold">فئات رعاة المنصة</h2>
+        <p class="mt-2 text-hasseef-gray">فرصة وطنية تنموية تسويقية للبنوك والشركات الكبرى وغيرهم.</p>
+      </div>
+
+      <div class="mt-10 grid md:grid-cols-5 gap-6 text-sm">
+        <div class="rounded-2xl border bg-white p-5">
+          <div class="font-bold">استراتيجي</div>
+          <ul class="mt-2 space-y-1 text-hasseef-gray">
+            <li>• قيادة المحتوى التوعوي</li>
+            <li>• ظهور موسّع في اللوحات</li>
+            <li>• تقارير أثر مخصصة</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl border bg-white p-5">
+          <div class="font-bold">بلاتيني</div>
+          <ul class="mt-2 space-y-1 text-hasseef-gray">
+            <li>• مساحات إعلانية رئيسة</li>
+            <li>• ندوات مشتركة</li>
+            <li>• شراكات طويلة الأجل</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl border bg-white p-5">
+          <div class="font-bold">ذهبي</div>
+          <ul class="mt-2 space-y-1 text-hasseef-gray">
+            <li>• ظهور على صفحات الحسابات</li>
+            <li>• تقارير دورية للأثر</li>
+            <li>• دعوات رسمية للفعاليات</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl border bg-white p-5">
+          <div class="font-bold">فضي</div>
+          <ul class="mt-2 space-y-1 text-hasseef-gray">
+            <li>• شارات راعي في الواجهة</li>
+            <li>• مشاركات محتوى مشتركة</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl border bg-white p-5">
+          <div class="font-bold">برونزي</div>
+          <ul class="mt-2 space-y-1 text-hasseef-gray">
+            <li>• إدراج في قائمة الرعاة</li>
+            <li>• شكر في النشرات الدورية</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Success Stories ====== -->
+  <section id="stories" class="py-16 md:py-24">
+    <div class="container mx-auto px-4">
+      <div class="flex items-end justify-between gap-6">
         <div>
-          <h2 class="text-2xl md:text-3xl font-black">إدارة المنصة</h2>
-          <p class="mt-2 text-slate-600">لوحة شاملة للمشرف العام وإدارة الدعم الفني ومقترحات التحسين.</p>
+          <h2 class="text-2xl md:text-3xl font-extrabold">قصص نجاح مختصرة</h2>
+          <p class="mt-2 text-hasseef-gray">عينات توضيحية قابلة للاستبدال بالبيانات الحقيقية.</p>
         </div>
-        <a href="#support" class="text-sm text-emerald-700 hover:underline">إرسال مقترح تحسين</a>
+        <div class="text-xs text-hasseef-gray">* بيانات تمثيلية</div>
       </div>
 
-      <div class="mt-8 grid lg:grid-cols-3 gap-6">
-        <div class="rounded-3xl border border-slate-200 bg-white p-6">
-          <h3 class="font-bold">لوحة المشرف العام</h3>
-          <ul class="mt-3 text-sm text-slate-700 space-y-2">
-            <li>إدارة الحسابات والمستخدمين والتراخيص.</li>
-            <li>مراقبة المؤشرات العامة والتقارير المجمّعة.</li>
-            <li>إدارة التكاملات (API Keys / Webhooks).</li>
-            <li>مركز الإشعارات والتنبيهات.</li>
-          </ul>
+      <div class="mt-8 grid md:grid-cols-3 gap-6">
+        <div class="rounded-2xl border p-5 bg-white">
+          <div class="text-sm font-bold">منصة سجلها — اعتماد وطني</div>
+          <p class="mt-2 text-xs text-hasseef-gray">أُدرجت ضمن منتج MVPLAB في البرنامج الوطني لتنمية تقنية المعلومات؛ أكثر من 400 منشأة مستفيدة.</p>
         </div>
-        <div class="rounded-3xl border border-slate-200 bg-white p-6">
-          <h3 class="font-bold">الدعم الفني</h3>
-          <ul class="mt-3 text-sm text-slate-700 space-y-2">
-            <li>تذاكر دعم مصنّفة حسب الأولوية.</li>
-            <li>قاعدة معرفة ومقالات مساعدة.</li>
-            <li>اتصال مباشر عبر البريد/الهاتف/الواتساب.</li>
-            <li>اتفاقية مستوى الخدمة (SLA) حسب الباقة.</li>
-          </ul>
+        <div class="rounded-2xl border p-5 bg-white">
+          <div class="text-sm font-bold">بودكاست الإعاقة — تمكين الوعي</div>
+          <p class="mt-2 text-xs text-hasseef-gray">محتوى مرئي على يوتيوب، ملف تسويقي جاهز للشراكات والرعايات.</p>
         </div>
-        <div class="rounded-3xl border border-slate-200 bg-white p-6">
-          <h3 class="font-bold">مقترحات التحسين</h3>
-          <ul class="mt-3 text-sm text-slate-700 space-y-2">
-            <li>صندوق الأفكار مع تصويت المجتمع.</li>
-            <li>خارطة طريق عامة وتحديثات النسخ.</li>
-            <li>تحليلات رضا المستخدم (CSAT/NPS).</li>
-            <li>لوحة تفاعل مع الرعاة والشركاء.</li>
-          </ul>
+        <div class="rounded-2xl border p-5 bg-white">
+          <div class="text-sm font-bold">معرض تلبية — حاضنة مجتمعية</div>
+          <p class="mt-2 text-xs text-hasseef-gray">تطوير التشبيك وإتاحة فرص التدريب التعاوني لطلاب الجامعات والكليات.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- PRICING / SUBSCRIPTIONS -->
-  <section id="pricing" class="section py-16">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl md:text-3xl font-black">باقات الاشتراك للحسابات</h2>
-      <p class="mt-2 text-slate-600">مرونة في المزايا بحسب احتياج كل حساب. يمكن تخصيص المزايا للجهات الكبرى.</p>
-
-      <div class="mt-8 grid lg:grid-cols-3 gap-6">
-        <!-- Basic -->
-        <div class="rounded-3xl border border-slate-200 bg-white p-6">
-          <div class="flex items-baseline justify-between">
-            <h3 class="font-extrabold">أساسي</h3>
-            <span class="text-xs rounded-full bg-slate-100 text-slate-700 px-3 py-1">لبداية آمنة</span>
-          </div>
-          <p class="mt-1 text-sm text-slate-600">خدمات أساسية، دعم قياسي، تقارير عامة.</p>
-          <p class="mt-4 text-3xl font-black text-slate-900">—</p>
-          <ul class="mt-4 text-sm text-slate-700 space-y-2">
-            <li>إدارة مشاريع/مبادرات حتى 25 عنصرًا</li>
-            <li>محفظة معاملات أساسية</li>
-            <li>تكامل محدود (Webhook واحد)</li>
-            <li>مستخدمان + مراقب واحد</li>
-          </ul>
-          <button class="mt-6 w-full rounded-xl bg-slate-900 text-white py-2.5">ابدأ الآن</button>
-        </div>
-        <!-- Pro -->
-        <div class="rounded-3xl border-2 border-emerald-600 bg-white p-6 shadow-xl">
-          <div class="flex items-baseline justify-between">
-            <h3 class="font-extrabold">متقدم</h3>
-            <span class="text-xs rounded-full bg-emerald-50 text-emerald-700 px-3 py-1">الأكثر استخدامًا</span>
-          </div>
-          <p class="mt-1 text-sm text-slate-600">قدرات أوسع وتقارير تفصيلية ودعم أسرع.</p>
-          <p class="mt-4 text-3xl font-black text-emerald-700">—</p>
-          <ul class="mt-4 text-sm text-slate-700 space-y-2">
-            <li>مشاريع غير محدودة عمليًا</li>
-            <li>محفظة ذكية وتقارير مالية</li>
-            <li>تكامل API ومفاتيح متعددة</li>
-            <li>5 مستخدمين + 3 مراقبين</li>
-          </ul>
-          <button class="mt-6 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white py-2.5">ابدأ الآن</button>
-        </div>
-        <!-- Enterprise -->
-        <div class="rounded-3xl border border-slate-200 bg-white p-6">
-          <div class="flex items-baseline justify-between">
-            <h3 class="font-extrabold">متميز</h3>
-            <span class="text-xs rounded-full bg-yellow-50 text-yellow-700 px-3 py-1">مؤسسي</span>
-          </div>
-          <p class="mt-1 text-sm text-slate-600">لجهات كبرى مع احتياجات تكامل وأمن متقدم.</p>
-          <p class="mt-4 text-3xl font-black text-slate-900">—</p>
-          <ul class="mt-4 text-sm text-slate-700 space-y-2">
-            <li>حَوكمة وصلاحيات متقدمة</li>
-            <li>اتفاقيات مستوى خدمة (SLA)</li>
-            <li>استضافة/نطاقات خاصة</li>
-            <li>مدير نجاح مخصص</li>
-          </ul>
-          <button class="mt-6 w-full rounded-xl bg-slate-900 text-white py-2.5">تواصل معنا</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SPONSORS -->
-  <section id="sponsors" class="section py-16 bg-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl md:text-3xl font-black">فئات رعاة المنصة (وليس رعاة المشاريع)</h2>
-      <p class="mt-2 text-slate-600">فرصة وطنية تنموية وتسويقية للبنوك والشركات الكبرى والجهات الداعمة.</p>
-
-      <div class="mt-8 grid md:grid-cols-5 gap-6">
-        <div class="rounded-3xl border border-yellow-300 bg-yellow-50 p-6">
-          <h3 class="font-bold text-yellow-800">راعي استراتيجي</h3>
-          <ul class="mt-3 text-sm text-yellow-900 space-y-1">
-            <li>هوية مشتركة في الواجهة</li>
-            <li>تقرير أثر وطني مخصص</li>
-            <li>مساحات ترويجية رئيسية</li>
-          </ul>
-        </div>
-        <div class="rounded-3xl border border-yellow-300 bg-yellow-50 p-6">
-          <h3 class="font-bold text-yellow-800">بلاتيني</h3>
-          <ul class="mt-3 text-sm text-yellow-900 space-y-1">
-            <li>شعار في الصفحة الرئيسية</li>
-            <li>تقارير أداء ربع سنوية</li>
-            <li>دعوات لفعاليات رسمية</li>
-          </ul>
-        </div>
-        <div class="rounded-3xl border border-yellow-300 bg-yellow-50 p-6">
-          <h3 class="font-bold text-yellow-800">ذهبي</h3>
-          <ul class="mt-3 text-sm text-yellow-900 space-y-1">
-            <li>شعار في صفحات باطنية</li>
-            <li>تقارير تأثير نصف سنوية</li>
-            <li>محتوى تعريفي مشترك</li>
-          </ul>
-        </div>
-        <div class="rounded-3xl border border-yellow-300 bg-yellow-50 p-6">
-          <h3 class="font-bold text-yellow-800">فضي</h3>
-          <ul class="mt-3 text-sm text-yellow-900 space-y-1">
-            <li>ظهور في صفحات الشركاء</li>
-            <li>نشرة دورية</li>
-            <li>حضور مناسبات</li>
-          </ul>
-        </div>
-        <div class="rounded-3xl border border-yellow-300 bg-yellow-50 p-6">
-          <h3 class="font-bold text-yellow-800">برونزي</h3>
-          <ul class="mt-3 text-sm text-yellow-900 space-y-1">
-            <li>ذكر كشريك داعم</li>
-            <li>تقارير سنوية عامة</li>
-            <li>دعوات محدودة</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PARTNERS -->
-  <section id="partners" class="section py-16">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl md:text-3xl font-black">الشركاء الاستراتيجيون</h2>
-      <p class="mt-2 text-slate-600">واجهات وتمكين لجهات وطنية لضمان التكامل والشفافية.</p>
-
-      <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <a href="https://ncdc.gov.sa" target="_blank" rel="noopener" class="rounded-2xl border border-slate-200 bg-white p-4 text-sm hover:shadow">المركز الوطني لتنمية القطاع غير الربحي (NCDC)</a>
-        <a href="https://adaa.gov.sa" target="_blank" rel="noopener" class="rounded-2xl border border-slate-200 bg-white p-4 text-sm hover:shadow">مركز أداء</a>
-        <a href="https://mep.gov.sa" target="_blank" rel="noopener" class="rounded-2xl border border-slate-200 bg-white p-4 text-sm hover:shadow">وزارة الاقتصاد والتخطيط</a>
-        <a href="https://mof.gov.sa" target="_blank" rel="noopener" class="rounded-2xl border border-slate-200 bg-white p-4 text-sm hover:shadow">وزارة المالية</a>
-        <a href="https://moi.gov.sa" target="_blank" rel="noopener" class="rounded-2xl border border-slate-200 bg-white p-4 text-sm hover:shadow">وزارة الداخلية (إمارات المناطق)</a>
-        <a href="https://moc.gov.sa" target="_blank" rel="noopener" class="rounded-2xl border border-slate-200 bg-white p-4 text-sm hover:shadow">وزارة الثقافة</a>
-        <a href="https://moe.gov.sa" target="_blank" rel="noopener" class="rounded-2xl border border-slate-200 bg-white p-4 text-sm hover:shadow">وزارة التعليم</a>
-        <a href="https://monshaat.gov.sa" target="_blank" rel="noopener" class="rounded-2xl border border-slate-200 bg-white p-4 text-sm hover:shadow">منشآت</a>
-      </div>
-
-      <!-- Logo strip -->
-      <div class="mt-8 rounded-3xl border border-slate-200 bg-white p-4">
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 items-center">
-          <img class="h-10 mx-auto" src="https://dummyimage.com/200x80/ffffff/aaaaaa&text=Vision+2030" alt="Vision 2030"/>
-          <img class="h-10 mx-auto" src="https://dummyimage.com/180x80/ffffff/aaaaaa&text=NCDC" alt="NCDC"/>
-          <img class="h-10 mx-auto" src="https://dummyimage.com/180x80/ffffff/aaaaaa&text=Adaa" alt="Adaa"/>
-          <img class="h-10 mx-auto" src="https://dummyimage.com/180x80/ffffff/aaaaaa&text=Monsha'at" alt="Monsha'at"/>
-          <img class="h-10 mx-auto" src="https://dummyimage.com/180x80/ffffff/aaaaaa&text=MoE" alt="Ministry of Education"/>
-          <img class="h-10 mx-auto" src="https://dummyimage.com/180x80/ffffff/aaaaaa&text=MoF" alt="Ministry of Finance"/>
-        </div>
-        <div class="mt-3 text-xs text-slate-500 text-center">يمكن استبدال الصور بروابط شعارات رسمية لاحقًا.</div>
-      </div>
-
-      <div class="mt-6 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-900">
-        لدى كل شريك لوحة متابعة مؤشرات، وربط مباشر بمشاريع/فعاليات مرتبطة بأهداف الرؤية، وإمكانات تقارير مخصّصة.
-      </div>
-    </div>
-  </section>
-
-  <!-- SUPPORT / FEEDBACK -->
-  <section id="support" class="section py-16 bg-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl md:text-3xl font-black">الدعم والمقترحات</h2>
-      <p class="mt-2 text-slate-600">نسعد باستقبال استفساراتكم ومقترحات التحسين لرفع جودة المنصة وأثرها.</p>
-
-      <form class="mt-8 grid lg:grid-cols-2 gap-6">
+  <!-- ====== Contact ====== -->
+  <section id="contact" class="py-16 md:py-24 bg-hasseef-greenSoft/40">
+    <div class="container mx-auto px-4">
+      <div class="grid md:grid-cols-2 gap-10 items-start">
         <div>
-          <label class="block text-sm font-semibold">الاسم</label>
-          <input type="text" class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600" placeholder="الاسم الكامل"/>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold">البريد الإلكتروني</label>
-          <input type="email" class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600" placeholder="name@example.com"/>
-        </div>
-        <div class="lg:col-span-2">
-          <label class="block text-sm font-semibold">نوع الرسالة</label>
-          <select class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600">
-            <option>استفسار</option>
-            <option>مقترح تحسين</option>
-            <option>بلاغ تقني</option>
-            <option>طلب شراكة/رعاية</option>
-          </select>
-        </div>
-        <div class="lg:col-span-2">
-          <label class="block text-sm font-semibold">الرسالة</label>
-          <textarea rows="5" class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600" placeholder="اكتب رسالتك هنا..."></textarea>
-        </div>
-        <div class="lg:col-span-2 flex items-center justify-between">
-          <div class="flex items-center gap-2 text-sm text-slate-600">
-            <input id="consent" type="checkbox" class="h-4 w-4 rounded border-slate-300"/>
-            <label for="consent">أوافق على سياسة الخصوصية</label>
+          <h2 class="text-2xl md:text-3xl font-extrabold">تواصل معنا</h2>
+          <p class="mt-2 text-hasseef-gray">للاشتراك، طلب عرض سعر، أو إرسال مقترح تحسين.</p>
+          <div class="mt-6 grid grid-cols-2 gap-3 text-sm">
+            <div class="rounded-2xl border bg-white p-4">
+              <div class="font-bold">البريد</div>
+              <div class="text-hasseef-gray"><a class="underline" href="mailto:info@talbiya.sa">info@talbiya.sa</a></div>
+            </div>
+            <div class="rounded-2xl border bg-white p-4">
+              <div class="font-bold">الهاتف</div>
+              <div class="text-hasseef-gray">+966-5X-XXX-XXXX</div>
+            </div>
           </div>
-          <button type="button" id="sendBtn" class="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 text-sm font-semibold">إرسال</button>
         </div>
-        <p id="sendResult" class="lg:col-span-2 hidden text-sm"></p>
-      </form>
+        <form id="contactForm" class="rounded-3xl border bg-white p-6 shadow-soft grid gap-4">
+          <div class="grid gap-2">
+            <label class="text-sm">الاسم</label>
+            <input required class="w-full rounded-xl border px-3 py-2" placeholder="اسمك الثلاثي">
+          </div>
+          <div class="grid gap-2">
+            <label class="text-sm">البريد الإلكتروني</label>
+            <input required type="email" class="w-full rounded-xl border px-3 py-2" placeholder="you@example.com">
+          </div>
+          <div class="grid gap-2">
+            <label class="text-sm">اختر الحساب</label>
+            <select class="w-full rounded-xl border px-3 py-2">
+              <option>الأفراد</option>
+              <option>القطاع الخاص</option>
+              <option>القطاع غير الربحي</option>
+              <option>الجامعات</option>
+              <option>الحكومة</option>
+              <option>المانحون</option>
+              <option>الإمارة</option>
+            </select>
+          </div>
+          <div class="grid gap-2">
+            <label class="text-sm">رسالتك</label>
+            <textarea required class="w-full min-h-[120px] rounded-xl border px-3 py-2" placeholder="اكتب تفاصيل طلبك أو مقترحك..."></textarea>
+          </div>
+          <button class="mt-2 px-5 py-3 rounded-xl bg-hasseef-green text-white font-semibold">إرسال</button>
+        </form>
+      </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
-  <footer class="py-10 border-t border-slate-200 bg-slate-50">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-        <p class="text-sm text-slate-600">© 2025 منصة حصيف — جميع الحقوق محفوظة</p>
-        <div class="flex items-center gap-4 text-sm">
-          <a href="#" class="hover:underline">سياسة الخصوصية</a>
-          <span class="text-slate-300">|</span>
-          <a href="#" class="hover:underline">شروط الاستخدام</a>
+  <footer class="py-8 border-t">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-hasseef-gray">
+        <div>© <span id="year"></span> منصة حصيف – جميع الحقوق محفوظة.</div>
+        <div class="flex items-center gap-4">
+          <a class="hover:text-hasseef-green" href="#about">عن المنصة</a>
+          <a class="hover:text-hasseef-green" href="#accounts">الحسابات</a>
+          <a class="hover:text-hasseef-green" href="#pricing">الاشتراكات</a>
+          <a class="hover:text-hasseef-green" href="#contact">تواصل</a>
         </div>
       </div>
     </div>
   </footer>
 
-  <!-- DATA & INTERACTION SCRIPTS -->
+  <!-- ====== Modals: per account details ====== -->
+  <!-- Individual Modal -->
+  <div id="modal-individual" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between">
+        <h3 class="font-extrabold">تفاصيل حساب الأفراد</h3>
+        <button class="hs-close text-hasseef-gray">إغلاق</button>
+      </div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div>
+          <div class="font-bold mb-2">الخدمات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• إدراج المبادرة (اللبنات التسعة)</li>
+            <li>• ربط المبادرة ببرامج الرؤية وأهدافها</li>
+            <li>• التقديم على فرص (وظائف، تدريب، تطوع)</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-bold mb-2">الصلاحيات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• إنشاء/تعديل/حذف مبادرة قبل الاعتماد</li>
+            <li>• متابعة حالات الاعتماد والإشعارات</li>
+            <li>• تنزيل تقارير مبسطة</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Private Modal -->
+  <div id="modal-private" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items_center justify-between">
+        <h3 class="font-extrabold">تفاصيل حساب القطاع الخاص</h3>
+        <button class="hs-close text-hasseef-gray">إغلاق</button>
+      </div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div>
+          <div class="font-bold mb-2">الخدمات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• تقارير المسؤولية الاجتماعية</li>
+            <li>• فرص منح ورعاية مرتبطة بالرؤية</li>
+            <li>• إدارة المحفظة والشهادات</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-bold mb-2">الصلاحيات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• اعتماد المشاريع الممولة</li>
+            <li>• متابعة الأثر ومؤشرات الأداء</li>
+            <li>• تكاملات مع الجهات الحكومية</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nonprofit Modal -->
+  <div id="modal-nonprofit" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items_center justify-between">
+        <h3 class="font-extrabold">تفاصيل حساب القطاع غير الربحي</h3>
+        <button class="hs-close text-hasseef-gray">إغلاق</button>
+      </div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div>
+          <div class="font-bold mb-2">الخدمات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• نشر فرص (وظائف/تطوع/تدريب)</li>
+            <li>• إدارة التمويل والاستثمار</li>
+            <li>• تقارير حوكمة وأثر</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-bold mb-2">الصلاحيات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• اعتماد المشاريع الداخلية</li>
+            <li>• إدارة الشركاء والجهات المانحة</li>
+            <li>• تكامل مع الجامعات للاستشارات العلمية</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- University Modal -->
+  <div id="modal-university" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items_center justify-between">
+        <h3 class="font-extrabold">تفاصيل حساب الجامعات</h3>
+        <button class="hs-close text-hasseef-gray">إغلاق</button>
+      </div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div>
+          <div class="font-bold mb-2">الخدمات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• تعزيز علمي للمشاريع وقبولها</li>
+            <li>• تسويق البرامج والمبادرات البحثية</li>
+            <li>• إدارة مرافق للإيجار والاستثمار</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-bold mb-2">الصلاحيات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• إصدار تقارير علمية معتمدة</li>
+            <li>• إدارة فريق استشاري وتحصيل العوائد</li>
+            <li>• تكامل مع الجهات الممولة والحكومية</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Government Modal -->
+  <div id="modal-government" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify_center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between">
+        <h3 class="font-extrabold">تفاصيل حساب الحكومة</h3>
+        <button class="hs-close text-hasseef-gray">إغلاق</button>
+      </div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div>
+          <div class="font-bold mb-2">الخدمات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• إدارة المبادرات وربطها بأهداف الرؤية (3 مستويات)</li>
+            <li>• اعتماد الفعاليات وإدارة الشركاء</li>
+            <li>• طلب حلول من القطاع الخاص/الجامعات/غير الربحي</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-bold mb-2">الصلاحيات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• قبول/رفض الشراكات الاستراتيجية للفعاليات</li>
+            <li>• إصدار تقارير إقليمية ومؤشرات الأداء</li>
+            <li>• لوحة إشراف على المشاريع الممولة</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Funder Modal -->
+  <div id="modal-funder" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items_center justify-between">
+        <h3 class="font-extrabold">تفاصيل حساب المانحين</h3>
+        <button class="hs-close text-hasseef-gray">إغلاق</button>
+      </div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div>
+          <div class="font-bold mb-2">الخدمات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• فرص منح وفق معايير المانح</li>
+            <li>• محفظة مانح وتقارير أثر</li>
+            <li>• شهادات وإثباتات إنجاز</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-bold mb-2">الصلاحيات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• اعتماد تمويل المشاريع</li>
+            <li>• متابعة الأداء عبر مؤشرات مخصصة</li>
+            <li>• تكامل مع أنظمة المحاسبة والتدقيق</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emirate Modal -->
+  <div id="modal-emirate" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between">
+        <h3 class="font-extrabold">تفاصيل حساب الإمارة</h3>
+        <button class="hs-close text-hasseef-gray">إغلاق</button>
+      </div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div>
+          <div class="font-bold mb-2">الخدمات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• اعتماد الفعاليات وإدارة المشاركات</li>
+            <li>• استعراض المشاريع والتمويلات في المنطقة</li>
+            <li>• تقارير داعمي المنطقة وأثرهم</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-bold mb-2">الصلاحيات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• قبول/رفض الشراكات الاستراتيجية</li>
+            <li>• متابعة مؤشرات الأداء الإقليمية</li>
+            <li>• ربط مع الجهات الحكومية والجامعات</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Scripts ====== -->
   <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
     // Mobile menu toggle
     const menuBtn = document.getElementById('menuBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-    if (menuBtn) menuBtn.addEventListener('click', ()=> mobileMenu.classList.toggle('hidden'));
+    const mobileNav = document.getElementById('mobileNav');
+    menuBtn?.addEventListener('click', () => mobileNav.classList.toggle('hidden'));
 
-    // Account search filter
-    const search = document.getElementById('accountSearch');
-    const cards = Array.from(document.querySelectorAll('.account-card'));
-    if (search) {
-      search.addEventListener('input', (e)=>{
-        const q = e.target.value.trim();
-        cards.forEach(c=>{
-          const key = (c.getAttribute('data-account')||'') + ' ' + c.innerText;
-          c.style.display = key.includes(q) ? '' : 'none';
-        });
+    // Modal control
+    const openButtons = document.querySelectorAll('.hs-open');
+    const closeSelector = '.hs-close';
+    const modalClass = 'hs-modal';
+
+    openButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-modal');
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
       });
-    }
+    });
 
-    // Modal data per account
-    const accountDetails = {
-      'حساب الأفراد': {
-        sub: 'مبادراتي — تمكين الأفراد من المشاركة التنموية.',
-        services: [
-          'إدراج مبادرة عبر نموذج اللبنات التسع',
-          'التقديم على فرص (وظائف، تدريب، تطوع، فعاليات)',
-          'محفظة فردية للتبرع/الاستثمار',
-          'ملف إنجازات وشهادات',
-        ],
-        perms: ['إضافة/تعديل مبادرات', 'التقديم على الفرص', 'إدارة المحفظة والمعاملات', 'عرض التقارير الشخصية'],
-        api: 'POST /api/initiatives  •  GET /api/opportunities  •  POST /api/wallet/transfer',
-        value: 'رفع المشاركة المجتمعية وتسريع مواءمة المواهب مع الفرص.'
-      },
-      'حساب القطاع الخاص': {
-        sub: 'مسؤولية اجتماعية وتبني مشاريع أثرية.',
-        services: [
-          'فرص منح ورعاية تجارية',
-          'تقارير أثر وربط بأهداف الرؤية',
-          'لوحة التزامات CSR ومحفظة الشركة',
-          'ربط مع الجهات الحكومية والجامعات'
-        ],
-        perms: ['اعتماد تمويل المشاريع', 'إنشاء فرص رعاية', 'استعراض تقارير الأثر', 'وصول API للتقارير'],
-        api: 'GET /api/csr/reports  •  POST /api/grants  •  POST /api/sponsorships',
-        value: 'تعزيز صورة الشركة وتحقيق أثر ملموس وقابل للقياس.'
-      },
-      'حساب القطاع غير الربحي': {
-        sub: 'تمويل، متطوعون، قياس أثر، إدارة فعاليات.',
-        services: [
-          'طرح مشاريع وبرامج مع ملف الأثر',
-          'جذب متبرعين ومستثمرين',
-          'إدارة المتطوعين والتدريب',
-          'تحليل أثر وتقارير شفافة'
-        ],
-        perms: ['إدارة المشاريع والمتطوعين', 'استلام التبرعات', 'التقارير التفصيلية', 'تكامل مع الشركاء'],
-        api: 'POST /api/projects  •  GET /api/donors  •  GET /api/impact',
-        value: 'رفع كفاءة العمل الخيري وشفافيته وتوسيع قاعدة الداعمين.'
-      },
-      'حساب الجامعات': {
-        sub: 'تعزيز علمي واستشارات ومختبرات ابتكار.',
-        services: [
-          'تعزيز علمي للمشاريع وقابلية التطبيق',
-          'شراكات بحثية واستشارية',
-          'فرص تدريب تعاوني وتوظيف',
-          'إدراج مرافق جامعية للاستثمار/الإيجار'
-        ],
-        perms: ['اعتماد تعزيز علمي', 'نشر فرص تدريب', 'تقارير عوائد الشراكات', 'إدارة المرافق المدرجة'],
-        api: 'POST /api/universities/reviews  •  GET /api/internships  •  POST /api/facilities',
-        value: 'رفع جودة المشاريع وتقليل الهدر ودعم الاقتصاد المعرفي.'
-      },
-      'حساب الحكومة': {
-        sub: 'حلول، فعاليات، مؤشرات المناطق، موافقات.',
-        services: [
-          'طلب حلول تكاملية من القطاعات',
-          'اعتماد ورفض فعاليات مع إدارة المشاركين',
-          'لوحات مؤشرات المناطق (وظائف، فرص، منح)',
-          'ربط المبادرات بالأهداف الثلاثية للرؤية'
-        ],
-        perms: ['إدارة طلبات الحلول', 'إدارة منظومة الفعاليات', 'اعتماد المبادرات', 'لوحات مؤشرات متقدمة'],
-        api: 'GET /api/regions/metrics  •  POST /api/solutions  •  POST /api/events/approvals',
-        value: 'تعزيز فاعلية الحكومة ورفع كفاءة الإنفاق وضمان الشفافية.'
-      },
-      'حساب المانحين': {
-        sub: 'محفظة مانح، فرص حسب المعايير، تقارير أثر.',
-        services: [
-          'تصفّح فرص المنح بحسب معايير مانح',
-          'محفظة مانح وإدارة اشتراكات/استثمارات',
-          'تقارير أثر مخصصة',
-          'بروفايل مانح قابل للمشاركة'
-        ],
-        perms: ['اعتماد منح', 'إدارة المحفظة', 'وصول للتقارير', 'لوائح تفضيلات التمويل'],
-        api: 'GET /api/opportunities?filters=donor  •  GET /api/donor/reports  •  POST /api/wallet',
-        value: 'رفع جودة التوجيه المالي وتوسيع الأثر المستدام.'
-      },
-      'حساب الشركاء الاستراتيجيين': {
-        sub: 'واجهات بيانات ومؤشرات وطنية وربط تكاملي.',
-        services: [
-          'لوحات متابعة مؤشرات (NCDC/أداء/منشآت/وزارات)',
-          'تقارير مشتركة وتبادل بيانات',
-          'بوابات ربط للأجهزة الحكومية',
-          'قوالب قياس موحدة'
-        ],
-        perms: ['إدارة التكاملات', 'قراءة/تصدير بيانات', 'اعتماد تقارير مشتركة', 'إدارة نطاقات خاصة'],
-        api: 'GET /api/partners/kpis  •  POST /api/data-exchange  •  GET /api/government/gateways',
-        value: 'ضمان تكامل وطني شامل ومواءمة الجهود عبر القطاعات.'
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target.closest && target.closest(closeSelector)) {
+        const modal = target.closest('.' + modalClass);
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
       }
+      const m = target.classList && target.classList.contains(modalClass);
+      if (m) { target.classList.add('hidden'); target.classList.remove('flex'); }
+    });
+
+    // Upvote ideas (demo only)
+    document.querySelectorAll('#ideas .vote').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const count = btn.parentElement.querySelector('.count');
+        const n = parseInt(count.textContent || '0', 10) + 1;
+        count.textContent = n;
+        btn.setAttribute('disabled', 'true');
+        btn.classList.add('opacity-50');
+      });
+    });
+
+    // THEME + HC: persist with localStorage
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeToggleMobile = document.getElementById('themeToggleMobile');
+    const hcToggle = document.getElementById('hcToggle');
+    function applyTheme(t){ t==='dark' ? root.classList.add('dark') : root.classList.remove('dark'); }
+    function toggleTheme(){ const t = localStorage.getItem('theme')==='dark' ? 'light' : 'dark'; localStorage.setItem('theme', t); applyTheme(t); }
+    function applyHC(v){ v==='1' ? root.classList.add('hc') : root.classList.remove('hc'); }
+    function toggleHC(){ const v = localStorage.getItem('hc')==='1' ? '0' : '1'; localStorage.setItem('hc', v); applyHC(v); }
+    applyTheme(localStorage.getItem('theme')||'light');
+    applyHC(localStorage.getItem('hc')||'0');
+    themeToggle?.addEventListener('click', toggleTheme);
+    themeToggleMobile?.addEventListener('click', toggleTheme);
+    hcToggle?.addEventListener('click', toggleHC);
+    themeToggle?.addEventListener('click', toggleTheme);
+    themeToggleMobile?.addEventListener('click', toggleTheme);
+
+    // KPI Profiles & Animations (enhanced)
+    const kpiProfiles = {
+      national: { employment: 18, integration: 92, projects: 1240 },
+      hail: { employment: 22, integration: 88, projects: 260 },
+      private: { employment: 12, integration: 95, projects: 740 },
+      nonprofit: { employment: 9, integration: 86, projects: 340 }
     };
+    let kpiTimers = [];
+    function animateNumber(el, base, variance=5){
+      if(!el) return; let current = base;
+      const t = setInterval(()=>{ const delta = (Math.random()*variance - variance/2); current = Math.max(0, current + delta);
+        if(el.id==='kpi-projects'){ el.textContent = Math.round(current).toLocaleString('en-US'); }
+        else if(el.id==='kpi-integration'){ el.textContent = (current).toFixed(1)+'%'; }
+        else { el.textContent = (current>0?'+':'') + current.toFixed(1)+'%'; }
+      }, 2200 + Math.random()*600);
+      kpiTimers.push(t);
+    }
+    function clearTimers(){ kpiTimers.forEach(clearInterval); kpiTimers = []; }
+    function setProfile(p){
+      clearTimers();
+      const b = kpiProfiles[p] || kpiProfiles.national;
+      document.getElementById('kpi-employment').textContent = `+${b.employment}%`;
+      document.getElementById('kpi-integration').textContent = `${b.integration}%`;
+      document.getElementById('kpi-projects').textContent = b.projects.toLocaleString('en-US');
+      animateNumber(document.getElementById('kpi-employment'), b.employment);
+      animateNumber(document.getElementById('kpi-integration'), b.integration);
+      animateNumber(document.getElementById('kpi-projects'), b.projects, 20);
+    }
+    setProfile('national');
+    document.getElementById('kpiProfile')?.addEventListener('change', (e)=> setProfile(e.target.value));
 
-    // Open modal with dynamic content
-    const modal = document.getElementById('accountModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalSub = document.getElementById('modalSub');
-    const modalServices = document.getElementById('modalServices');
-    const modalPerms = document.getElementById('modalPerms');
-    const modalApi = document.getElementById('modalApi');
-    const modalValue = document.getElementById('modalValue');
+    // Bars update (kept)
+    function animateBars(){
+      const b1 = document.getElementById('bar-1');
+      const b2 = document.getElementById('bar-2');
+      const b3 = document.getElementById('bar-3');
+      setInterval(()=>{
+        const a = Math.floor(50 + Math.random()*30);
+        const b = Math.floor((100-a)/2);
+        const c = 100 - a - b;
+        if(b1) b1.style.width = a+'%';
+        if(b2) b2.style.width = b+'%';
+        if(b3) b3.style.width = c+'%';
+      }, 3000);
+    }
+    animateBars();
 
-    cards.forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const title = btn.querySelector('h3').innerText.trim();
-        const d = accountDetails[title];
-        if (!d) return;
-        modalTitle.textContent = title;
-        modalSub.textContent = d.sub;
-        modalServices.innerHTML = d.services.map(s=>`<li>${s}</li>`).join('');
-        modalPerms.innerHTML = d.perms.map(p=>`<li>${p}</li>`).join('');
-        modalApi.textContent = d.api;
-        modalValue.textContent = d.value;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      })
-    });
-
-    modal.addEventListener('click', (e)=>{
-      if (e.target.hasAttribute('data-close')) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-    });
-
-    // Fake submit for support form
-    const sendBtn = document.getElementById('sendBtn');
-    const sendResult = document.getElementById('sendResult');
-    if (sendBtn) {
-      sendBtn.addEventListener('click', ()=>{
-        const consent = document.getElementById('consent');
-        if (!consent.checked){
-          sendResult.textContent = 'فضلاً وافق على سياسة الخصوصية لإرسال الرسالة.';
-          sendResult.className = 'lg:col-span-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3';
-          sendResult.classList.remove('hidden');
-          return;
-        }
-        sendResult.textContent = 'تم استلام رسالتك — شكرًا لمساهمتك في تحسين المنصة!';
-        sendResult.className = 'lg:col-span-2 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3';
-        sendResult.classList.remove('hidden');
+    // Contact form -> mailto
+    const form = document.getElementById('contactForm');
+    if(form){
+      form.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const [name,email,account,message] = Array.from(form.querySelectorAll('input,select,textarea')).map(el=>encodeURIComponent(el.value));
+        const subject = `استفسار من ${decodeURIComponent(name)}`;
+        const body = `الحساب: ${decodeURIComponent(account)}%0D%0Aالبريد: ${decodeURIComponent(email)}%0D%0A%0D%0A${decodeURIComponent(message)}`;
+        window.location.href = `mailto:info@talbiya.sa?subject=${subject}&body=${body}`;
       });
     }
+
+    // Loader hide
+    window.addEventListener('load', ()=>{
+      const l = document.getElementById('loader');
+      if(l){ setTimeout(()=> l.style.display = 'none', 800); }
+    });
   </script>
-  <!-- External libs -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <!-- DATA & INTERACTION SCRIPTS -->
-  <script>
-    // Mobile menu toggle
-    const menuBtn = document.getElementById('menuBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-    if (menuBtn) menuBtn.addEventListener('click', ()=> mobileMenu.classList.toggle('hidden'));
-
-    // Account search filter
-    const search = document.getElementById('accountSearch');
-    const cards = Array.from(document.querySelectorAll('.account-card'));
-    if (search) {
-      search.addEventListener('input', (e)=>{
-        const q = e.target.value.trim();
-        cards.forEach(c=>{
-          const key = (c.getAttribute('data-account')||'') + ' ' + c.innerText;
-          c.style.display = key.includes(q) ? '' : 'none';
-        });
-      });
-    }
-
-    // Modal data per account (existing)
-    const accountDetails = window.accountDetails || {};
-
-    // Rebind modal openers (in case content changed)
-    const modal = document.getElementById('accountModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalSub = document.getElementById('modalSub');
-    const modalServices = document.getElementById('modalServices');
-    const modalPerms = document.getElementById('modalPerms');
-    const modalApi = document.getElementById('modalApi');
-    const modalValue = document.getElementById('modalValue');
-
-    cards.forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const title = btn.querySelector('h3').innerText.trim();
-        const d = accountDetails[title];
-        if (!d) return;
-        modalTitle.textContent = title;
-        modalSub.textContent = d.sub;
-        modalServices.innerHTML = d.services.map(s=>`<li>${s}</li>`).join('');
-        modalPerms.innerHTML = d.perms.map(p=>`<li>${p}</li>`).join('');
-        modalApi.textContent = d.api;
-        modalValue.textContent = d.value;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      })
-    });
-
-    modal?.addEventListener('click', (e)=>{
-      if (e.target.hasAttribute('data-close')) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-    });
-
-    // Regional data (sample)
-    const regions = [
-      { id:'Hail', name:'حائل', jobs:72, grants:18, vols:220 },
-      { id:'Riyadh', name:'الرياض', jobs:310, grants:95, vols:920 },
-      { id:'Makkah', name:'مكة المكرمة', jobs:280, grants:88, vols:840 },
-      { id:'Madinah', name:'المدينة المنورة', jobs:130, grants:42, vols:410 },
-      { id:'Eastern', name:'الشرقية', jobs:260, grants:74, vols:700 },
-      { id:'Qassim', name:'القصيم', jobs:110, grants:27, vols:300 },
-      { id:'Tabuk', name:'تبوك', jobs:90, grants:20, vols:210 },
-      { id:'Jazan', name:'جازان', jobs:85, grants:19, vols:190 },
-      { id:'Asir', name:'عسير', jobs:120, grants:31, vols:330 },
-      { id:'Najran', name:'نجران', jobs:60, grants:12, vols:120 },
-      { id:'Baha', name:'الباحة', jobs:55, grants:11, vols:115 },
-      { id:'Hafr', name:'الحدود الشمالية', jobs:40, grants:9, vols:90 }
-    ];
-
-    const regionList = document.getElementById('regionList');
-    const regionTitle = document.getElementById('regionTitle');
-    const kpiJobs = document.getElementById('kpiJobs');
-    const kpiGrants = document.getElementById('kpiGrants');
-    const kpiVols = document.getElementById('kpiVols');
-
-    function renderRegions(){
-      if(!regionList) return;
-      regionList.innerHTML = regions.map(r=>`<button data-rid="${r.id}" class="region-btn rounded-xl border border-slate-200 px-3 py-2 hover:border-emerald-600">${r.name}</button>`).join('');
-      regionList.querySelectorAll('.region-btn').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const r = regions.find(x=>x.id === btn.getAttribute('data-rid'));
-          if(!r) return;
-          regionTitle.textContent = 'منطقة ' + r.name;
-          kpiJobs.textContent = r.jobs;
-          kpiGrants.textContent = r.grants;
-          kpiVols.textContent = r.vols;
-        });
-      });
-      const init = regions[0];
-      kpiJobs.textContent = init.jobs; kpiGrants.textContent = init.grants; kpiVols.textContent = init.vols;
-    }
-    renderRegions();
-
-    // Charts
-    function initCharts(){
-      const grantsCtx = document.getElementById('chartGrants');
-      if (grantsCtx) {
-        new Chart(grantsCtx, {
-          type:'doughnut',
-          data:{ labels:['الأفراد','القطاع الخاص','غير الربحي','الجامعات','الحكومة','المانحون'], datasets:[{ data:[12,28,34,10,8,20] }] },
-          options:{ responsive:true, plugins:{ legend:{ position:'bottom' } } }
-        });
-      }
-      const growthCtx = document.getElementById('chartGrowth');
-      if (growthCtx) {
-        new Chart(growthCtx, {
-          type:'line',
-          data:{ labels:['1','2','3','4','5','6','7','8','9','10','11','12'], datasets:[{ label:'مشاركات', data:[20,24,22,28,30,35,40,44,48,52,58,65], tension:.35, fill:false }] },
-          options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
-        });
-      }
-    }
-    initCharts();
-  </script>
+  <!-- Partner Modals -->
+  <div id="modal-npoc" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between"><h3 class="font-extrabold">المركز الوطني لتنمية القطاع غير الربحي</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• توثيق برامج الحوكمة والأثر</li><li>• منح الموافقات الرقمية</li><li>• لوحات متابعة دعم المناطق</li></ul></div>
+        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• مراجعة واعتماد التقارير</li><li>• إدارة مؤشرات الأداء للقطاع</li><li>• الربط مع حسابات الجمعيات</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div id="modal-adaa" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between"><h3 class="font-extrabold">مركز أداء</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• تكامل لوحات مؤشرات وطنية</li><li>• نماذج قياس للأثر التنموي</li><li>• تقارير مقارنة بينية</li></ul></div>
+        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• ضبط مؤشرات قياس موحدة</li><li>• مشاركة النتائج مع الشركاء</li><li>• تنبيهات أداء للجهات</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div id="modal-mep" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between"><h3 class="font-extrabold">وزارة الاقتصاد والتخطيط</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• محاذاة المبادرات مع الخطط</li><li>• متابعة مؤشرات الاقتصاد</li><li>• تقارير فجوات القطاع/المنطقة</li></ul></div>
+        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• اعتماد المواءمة الاستراتيجية</li><li>• مشاركة سياسات وتوصيات</li><li>• تكامل بيانات مع الجهات</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div id="modal-mof" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between"><h3 class="font-extrabold">وزارة المالية</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• تتبع الصرف والالتزام</li><li>• تقارير الأثر المالي</li><li>• تدقيق دعم المشاريع</li></ul></div>
+        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• مراجعة واعتماد الصرف</li><li>• سياسات وإشعارات امتثال</li><li>• تكامل مع محافظ المانحين</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div id="modal-moi" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between"><h3 class="font-extrabold">وزارة الداخلية</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• اعتماد الفعاليات في المناطق</li><li>• لوحات مؤشرات السلامة</li><li>• إدارة المشاركات مع الإمارة</li></ul></div>
+        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• قبول/رفض الشراكات</li><li>• تنسيق بين إمارات المناطق</li><li>• تقارير موحدة للأمن والسلامة</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div id="modal-moc" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between"><h3 class="font-extrabold">وزارة الثقافة</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• اعتماد الفعاليات الثقافية</li><li>• إدارة المنح الثقافية</li><li>• متابعة الأثر الإبداعي</li></ul></div>
+        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• تنسيق مع الجهات الراعية</li><li>• سياسات المحتوى الثقافي</li><li>• تقارير قطاع الثقافة</li></ul></div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
