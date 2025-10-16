@@ -137,6 +137,29 @@ a.logo-link:hover{transform:translateY(-1px) scale(1.03); filter:drop-shadow(0 1
   .no-print{display:none!important}
 }
 
+
+/* --- Hasseef v7: branding & status badges --- */
+:root{
+  --brand-green:#5AA044;
+  --brand-green-soft:#F2FAEC;
+  --brand-gold:#F8BE43;
+  --brand-bg:#ffffff;
+  --brand-ink:#1f2937;
+  --brand-muted:#6B7280;
+  --brand-line:rgba(0,0,0,.08);
+}
+body{background:var(--brand-bg);color:var(--brand-ink)}
+.has-chip.primary{background:var(--brand-green-soft);border-color:var(--brand-green);}
+.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--brand-line);border-radius:999px;padding:2px 8px;font-size:12px}
+.badge.pending{background:#fff3cd;border-color:#ffec99}
+.badge.review{background:#e7f5ff;border-color:#a5d8ff}
+.badge.approved{background:#e6fcf5;border-color:#96f2d7}
+.badge.rejected{background:#fff5f5;border-color:#ffe3e3}
+.badge.archived{background:#f1f3f5;border-color:#dee2e6}
+.has-tab.warning{color:#b7791f}
+/* Disable button style */
+.has-chip[disabled], .has-btn[disabled]{opacity:.5;cursor:not-allowed}
+
 </style>
 </head>
 <body>
@@ -186,6 +209,22 @@ a.logo-link:hover{transform:translateY(-1px) scale(1.03); filter:drop-shadow(0 1
             <div class="caption" data-i="kpi1">نمو التوظيف</div>
             <div class="value" id="kpi-employment">+18%</div>
             <div class="progress"><div class="bar" id="bar-1" style="width:62%"></div></div>
+<div id="panel-archived" class="has-panel">
+  <div class="has-muted" style="margin:10px 0 8px">السجلات المؤرشفة</div>
+  <div class="filters no-print">
+    <input id="arc-from" class="has-input" type="date"/>
+    <input id="arc-to" class="has-input" type="date"/>
+    <select id="arc-role" class="has-select"><option value="">كل الأدوار</option></select>
+    <select id="arc-svc" class="has-select"><option value="">كل الخدمات</option></select>
+  </div>
+  <div class="has-card" style="overflow:auto">
+    <table class="has-table" id="arc-table">
+      <thead><tr><th>الدور</th><th>الخدمة</th><th>التاريخ</th><th>الحقول</th><th>الحالة</th><th>إجراء</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
           </div>
           <div class="kpi">
             <div class="caption" data-i="kpi2">تكامل الشركاء</div>
@@ -726,7 +765,7 @@ function updateNationalKpis(){
     <div class="has-muted" style="margin-bottom:8px">مؤشرات الحساب</div>
     <div id="has-role-kpis" class="has-kpis"></div>
   </div>
-  <div class="has-tabs"><button class="has-tab active" data-tab="panel-services">الخدمات</button><button class="has-tab" data-tab="panel-workflow">سير العمل</button><button class="has-tab" data-tab="panel-reports">التقارير</button></div><div id="panel-services" class="has-panel show"><div class="has-muted" style="margin:10px 0 8px">خدمات الحساب</div><div id="has-services2" class="has-services" style="display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))"></div></div><div id="panel-workflow" class="has-panel"><div class="has-muted" style="margin:10px 0 8px">صندوق الوارد لسير العمل</div><div class="filters no-print"><input id="wf-from" class="has-input" type="date"/><input id="wf-to" class="has-input" type="date"/><select id="wf-role" class="has-select"><option value="">كل الأدوار</option></select><select id="wf-svc" class="has-select"><option value="">كل الخدمات</option></select></div><div class="has-card" style="overflow:auto"><table class="has-table" id="wf-table"><thead><tr><th>الدور</th><th>الخدمة</th><th>التاريخ</th><th>الحقول</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody></tbody></table></div></div><div id="panel-reports" class="has-panel"><div class="has-muted" style="margin:10px 0 8px">ملخّص الاستخدام</div><div class="filters no-print"><input id="rep-from" class="has-input" type="date"/><input id="rep-to" class="has-input" type="date"/><select id="rep-role" class="has-select"><option value="">كل الأدوار</option></select><select id="rep-svc" class="has-select"><option value="">كل الخدمات</option></select><button id="rep-apply" class="has-btn">تطبيق</button></div><div class="chart-box"><canvas id="chart-roles" width="640" height="280"></canvas></div><div class="has-card" style="margin-top:10px;overflow:auto"><table class="has-table" id="rep-table"><thead><tr><th>الدور</th><th>الخدمة</th><th>عدد السجلات</th></tr></thead><tbody></tbody></table></div></div>
+  <div class="has-tabs"><button class="has-tab active" data-tab="panel-services">الخدمات</button><button class="has-tab" data-tab="panel-workflow">سير العمل</button><button class="has-tab" data-tab="panel-reports">التقارير</button><button class="has-tab warning" data-tab="panel-archived">المؤرشَف</button></div><div id="panel-services" class="has-panel show"><div class="has-muted" style="margin:10px 0 8px">خدمات الحساب</div><div id="has-services2" class="has-services" style="display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))"></div></div><div id="panel-workflow" class="has-panel"><div class="has-muted" style="margin:10px 0 8px">صندوق الوارد لسير العمل</div><div class="filters no-print"><input id="wf-from" class="has-input" type="date"/><input id="wf-to" class="has-input" type="date"/><select id="wf-role" class="has-select"><option value="">كل الأدوار</option></select><select id="wf-svc" class="has-select"><option value="">كل الخدمات</option></select></div><div class="has-card" style="overflow:auto"><table class="has-table" id="wf-table"><thead><tr><th>الدور</th><th>الخدمة</th><th>التاريخ</th><th>الحقول</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody></tbody></table></div></div><div id="panel-reports" class="has-panel"><div class="has-muted" style="margin:10px 0 8px">ملخّص الاستخدام</div><div class="filters no-print"><input id="rep-from" class="has-input" type="date"/><input id="rep-to" class="has-input" type="date"/><select id="rep-role" class="has-select"><option value="">كل الأدوار</option></select><select id="rep-svc" class="has-select"><option value="">كل الخدمات</option></select><button id="rep-apply" class="has-btn">تطبيق</button></div><div class="chart-box"><canvas id="chart-roles" width="640" height="280"></canvas></div><div class="has-card" style="margin-top:10px;overflow:auto"><table class="has-table" id="rep-table"><thead><tr><th>الدور</th><th>الخدمة</th><th>عدد السجلات</th></tr></thead><tbody></tbody></table></div></div>
 </div>
 
 
@@ -1716,6 +1755,254 @@ document.addEventListener('has-submissions-updated', ()=>{
     if(m && m.role) renderWorkflow(m.role);
   }catch{}
 });
+</script>
+
+
+<script>
+// v7: Granular permissions per service/action
+// actions: open (submit), review (set Under Review), approve, reject, archive
+const PERMISSIONS = {
+  default: { open:['*'], review:[], approve:[], reject:[], archive:[] },
+  'funding-intake': { open:['nonprofit','private','individual'], review:['funder'], approve:['funder'], reject:['funder'], archive:['funder'] },
+  'approve-initiatives': { open:['emirate','government','nonprofit','private'], review:['emirate','government'], approve:['emirate','government'], reject:['emirate','government'], archive:['emirate'] },
+  'approve-events': { open:['government'], review:['government'], approve:['government'], reject:['government'], archive:['government'] },
+  'prince-sponsorship': { open:['emirate','government','private','nonprofit'], review:['emirate'], approve:['emirate'], reject:['emirate'], archive:['emirate'] },
+  'security-screening': { open:['emirate','government'], review:['emirate'], approve:['emirate'], reject:['emirate'], archive:['emirate'] },
+  'csr-report': { open:['private'], archive:['private'] },
+  'sponsor': { open:['private'], archive:['private'] },
+  'jobs': { open:['private'], archive:['private'] },
+  'publish-opps': { open:['nonprofit'], archive:['nonprofit'] },
+  'manage-projects': { open:['nonprofit'], archive:['nonprofit'] },
+  'academic-review': { open:['university'], archive:['university'] },
+  'coop-training': { open:['university'], archive:['university'] },
+  'research-listing': { open:['university'], archive:['university'] },
+  'grant-criteria': { open:['funder'], archive:['funder'] },
+  'grant-portfolio': { open:['funder'], archive:['funder'] },
+  'find-projects': { open:['funder'], archive:['funder'] },
+  'partner-oversight': { open:['partner'], archive:['partner'] },
+  'partner-kpis': { open:['partner'], archive:['partner'] },
+  'policy-notices': { open:['partner'], archive:['partner'] },
+  'add-initiative': { open:['individual'], archive:['individual'] },
+  'volunteer': { open:['individual'], archive:['individual'] },
+  'jobs-list': { open:['individual'], archive:['individual'] },
+};
+
+function can(role, action, serviceId){
+  const rule = PERMISSIONS[serviceId] || PERMISSIONS.default;
+  const list = rule[action] || [];
+  return list.includes('*') || list.includes(role);
+}
+
+// Disable "فتح" if not allowed
+(function guardOpenButtons(){
+  const user = JSON.parse(localStorage.getItem('has-demo-user')||'{}');
+  const role = user.role || '';
+  const container = document.getElementById('has-services2');
+  if(!container) return;
+  const observer = new MutationObserver(()=>{
+    container.querySelectorAll('.has-card').forEach(card=>{
+      const idTxt = card.querySelector('.has-muted')?.textContent || '';
+      const id = (idTxt.match(/\((.*?)\)/)||['',''])[1];
+      const btn = card.querySelector('button.has-chip');
+      if(!id || !btn) return;
+      btn.disabled = !can(role,'open',id);
+      btn.title = btn.disabled ? 'الصلاحية غير متاحة لهذا الدور' : '';
+    });
+  });
+  observer.observe(container, {childList:true, subtree:true});
+})();
+
+// Multi-step states helper
+function statusBadge(s){
+  const cls = s==='Approved'?'approved': s==='Rejected'?'rejected': s==='Under Review'?'review':'pending';
+  return `<span class="badge ${cls}">${s}</span>`;
+}
+
+// Restore & Extend renderWorkflow to include Under Review + Archive
+const _renderWorkflow_v6 = window.renderWorkflow;
+window.renderWorkflow = function(role){
+  _renderWorkflow_v6(role);
+  // Add status badges + review/archive actions
+  const store = getSubmissions();
+  const tbody = document.querySelector('#wf-table tbody'); if(!tbody) return;
+  Array.from(tbody.querySelectorAll('tr')).forEach(tr=>{
+    const tdStatus = tr.querySelector('.wf-status');
+    if(tdStatus && !tdStatus.dataset.styled){
+      tdStatus.dataset.styled='1';
+      tdStatus.innerHTML = statusBadge(tdStatus.textContent.split('\n')[0].trim()) + '<br/><small>'+ (tdStatus.textContent.split('\n')[1]||'') +'</small>';
+    }
+  });
+  // Re-bind actions to include Under Review & Archive based on routing/permissions
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.forEach((tr, idx)=>{
+    const svcName = tr.children[1]?.textContent||'';
+    // Find the id by matching mapServiceName reverse (best-effort)
+    let svcId = null;
+    // We'll scan services mapping in DOM has-services2
+    Array.from(document.querySelectorAll('#has-services2 .has-card .has-muted')).forEach(m=>{
+      if(m.parentElement?.querySelector('b')?.textContent === svcName){
+        const mm = m.textContent.match(/\((.*?)\)/); if(mm) svcId = mm[1];
+      }
+    });
+    const tdAct = tr.querySelector('.wf-actions');
+    if(!tdAct || !svcId) return;
+    const user = JSON.parse(localStorage.getItem('has-demo-user')||'{}');
+    const roleNow = user.role || role;
+
+    // Append "مراجعة" if allowed
+    if(can(roleNow,'review',svcId)){
+      const rv = document.createElement('button'); rv.className='has-chip'; rv.textContent='مراجعة';
+      rv.onclick = ()=>{
+        mutateEntryByRowIndex(idx, (entry)=>{ entry.data.status='Under Review'; });
+        tr.querySelector('.wf-status').innerHTML = statusBadge('Under Review') + tr.querySelector('.wf-status').innerHTML.replace(/^.*?<br/,'<br');
+        toast('تم تحويل الحالة إلى: قيد المراجعة');
+      };
+      tdAct.appendChild(rv);
+    }
+    // Append "أرشفة" if allowed
+    if(can(roleNow,'archive',svcId)){
+      const ar = document.createElement('button'); ar.className='has-chip'; ar.textContent='أرشفة';
+      ar.onclick = ()=>{ archiveByRowIndex(idx); };
+      tdAct.appendChild(ar);
+    }
+  });
+};
+
+// Helpers to mutate a specific entry by row index in current workflow view
+function mutateEntryByRowIndex(rowIndex, mutator){
+  const store = getSubmissions();
+  // Recreate same iteration order as renderWorkflow to find target entry
+  const tbody = document.querySelector('#wf-table tbody');
+  const tr = tbody.querySelectorAll('tr')[rowIndex];
+  if(!tr) return;
+  const role = tr.children[0].textContent;
+  const svcName = tr.children[1].textContent;
+  // Find svc id by name
+  let svcId = null;
+  Array.from(document.querySelectorAll('#has-services2 .has-card .has-muted')).forEach(m=>{
+    if(m.parentElement?.querySelector('b')?.textContent === svcName){
+      const mm = m.textContent.match(/\((.*?)\)/); if(mm) svcId = mm[1];
+    }
+  });
+  if(!svcId) return;
+  const tsText = tr.children[2].textContent;
+  const list = store[role]?.[svcId] || [];
+  const entry = list.find(e=> new Date(e.ts).toLocaleString() === tsText);
+  if(entry){
+    mutator(entry);
+    try{ localStorage.setItem('has-submissions', JSON.stringify(store)); document.dispatchEvent(new CustomEvent('has-submissions-updated')); }catch{}
+  }
+}
+
+// Archive logic
+function archiveByRowIndex(rowIndex){
+  const store = getSubmissions();
+  const tbody = document.querySelector('#wf-table tbody');
+  const tr = tbody.querySelectorAll('tr')[rowIndex];
+  if(!tr) return;
+  const role = tr.children[0].textContent;
+  const svcName = tr.children[1].textContent;
+  const tsText = tr.children[2].textContent;
+  // find svc id
+  let svcId = null;
+  Array.from(document.querySelectorAll('#has-services2 .has-card .has-muted')).forEach(m=>{
+    if(m.parentElement?.querySelector('b')?.textContent === svcName){
+      const mm = m.textContent.match(/\((.*?)\)/); if(mm) svcId = mm[1];
+    }
+  });
+  if(!svcId) return;
+  const list = store[role]?.[svcId] || [];
+  const idx = list.findIndex(e=> new Date(e.ts).toLocaleString() === tsText);
+  if(idx>=0){
+    const entry = list.splice(idx,1)[0];
+    entry.data.archived = true;
+    // Persist into 'has-archived'
+    try{
+      const key='has-archived';
+      const arch = JSON.parse(localStorage.getItem(key)||'{}');
+      arch[role] = arch[role] || {};
+      arch[svcId] = arch[svcId] || [];
+      arch[svcId].push(entry);
+      localStorage.setItem('has-archived', JSON.stringify(arch));
+      localStorage.setItem('has-submissions', JSON.stringify(store));
+      document.dispatchEvent(new CustomEvent('has-submissions-updated'));
+      toast('تمت الأرشفة');
+      renderArchived(); // refresh
+      renderWorkflow(JSON.parse(localStorage.getItem('has-demo-user')||'{}').role || '');
+    }catch(e){ console.warn(e); }
+  }
+}
+
+// Render Archived panel
+function renderArchived(){
+  const tbody = document.querySelector('#arc-table tbody'); if(!tbody) return;
+  tbody.innerHTML='';
+  let arch = {}; try{ arch = JSON.parse(localStorage.getItem('has-archived')||'{}'); }catch{ arch = {}; }
+  // build filters
+  const roleSel = document.getElementById('arc-role');
+  const svcSel = document.getElementById('arc-svc');
+  const roles = new Set(), svcs = new Set();
+  Object.keys(arch).forEach(r=>{ roles.add(r); Object.keys(arch[r]).forEach(s=>svcs.add(s)); });
+  if(roleSel && roleSel.options.length<=1){ roles.forEach(r=>{ const o=document.createElement('option'); o.value=r; o.textContent=r; roleSel.appendChild(o); }); }
+  if(svcSel && svcSel.options.length<=1){ svcs.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; svcSel.appendChild(o); }); }
+
+  const from = document.getElementById('arc-from')?.value ? new Date(document.getElementById('arc-from').value) : null;
+  const to   = document.getElementById('arc-to')?.value ? new Date(document.getElementById('arc-to').value) : null;
+  const rf   = roleSel?.value || '';
+  const sf   = svcSel?.value || '';
+
+  Object.keys(arch).forEach(role=>{
+    Object.keys(arch[role]).forEach(svc=>{
+      (arch[role][svc]||[]).forEach(entry=>{
+        const ts = new Date(entry.ts);
+        if(from && ts < from) return;
+        if(to && ts > to) return;
+        if(rf && rf!==role) return;
+        if(sf && sf!==svc) return;
+        const tr = document.createElement('tr');
+        const fields = Object.keys(entry.data).filter(k=>!['signature','status','route','id','submittedBy','archived'].includes(k)).slice(0,5).map(k=>`${k}: ${entry.data[k]}`).join(' · ');
+        tr.innerHTML = `<td>${role}</td><td>${mapServiceName(svc)}</td><td>${ts.toLocaleString()}</td><td>${fields}</td>
+                        <td><span class="badge archived">Archived</span><br/><small>${entry.data.id||''}</small></td>
+                        <td class="no-print"><button class="has-chip" onclick="unarchive('${role}','${svc}',${entry.ts})">استرجاع</button></td>`;
+        tbody.appendChild(tr);
+      });
+    });
+  });
+}
+function unarchive(role, svc, ts){
+  let arch = {}; try{ arch = JSON.parse(localStorage.getItem('has-archived')||'{}'); }catch{ arch = {}; }
+  const list = arch[role]?.[svc] || [];
+  const idx = list.findIndex(e=> e.ts===ts);
+  if(idx>=0){
+    const entry = list.splice(idx,1)[0];
+    try{
+      const key='has-submissions';
+      const store = JSON.parse(localStorage.getItem(key)||'{}');
+      store[role] = store[role] || {};
+      store[role][svc] = store[role][svc] || [];
+      store[role][svc].push(entry);
+      localStorage.setItem('has-archived', JSON.stringify(arch));
+      localStorage.setItem('has-submissions', JSON.stringify(store));
+      document.dispatchEvent(new CustomEvent('has-submissions-updated'));
+      toast('تم الاسترجاع من الأرشيف');
+      renderArchived();
+      const m = JSON.parse(localStorage.getItem('has-demo-user')||'{}');
+      if(m && m.role) renderWorkflow(m.role);
+    }catch(e){ console.warn(e); }
+  }
+}
+
+// Bind archived filters
+['arc-from','arc-to','arc-role','arc-svc'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change', renderArchived);
+});
+
+// Ensure archived renders when tab opens
+(function tabHook(){
+  const tab = document.querySelector('[data-tab="panel-archived"]');
+  if(!tab) return;
+  tab.addEventListener('click', renderArchived);
+})();
 </script>
 
 </body>
