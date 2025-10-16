@@ -727,6 +727,63 @@
     </div>
   </footer>
 
+  <!-- ====== Dashboard (interactive accounts) ====== -->
+  <section id="dashboard" class="py-16 md:py-24 hidden">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-2xl md:text-3xl font-extrabold">لوحتي</h2>
+        <div class="text-sm text-hasseef-gray">مرحبًا، <span id="userName">ضيف</span> · الدور: <span id="userRole">—</span></div>
+      </div>
+
+      <div class="mt-6 rounded-2xl border bg-white p-4">
+        <!-- مساحة عمل الخدمة حسب الدور -->
+        <div id="service-workspace" class="hidden mb-6 rounded-xl border p-4 bg-white"></div>
+
+        <h3 class="font-bold mb-3">خدمات الحساب</h3>
+        <div id="role-services" class="grid md:grid-cols-3 gap-3"></div>
+        <hr class="my-4"/>
+
+        <div class="flex flex-wrap gap-2">
+          <button class="tabBtn px-3 py-1.5 rounded-xl border active" data-tab="tab-overview">نظرة عامة</button>
+          <button class="tabBtn px-3 py-1.5 rounded-xl border" data-tab="tab-initiatives">مبادراتي</button>
+          <button class="tabBtn px-3 py-1.5 rounded-xl border" data-tab="tab-opps">فرص</button>
+        </div>
+        <div class="mt-4">
+          <div id="tab-overview" class="tabPanel">
+            <div class="grid md:grid-cols-3 gap-4">
+              <div class="rounded-xl border p-4"><div class="text-xs text-hasseef-gray">عدد المبادرات</div><div class="text-2xl font-extrabold" id="stat-initiatives">0</div></div>
+              <div class="rounded-xl border p-4"><div class="text-xs text-hasseef-gray">طلبات قيد المراجعة</div><div class="text-2xl font-extrabold" id="stat-pending">0</div></div>
+              <div class="rounded-xl border p-4"><div class="text-xs text-hasseef-gray">فرص مقترحة</div><div class="text-2xl font-extrabold" id="stat-opps">0</div></div>
+            </div>
+          </div>
+          <div id="tab-initiatives" class="tabPanel hidden">
+            <form id="form-initiative" class="grid gap-3 md:grid-cols-2">
+              <input class="rounded-xl border px-3 py-2" placeholder="اسم المبادرة" required/>
+              <select class="rounded-xl border px-3 py-2">
+                <option>تعليمي</option><option>ثقافي</option><option>اجتماعي</option><option>اقتصادي</option>
+              </select>
+              <textarea class="md:col-span-2 rounded-xl border px-3 py-2" placeholder="وصف مختصر" required></textarea>
+              <div class="md:col-span-2 grid md:grid-cols-3 gap-3">
+                <input class="rounded-xl border px-3 py-2" placeholder="اللبنة: الجمهور المستهدف"/>
+                <input class="rounded-xl border px-3 py-2" placeholder="اللبنة: القيمة المقترحة"/>
+                <input class="rounded-xl border px-3 py-2" placeholder="اللبنة: القنوات"/>
+              </div>
+              <button class="md:col-span-2 px-4 py-2 rounded-xl bg-hasseef-green text-white">حفظ المبادرة</button>
+            </form>
+            <div class="mt-6">
+              <h4 class="font-bold">قائمة المبادرات</h4>
+              <div id="list-initiatives" class="mt-2 grid gap-3"></div>
+            </div>
+          </div>
+          <div id="tab-opps" class="tabPanel hidden">
+            <div class="text-sm text-hasseef-gray">(تجريبي) فرص مقترحة بناءً على دورك ومنطقتك.</div>
+            <div id="list-opps" class="mt-3 grid md:grid-cols-2 gap-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ====== Modals: per account details ====== -->
   <!-- Individual Modal -->
   <div id="modal-individual" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
@@ -1141,13 +1198,21 @@
     // Login submit
     document.getElementById('loginForm')?.addEventListener('submit', (e)=>{
       e.preventDefault();
-      const [name, role] = Array.from(e.target.querySelectorAll('input,select')).map(el=>el.value);
-      App.user = {name, role}; localStorage.setItem('user', JSON.stringify(App.user));
-      document.getElementById('userName').textContent = name;
-      document.getElementById('userRole').textContent = role;
+      const emailOrName = (e.target.querySelector('[name="emailOrName"]').value||'').trim();
+      const password = (e.target.querySelector('[name="password"]').value||'').trim();
+      const roleSel = (e.target.querySelector('[name="role"]').value||'individual');
+      // إذا كان بريدًا إلكترونيًا واُدخلت كلمة مرور -> دخول فعلي من سجل المستخدمين
+      if(emailOrName.includes('@') && password){
+        try{ AppAuth.signin(emailOrName, password); } catch(err){ alert(err.message); return; }
+      } else {
+        // دخول تجريبي باسم ودور
+        App.user = {name: emailOrName||'ضيف', role: roleSel}; localStorage.setItem('user', JSON.stringify(App.user));
+      }
+      const u = AppAuth.user || App.user;
+      document.getElementById('userName').textContent = u.name; document.getElementById('userRole').textContent = u.role;
       location.hash = 'dashboard';
       const mdl = document.getElementById('modal-login'); mdl.classList.add('hidden'); mdl.classList.remove('flex');
-      updateStats(); renderOpps(); renderList();
+      ensureServicesContainer(); renderServices(); updateStats(); renderOpps(); renderList();
     });
 
     // Tabs
@@ -1202,6 +1267,29 @@
     })();
   </script>
   
+  <!-- Login Modal -->
+  <div id="modal-login" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between"><h3 class="font-extrabold">تسجيل دخول</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
+      <form id="loginForm" class="mt-4 grid gap-3">
+        <input name="emailOrName" class="rounded-xl border px-3 py-2" placeholder="البريد الإلكتروني أو الاسم" required/>
+        <div class="grid md:grid-cols-2 gap-2">
+          <input name="password" type="password" class="rounded-xl border px-3 py-2" placeholder="كلمة المرور (لمن سجّل بحساب)"/>
+          <select name="role" class="rounded-xl border px-3 py-2">
+            <option value="individual">فرد</option>
+            <option value="private">قطاع خاص</option>
+            <option value="nonprofit">قطاع غير ربحي</option>
+            <option value="university">جامعة</option>
+            <option value="government">حكومة</option>
+            <option value="emirate">إمارة</option>
+            <option value="funder">مانح</option>
+          </select>
+        </div>
+        <button class="px-4 py-2 rounded-xl bg-hasseef-green text-white">دخول</button>
+      </form>
+    </div>
+  </div>
+
   <!-- Sign Up Modal -->
   <div id="modal-signup" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
     <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-soft">
@@ -1347,6 +1435,121 @@
         d.querySelector('button').addEventListener('click', s.act);
         grid.appendChild(d);
       });
+    }
+
+    // === خدمة مساحة العمل لكل دور ===
+    function openService(id){
+      const box = document.getElementById('service-workspace'); if(!box) return;
+      box.classList.remove('hidden');
+      const closeBtn = '<button id="closeWS" class="mb-3 px-3 py-1.5 rounded-xl border text-xs">إغلاق المساحة</button>';
+      let html='';
+      switch(id){
+        case 'add-initiative':
+          html = `${closeBtn}<div class="font-bold mb-2">نموذج إضافة مبادرة (مبسط)</div>
+          <p class="text-xs text-hasseef-gray mb-2">يؤدي نفس ما في تبويب "مبادراتي" لكن من داخل الخدمات.</p>
+          <form id="ws-add-init" class="grid gap-2 md:grid-cols-2">
+            <input class="rounded-xl border px-3 py-2" placeholder="اسم المبادرة" required/>
+            <select class="rounded-xl border px-3 py-2"><option>تعليمي</option><option>ثقافي</option><option>اجتماعي</option><option>اقتصادي</option></select>
+            <textarea class="md:col-span-2 rounded-xl border px-3 py-2" placeholder="وصف مختصر" required></textarea>
+            <button class="md:col-span-2 px-4 py-2 rounded-xl bg-hasseef-green text-white">حفظ</button>
+          </form>`; break;
+        case 'csr-report':
+          html = `${closeBtn}<div class="font-bold mb-2">تقرير المسؤولية (CSR)</div>
+          <form id="ws-csr" class="grid gap-2 md:grid-cols-3">
+            <input class="rounded-xl border px-3 py-2" placeholder="المنشأة" required/>
+            <input class="rounded-xl border px-3 py-2" placeholder="الفترة (مثال: 2025-Q4)" required/>
+            <input class="rounded-xl border px-3 py-2" placeholder="حجم الإنفاق (ر.س)" required/>
+            <textarea class="md:col-span-3 rounded-xl border px-3 py-2" placeholder="ملاحظات/ربط مشاريع"></textarea>
+            <button class="md:col-span-3 px-4 py-2 rounded-xl bg-hasseef-green text-white">توليد مسودة</button>
+          </form>`; break;
+        case 'sponsor':
+          html = `${closeBtn}<div class="font-bold mb-2">طلب رعاية فعالية</div>
+          <form id="ws-sponsor" class="grid gap-2 md:grid-cols-2">
+            <input class="rounded-xl border px-3 py-2" placeholder="اسم الفعالية" required/>
+            <input class="rounded-xl border px-3 py-2" placeholder="الجهة المنظمة" required/>
+            <input class="rounded-xl border px-3 py-2" placeholder="التاريخ"/>
+            <input class="rounded-xl border px-3 py-2" placeholder="المدينة"/>
+            <button class="md:col-span-2 px-4 py-2 rounded-xl bg-hasseef-green text-white">إرسال الطلب</button>
+          </form>`; break;
+        case 'publish-opps':
+          html = `${closeBtn}<div class="font-bold mb-2">نشر فرصة</div>
+          <form id="ws-opp" class="grid gap-2 md:grid-cols-3">
+            <input class="rounded-xl border px-3 py-2" placeholder="عنوان الفرصة" required/>
+            <select class="rounded-xl border px-3 py-2"><option>وظيفة</option><option>تطوع</option><option>تدريب</option></select>
+            <input class="rounded-xl border px-3 py-2" placeholder="القطاع/الفئة"/>
+            <textarea class="md:col-span-3 rounded-xl border px-3 py-2" placeholder="وصف مختصر"></textarea>
+            <button class="md:col-span-3 px-4 py-2 rounded-xl bg-hasseef-green text-white">نشر</button>
+          </form>`; break;
+        case 'manage-projects':
+          html = `${closeBtn}<div class="font-bold mb-2">إدارة المشاريع</div>
+          <div class="text-xs text-hasseef-gray mb-2">نموذج أولي: إضافة سريعة وتحديث حالة.</div>
+          <div id="ws-projects" class="grid gap-2"></div>
+          <form id="ws-add-proj" class="grid md:grid-cols-3 gap-2 mt-2">
+            <input class="rounded-xl border px-3 py-2" placeholder="اسم المشروع" required/>
+            <select class="rounded-xl border px-3 py-2"><option>قيد التخطيط</option><option>قيد التنفيذ</option><option>مكتمل</option></select>
+            <button class="px-4 py-2 rounded-xl bg-hasseef-green text-white">إضافة</button>
+          </form>`; break;
+        case 'academic-review':
+          html = `${closeBtn}<div class="font-bold mb-2">تعزيز علمي</div>
+          <form id="ws-acad" class="grid gap-2">
+            <input class="rounded-xl border px-3 py-2" placeholder="عنوان الدراسة" required/>
+            <textarea class="rounded-xl border px-3 py-2" placeholder="ملخص"></textarea>
+            <button class="px-4 py-2 rounded-xl bg-hasseef-green text-white">إصدار مسودة اعتماد</button>
+          </form>`; break;
+        case 'coop-training':
+          html = `${closeBtn}<div class="font-bold mb-2">إتاحة تدريب تعاوني</div>
+          <form id="ws-coop" class="grid gap-2 md:grid-cols-2">
+            <input class="rounded-xl border px-3 py-2" placeholder="المسمّى" required/>
+            <input class="rounded-xl border px-3 py-2" placeholder="المدة (أسابيع)"/>
+            <button class="md:col-span-2 px-4 py-2 rounded-xl bg-hasseef-green text-white">نشر</button>
+          </form>`; break;
+        case 'approve-events':
+          html = `${closeBtn}<div class="font-bold mb-2">طلبات فعاليات (تجريبي)</div>
+          <div id="ws-events" class="grid gap-2"></div>`; break;
+        case 'request-solutions':
+          html = `${closeBtn}<div class="font-bold mb-2">طلب حلول</div>
+          <form id="ws-sol" class="grid gap-2 md:grid-cols-2">
+            <input class="rounded-xl border px-3 py-2" placeholder="عنوان التحدي" required/>
+            <textarea class="md:col-span-2 rounded-xl border px-3 py-2" placeholder="التفاصيل"></textarea>
+            <button class="md:col-span-2 px-4 py-2 rounded-xl bg-hasseef-green text-white">نشر الطلب</button>
+          </form>`; break;
+        case 'regional-dashboard':
+          html = `${closeBtn}<div class="font-bold mb-2">لوحة المنطقة (تجريبي)</div>
+          <div class="grid md:grid-cols-3 gap-3">
+            <div class="rounded-xl border p-3"><div class="text-xs text-hasseef-gray">مبادرات</div><div class="text-xl font-extrabold" id="rg-init">0</div></div>
+            <div class="rounded-xl border p-3"><div class="text-xs text-hasseef-gray">وظائف/تطوع</div><div class="text-xl font-extrabold" id="rg-opps">0</div></div>
+            <div class="rounded-xl border p-3"><div class="text-xs text-hasseef-gray">مشاريع</div><div class="text-xl font-extrabold" id="rg-proj">0</div></div>
+          </div>`; break;
+        case 'approve-initiatives':
+          html = `${closeBtn}<div class="font-bold mb-2">اعتماد المبادرات</div>
+          <div id="ws-approve" class="grid gap-2"></div>`; break;
+        case 'grant-portfolio':
+          html = `${closeBtn}<div class="font-bold mb-2">محفظة المانح</div>
+          <div class="text-xs text-hasseef-gray">(تجريبي) إجمالي تمويل ومشاريع مموّلة.</div>
+          <div class="grid md:grid-cols-3 gap-3 mt-2"><div class="rounded-xl border p-3"><div class="text-xs">إجمالي التمويل</div><div class="text-xl font-extrabold">1.2م</div></div><div class="rounded-xl border p-3"><div class="text-xs">مشاريع نشطة</div><div class="text-xl font-extrabold">7</div></div><div class="rounded-xl border p-3"><div class="text-xs">مكتملة</div><div class="text-xl font-extrabold">12</div></div></div>`; break;
+        case 'find-projects':
+          html = `${closeBtn}<div class="font-bold mb-2">اعثر على مشاريع</div>
+          <form id="ws-find" class="grid gap-2 md:grid-cols-3">
+            <select class="rounded-xl border px-3 py-2"><option>تعليمي</option><option>ثقافي</option><option>اجتماعي</option><option>اقتصادي</option></select>
+            <input class="rounded-xl border px-3 py-2" placeholder="المنطقة"/>
+            <button class="px-4 py-2 rounded-xl bg-hasseef-green text-white">بحث</button>
+          </form>
+          <div id="ws-results" class="mt-3 grid gap-2"></div>`; break;
+        default:
+          html = `${closeBtn}<div class="text-sm">الخدمة غير معرّفة بعد.</div>`;
+      }
+      box.innerHTML = html;
+
+      // سلوكيات مبسطة
+      document.getElementById('closeWS')?.addEventListener('click',()=>{ box.classList.add('hidden'); box.innerHTML=''; });
+      document.getElementById('ws-add-init')?.addEventListener('submit',(e)=>{ e.preventDefault(); alert('تم حفظ المبادرة (تجريبي)'); });
+      document.getElementById('ws-opp')?.addEventListener('submit',(e)=>{ e.preventDefault(); const t=e.target.querySelector('input').value; const r=document.getElementById('list-opps'); if(r){ const d=document.createElement('div'); d.className='rounded-xl border p-3 bg-white'; d.innerHTML=`<div class="font-bold text-sm">${t}</div><div class="text-xs text-hasseef-gray">مضافة الآن</div>`; r.prepend(d);} alert('تم نشر الفرصة'); });
+      if(document.getElementById('ws-events')){
+        const host=document.getElementById('ws-events'); ['مهرجان صيفي','ملتقى التطوع','معرض الجامعات'].forEach(n=>{ const c=document.createElement('div'); c.className='rounded border p-3 flex items-center justify-between text-sm'; c.innerHTML=`<div>${n}</div><div class="flex gap-2"><button class="px-2 py-1 rounded border">قبول</button><button class="px-2 py-1 rounded border">رفض</button></div>`; host.appendChild(c); });
+      }
+      if(document.getElementById('ws-approve')){
+        const host=document.getElementById('ws-approve'); (App.initiatives||[]).forEach(it=>{ if(it.status==='قيد المراجعة'){ const c=document.createElement('div'); c.className='rounded border p-3 flex items-center justify-between text-sm'; c.innerHTML=`<div>${it.name}</div><button class="px-2 py-1 rounded bg-hasseef-green text-white">اعتماد</button>`; c.querySelector('button').addEventListener('click',()=>{ it.status='معتمد'; localStorage.setItem('initiatives', JSON.stringify(App.initiatives)); c.remove(); alert('تم الاعتماد'); }); host.appendChild(c);} });
+      }
     }
 
     // Initialize
