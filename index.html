@@ -52,6 +52,29 @@ footer{padding:24px 0;color:var(--gray)}
 .header-logos{display:flex;align-items:center;gap:10px}
 .header-logos img{height:40px;width:auto;display:block;filter:none}
 @media (max-width:768px){ .grid-3{grid-template-columns:1fr} .kpi-grid{grid-template-columns:1fr} .logo-grid{grid-template-columns:repeat(3,1fr)} .header-logos img{height:32px} }
+
+/* --- Hasseef Patch: clickable logos + auth + account panel --- */
+a.logo-link{display:inline-flex;align-items:center;transition:transform .15s ease, filter .15s ease}
+a.logo-link:hover{transform:translateY(-1px) scale(1.03); filter:drop-shadow(0 1px 1px rgba(0,0,0,.08))}
+.has-demo-login{position:fixed;inset-inline-end:16px;bottom:16px;z-index:9999}
+.has-demo-login .fab{background:#5AA044;color:#fff;border:0;border-radius:999px;padding:12px 16px;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,.12)}
+.has-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:9999}
+.has-modal.show{display:flex}
+.has-dialog{background:#fff;border-radius:14px;max-width:560px;width:92vw;padding:16px;border:1px solid rgba(0,0,0,.06)}
+.has-grid{display:grid;gap:10px}
+.has-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.has-tag{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(0,0,0,.12);border-radius:999px;padding:8px 10px;background:#fff;cursor:pointer}
+.has-tag b{font-weight:700}
+.has-accounts{display:flex;flex-wrap:wrap;gap:8px}
+#has-account-panel{position:fixed;inset:0;z-index:9998;display:none}
+#has-account-panel.show{display:block}
+#has-account-panel .overlay{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+#has-account-panel .sheet{position:absolute;inset-inline:0;bottom:0;background:#fff;border-radius:18px 18px 0 0;max-height:85vh;overflow:auto;padding:16px}
+@media (min-width: 900px){ #has-account-panel .sheet{inset:10% 18%;border-radius:18px} }
+.has-card{border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:12px}
+.has-services{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width: 900px){ .has-services{grid-template-columns:repeat(3,minmax(0,1fr))} }
+
 </style>
 </head>
 <body>
@@ -601,5 +624,167 @@ function updateNationalKpis(){
   applyLang('ar');
 })();
 </script>
+
+<!-- Hasseef Patch UI: demo login & account panel -->
+<div class="has-demo-login">
+  <button class="fab" id="has-open-login">تجربة الحسابات</button>
+</div>
+<div class="has-modal" id="has-login-modal" role="dialog" aria-label="تسجيل الدخول التجريبي">
+  <div class="has-dialog">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <b>تسجيل الدخول التجريبي</b>
+      <button id="has-close-login" class="has-tag">إغلاق</button>
+    </div>
+    <p style="color:#6B7280;margin:.4rem 0">اختر حسابًا جاهزًا للتجربة أو أدخل اسم مستخدم/كلمة مرور بسيطة.</p>
+    <div class="has-accounts" id="has-demo-accounts"></div>
+    <hr style="border:0;border-top:1px solid rgba(0,0,0,.08);margin:10px 0"/>
+    <form id="has-login-form" class="has-grid has-grid-2">
+      <input name="username" placeholder="اسم المستخدم (مثال: emirate)" required/>
+      <input name="password" type="password" placeholder="كلمة المرور (مثال: 1234)" required/>
+      <button class="has-tag" type="submit"><b>دخول</b></button>
+    </form>
+  </div>
+</div>
+<div id="has-account-panel">
+  <div class="overlay"></div>
+  <div class="sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <b id="has-role-title">—</b>
+        <div style="color:#6B7280;font-size:13px" id="has-role-sub">خدمات الحساب الفعّالة</div>
+      </div>
+      <button id="has-close-panel" class="has-tag">إغلاق</button>
+    </div>
+    <div id="has-services" class="has-services" style="margin-top:10px"></div>
+  </div>
+</div>
+
+
+<script>
+// Wrap Vision/Talbiya logos with links
+(function wrapLogos(){
+  const V = "https://vision2030.gov.sa";
+  const T = "https://talbiya.sa";
+  const nodes = Array.from(document.querySelectorAll('img,svg'));
+  const hasText = (el) => ((el.getAttribute('alt')||'') + ' ' + (el.getAttribute('src')||'') + ' ' + (el.textContent||'')).toLowerCase();
+  function wrap(el, href){
+    if(!el || el.closest('a')) return;
+    const a = document.createElement('a'); a.href = href; a.target="_blank"; a.rel="noopener"; a.className="logo-link";
+    el.parentNode.insertBefore(a, el); a.appendChild(el);
+  }
+  nodes.forEach(el=>{ const t=hasText(el); if(t.includes('2030')||t.includes('vision')||t.includes('رؤية')) wrap(el,V); });
+  nodes.forEach(el=>{ const t=hasText(el); if(t.includes('talbiya')||t.includes('تلبية')) wrap(el,T); });
+})();
+
+// Demo accounts & services
+const DEMO = [
+  {u:'emirate',p:'1234',role:'emirate',ar:'إمارة المنطقة'},
+  {u:'government',p:'1234',role:'government',ar:'جهة حكومية'},
+  {u:'private',p:'1234',role:'private',ar:'قطاع خاص'},
+  {u:'nonprofit',p:'1234',role:'nonprofit',ar:'قطاع غير ربحي'},
+  {u:'university',p:'1234',role:'university',ar:'جامعة'},
+  {u:'funder',p:'1234',role:'funder',ar:'جهة تمويل/مانح'},
+  {u:'partner',p:'1234',role:'partner',ar:'شريك استراتيجي'},
+  {u:'individual',p:'1234',role:'individual',ar:'فرد'}
+];
+const SERVICES = {
+  emirate:[
+    {id:'regional-dashboard',title:'لوحة المنطقة'},
+    {id:'approve-initiatives',title:'اعتماد مبادرات'},
+    {id:'prince-sponsorship',title:'رعاية سمو الأمير'},
+    {id:'security-screening',title:'المسح الأمني'}
+  ],
+  government:[
+    {id:'challenge-request',title:'طرح تحديات/طلب حلول'},
+    {id:'approve-events',title:'اعتماد الفعاليات'},
+    {id:'request-solutions',title:'طلب حلول وتنفيذ'}
+  ],
+  private:[
+    {id:'csr-report',title:'تقرير المسؤولية CSR'},
+    {id:'sponsor',title:'رعاية مشروع/فعالية'},
+    {id:'jobs',title:'نشر وظائف'}
+  ],
+  nonprofit:[
+    {id:'publish-opps',title:'نشر فرص التطوع/التدريب'},
+    {id:'manage-projects',title:'إدارة المبادرات والمشاريع'},
+    {id:'funding-intake',title:'استقبال تمويل'}
+  ],
+  university:[
+    {id:'academic-review',title:'استشارات علمية'},
+    {id:'coop-training',title:'تدريب تعاوني'},
+    {id:'research-listing',title:'أبحاث قابلة للتطبيق'}
+  ],
+  funder:[
+    {id:'grant-criteria',title:'معايير المنح'},
+    {id:'grant-portfolio',title:'محفظة المنح'},
+    {id:'find-projects',title:'مطابقة مشاريع ومعايير'}
+  ],
+  partner:[
+    {id:'partner-oversight',title:'واجهة إشرافية للشريك'},
+    {id:'partner-kpis',title:'مؤشرات الشريك'},
+    {id:'policy-notices',title:'تنبيهات السياسات'}
+  ],
+  individual:[
+    {id:'add-initiative',title:'إضافة مبادرة فردية'},
+    {id:'volunteer',title:'التطوع وتوثيق الساعات'},
+    {id:'jobs-list',title:'فرص وظيفية'}
+  ]
+};
+
+(function renderPills(){
+  const host=document.getElementById('has-demo-accounts'); if(!host) return;
+  DEMO.forEach(acc=>{
+    const b=document.createElement('button'); b.className='has-tag';
+    b.innerHTML=`<span>${acc.ar}</span><code style="background:#F7F9FC;padding:2px 6px;border-radius:6px">user: ${acc.u} · pass: ${acc.p}</code>`;
+    b.onclick=()=>doLogin(acc.u,acc.p); host.appendChild(b);
+  });
+})();
+
+document.getElementById('has-open-login')?.addEventListener('click',()=>{
+  document.getElementById('has-login-modal').classList.add('show');
+});
+document.getElementById('has-close-login')?.addEventListener('click',()=>{
+  document.getElementById('has-login-modal').classList.remove('show');
+});
+document.getElementById('has-login-form')?.addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const u=e.target.username.value.trim().toLowerCase();
+  const p=e.target.password.value.trim();
+  doLogin(u,p);
+});
+
+function doLogin(u,p){
+  const m = DEMO.find(x=>x.u===u && x.p===p);
+  if(!m){ alert('بيانات الدخول غير صحيحة'); return; }
+  try{ localStorage.setItem('has-demo-user', JSON.stringify(m)); }catch{}
+  openAccount(m);
+  document.getElementById('has-login-modal').classList.remove('show');
+}
+
+(function restore(){
+  try{
+    const m = JSON.parse(localStorage.getItem('has-demo-user')||'null');
+    if(m && m.role){ openAccount(m); }
+  }catch{}
+})();
+
+function openAccount(m){
+  const panel=document.getElementById('has-account-panel');
+  document.getElementById('has-role-title').textContent=m.ar||m.role||'حسابي';
+  const host=document.getElementById('has-services'); host.innerHTML='';
+  (SERVICES[m.role]||[]).forEach(s=>{
+    const d=document.createElement('div'); d.className='has-card';
+    d.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div><b>${s.title}</b><div style="color:#6B7280;font-size:12px">(${s.id})</div></div>
+      <button class="has-tag">فتح</button>
+    </div>`;
+    host.appendChild(d);
+  });
+  panel.classList.add('show');
+  panel.querySelector('.overlay').onclick=()=>panel.classList.remove('show');
+  document.getElementById('has-close-panel').onclick=()=>panel.classList.remove('show');
+}
+</script>
+
 </body>
 </html>
