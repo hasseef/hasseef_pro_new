@@ -99,8 +99,16 @@
             <span class=\"text-xs\">تباين</span>
           </button>
         </nav>
-        <button id="menuBtn" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border text-hasseef-dark">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <div id=\"authButtons\" class=\"hidden md:flex items-center gap-2\">
+          <button id=\"signupBtn\" type=\"button\" class=\"inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border\">تسجيل</button>
+          <button id=\"loginBtn\" type=\"button\" class=\"inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border\">دخول</button>
+          <div id=\"userMenu\" class=\"hidden items-center gap-2\">
+            <span class=\"text-xs text-hasseef-gray\">مرحبًا، <strong id=\"navUser\">—</strong></span>
+            <button id=\"logoutBtn\" class=\"inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border\">خروج</button>
+          </div>
+        </div>
+        <button id=\"menuBtn\" class=\"md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border text-hasseef-dark\">
+          <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-6 h-6\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h16M4 18h16\"/></svg>
         </button>
       </div>
       <div id="mobileNav" class="hidden md:hidden pb-3">
@@ -1192,6 +1200,157 @@
       if(App.user){ document.getElementById('userName').textContent = App.user.name; document.getElementById('userRole').textContent = App.user.role; }
       renderList(); updateStats(); renderOpps();
     })();
+  </script>
+  
+  <!-- Sign Up Modal -->
+  <div id="modal-signup" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between"><h3 class="font-extrabold">تسجيل حساب</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
+      <form id="signupForm" class="mt-4 grid gap-3">
+        <input name="name" class="rounded-xl border px-3 py-2" placeholder="الاسم الكامل" required/>
+        <input name="email" type="email" class="rounded-xl border px-3 py-2" placeholder="البريد الإلكتروني" required/>
+        <select name="role" class="rounded-xl border px-3 py-2" required>
+          <option value="individual">فرد</option>
+          <option value="private">قطاع خاص</option>
+          <option value="nonprofit">قطاع غير ربحي</option>
+          <option value="university">جامعة</option>
+          <option value="government">حكومة</option>
+          <option value="emirate">إمارة</option>
+          <option value="funder">مانح</option>
+        </select>
+        <input name="region" class="rounded-xl border px-3 py-2" placeholder="المنطقة (اختياري)"/>
+        <input name="password" type="password" class="rounded-xl border px-3 py-2" placeholder="كلمة المرور" required/>
+        <button class="px-4 py-2 rounded-xl bg-hasseef-green text-white">إنشاء حساب</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // === Minimal Auth & Accounts (MVP, localStorage) ===
+    const $ = (s,sc)=> (sc||document).querySelector(s);
+    const $$ = (s,sc)=> Array.from((sc||document).querySelectorAll(s));
+
+    const AppAuth = {
+      users: JSON.parse(localStorage.getItem('users')||'[]'),
+      get user(){ return JSON.parse(localStorage.getItem('user')||'null'); },
+      set user(v){ localStorage.setItem('user', JSON.stringify(v)); },
+      signup(data){
+        if(this.users.some(u=>u.email===data.email)) throw new Error('البريد مسجّل مسبقًا');
+        data.pw = btoa(data.password); delete data.password; this.users.push(data);
+        localStorage.setItem('users', JSON.stringify(this.users));
+        this.user = {name:data.name, email:data.email, role:data.role, region:data.region||''};
+      },
+      signin(email, password){
+        const u = this.users.find(u=>u.email===email && u.pw===btoa(password));
+        if(!u) throw new Error('بيانات الدخول غير صحيحة');
+        this.user = {name:u.name, email:u.email, role:u.role, region:u.region||''};
+      },
+      signout(){ localStorage.removeItem('user'); }
+    };
+
+    // UI bindings
+    function toggleAuthUI(){
+      const u = AppAuth.user;
+      const authBtns = $('#authButtons'); const menu = $('#userMenu');
+      if(u){ authBtns?.classList.remove('hidden'); $('#signupBtn')?.classList.add('hidden'); $('#loginBtn')?.classList.add('hidden'); menu?.classList.remove('hidden'); $('#navUser').textContent = u.name; }
+      else { authBtns?.classList.remove('hidden'); $('#signupBtn')?.classList.remove('hidden'); $('#loginBtn')?.classList.remove('hidden'); menu?.classList.add('hidden'); }
+    }
+
+    $('#signupBtn')?.addEventListener('click', ()=>{ const m=$('#modal-signup'); m.classList.remove('hidden'); m.classList.add('flex'); });
+    $('#loginBtn')?.addEventListener('click', ()=>{ const m=$('#modal-login'); m.classList.remove('hidden'); m.classList.add('flex'); });
+
+    // close buttons
+    $$('#modal-signup .hs-close, #modal-login .hs-close').forEach(b=> b.addEventListener('click', ()=>{ const mdl=b.closest('.hs-modal'); mdl.classList.add('hidden'); mdl.classList.remove('flex'); }));
+
+    // signup submit
+    $('#signupForm')?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const data = Object.fromEntries(fd.entries());
+      try{ AppAuth.signup(data); location.hash='dashboard'; $('#modal-signup').classList.add('hidden'); $('#modal-signup').classList.remove('flex'); afterLogin(); }
+      catch(err){ alert(err.message); }
+    });
+
+    // login submit (reuse existing modal)
+    $('#loginForm')?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const [nameOr, roleOr] = Array.from(e.target.querySelectorAll('input,select')).map(el=>el.value);
+      // If user typed email in name field, try real auth; otherwise fallback to demo role login
+      if(nameOr.includes('@')){
+        try{ AppAuth.signin(nameOr, roleOr); afterLogin(); $('#modal-login').classList.add('hidden'); $('#modal-login').classList.remove('flex'); location.hash='dashboard'; }
+        catch(err){ alert(err.message); }
+      } else {
+        // demo mode
+        const demo = {name:nameOr, role:roleOr}; App.user = demo; localStorage.setItem('user', JSON.stringify(demo)); afterLogin(); $('#modal-login').classList.add('hidden'); $('#modal-login').classList.remove('flex'); location.hash='dashboard';
+      }
+    });
+
+    $('#logoutBtn')?.addEventListener('click', ()=>{ AppAuth.signout(); toggleAuthUI(); location.hash=''; alert('تم تسجيل الخروج'); });
+
+    function afterLogin(){
+      const u = AppAuth.user || App.user; // support old demo user
+      $('#userName').textContent = u?.name || 'ضيف';
+      $('#userRole').textContent = u?.role || '—';
+      toggleAuthUI();
+      ensureServicesContainer();
+      renderServices();
+      updateStats(); renderOpps(); renderList();
+    }
+
+    // === Role Services ===
+    const servicesByRole = {
+      individual:[
+        {id:'add-initiative', title:'إضافة مبادرة', desc:'أنشئ مبادرة بنموذج اللبنات التسعة', act:()=>{ location.hash='dashboard'; document.querySelector('[data-tab="tab-initiatives"]').click(); }}
+      ],
+      private:[
+        {id:'csr-report', title:'تقرير المسؤولية', desc:'إعداد تقرير CSR وربط المشاريع المدعومة', act:()=>alert('نموذج تقرير CSR — (نموذج أولي)')},
+        {id:'sponsor', title:'رعاية فعالية', desc:'تقديم طلب رعاية واعتماد سريع', act:()=>location.href='#sponsors'}
+      ],
+      nonprofit:[
+        {id:'publish-opps', title:'نشر فرص', desc:'وظائف/تطوع/تدريب', act:()=>{ alert('واجهة نشر فرص — (نموذج أولي)'); }},
+        {id:'manage-projects', title:'إدارة المشاريع', desc:'تحديث مؤشرات الأداء', act:()=>{ alert('لوحة مشاريع — (نموذج أولي)'); }}
+      ],
+      university:[
+        {id:'academic-review', title:'تعزيز علمي', desc:'تقييم مبادرات وإصدار اعتماد', act:()=>alert('نموذج اعتماد علمي — (نموذج أولي)')},
+        {id:'coop-training', title:'تدريب تعاوني', desc:'نشر فرص تدريب للطلاب', act:()=>{ $('#tab-opps')?.classList.remove('hidden'); }}
+      ],
+      government:[
+        {id:'approve-events', title:'اعتماد الفعاليات', desc:'إدارة طلبات الفعاليات', act:()=>alert('قائمة الفعاليات — (نموذج أولي)')},
+        {id:'request-solutions', title:'طلب حلول', desc:'من القطاعات المختلفة', act:()=>alert('نموذج طلب حلول — (نموذج أولي)')}
+      ],
+      emirate:[
+        {id:'regional-dashboard', title:'لوحة المنطقة', desc:'مشاريع/وظائف/تطوع حسب المنطقة', act:()=>alert('لوحة منطقة — (نموذج أولي)')},
+        {id:'approve-initiatives', title:'اعتماد مبادرات', desc:'اعتماد مبادرات المواطنين والجمعيات', act:()=>{ location.hash='dashboard'; document.querySelector('[data-tab="tab-initiatives"]').click(); }}
+      ],
+      funder:[
+        {id:'grant-portfolio', title:'محفظة المنح', desc:'متابعة تمويل المشاريع', act:()=>alert('محفظة مانح — (نموذج أولي)')},
+        {id:'find-projects', title:'اعثر على مشاريع', desc:'مطابقة معايير المانح', act:()=>alert('مطابقة مشاريع — (نموذج أولي)')}
+      ]
+    };
+
+    function ensureServicesContainer(){
+      const host = document.querySelector('#dashboard .rounded-2xl.border.bg-white.p-4');
+      if(!host) return;
+      if(!document.getElementById('role-services')){
+        const h3 = document.createElement('h3'); h3.className='font-bold mb-3'; h3.textContent='خدمات الحساب'; host.prepend(h3);
+        const grid = document.createElement('div'); grid.id='role-services'; grid.className='grid md:grid-cols-3 gap-3'; host.insertBefore(grid, h3.nextSibling);
+        const hr = document.createElement('hr'); hr.className='my-4'; host.insertBefore(hr, grid.nextSibling);
+      }
+    }
+
+    function renderServices(){
+      const u = AppAuth.user || App.user; if(!u) return;
+      const grid = $('#role-services'); if(!grid) return; grid.innerHTML='';
+      (servicesByRole[u.role]||[]).forEach(s=>{
+        const d=document.createElement('div'); d.className='rounded-xl border p-4 bg-white';
+        d.innerHTML = `<div class="font-bold">${s.title}</div><div class="text-xs text-hasseef-gray mt-1">${s.desc}</div><button class="mt-3 px-3 py-1.5 rounded-xl bg-hasseef-green text-white text-xs">فتح</button>`;
+        d.querySelector('button').addEventListener('click', s.act);
+        grid.appendChild(d);
+      });
+    }
+
+    // Initialize
+    (function(){ toggleAuthUI(); if(AppAuth.user||App.user){ afterLogin(); } })();
   </script>
 </body>
 </html>
