@@ -110,6 +110,21 @@ a.logo-link:hover{transform:translateY(-1px) scale(1.03); filter:drop-shadow(0 1
 .dark .lang-switch button{background:#1a1f25}
 .dark .lang-switch button.active{background:#26321f}
 
+
+/* --- Hasseef v5: tabs, inbox, charts --- */
+.has-tabs{display:flex;gap:8px;border-bottom:1px solid rgba(0,0,0,.08);margin:0 16px 10px}
+.has-tab{padding:8px 12px;border:1px solid transparent;border-radius:10px 10px 0 0;cursor:pointer}
+.has-tab.active{border-color:rgba(0,0,0,.1);border-bottom-color:#fff;background:#fff}
+.has-panel{display:none;padding:0 16px 16px}
+.has-panel.show{display:block}
+.has-table{width:100%;border-collapse:collapse}
+.has-table th, .has-table td{border-bottom:1px solid rgba(0,0,0,.08);padding:8px 6px;text-align:right}
+.sig-wrap{border:1px dashed rgba(0,0,0,.25);border-radius:10px;padding:8px}
+.sig-canvas{width:100%;height:140px;background:#fff;border-radius:8px;touch-action:none}
+.sig-toolbar{display:flex;gap:8px;align-items:center;margin-top:6px}
+.chart-box{border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:12px;background:#fff}
+.dark .chart-box{background:#1a1f25;border-color:#2a313a}
+
 </style>
 </head>
 <body>
@@ -699,10 +714,7 @@ function updateNationalKpis(){
     <div class="has-muted" style="margin-bottom:8px">مؤشرات الحساب</div>
     <div id="has-role-kpis" class="has-kpis"></div>
   </div>
-  <div class="has-section">
-    <div class="has-muted" style="margin-bottom:8px">خدمات الحساب</div>
-    <div id="has-services2" class="has-services" style="display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))"></div>
-  </div>
+  <div class="has-tabs"><button class="has-tab active" data-tab="panel-services">الخدمات</button><button class="has-tab" data-tab="panel-workflow">سير العمل</button><button class="has-tab" data-tab="panel-reports">التقارير</button></div><div id="panel-services" class="has-panel show"><div class="has-muted" style="margin:10px 0 8px">خدمات الحساب</div><div id="has-services2" class="has-services" style="display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))"></div></div><div id="panel-workflow" class="has-panel"><div class="has-muted" style="margin:10px 0 8px">صندوق الوارد لسير العمل</div><div class="has-card" style="overflow:auto"><table class="has-table" id="wf-table"><thead><tr><th>الدور</th><th>الخدمة</th><th>التاريخ</th><th>الحقول</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody></tbody></table></div></div><div id="panel-reports" class="has-panel"><div class="has-muted" style="margin:10px 0 8px">ملخّص الاستخدام</div><div class="chart-box"><canvas id="chart-roles" width="640" height="280"></canvas></div><div class="has-card" style="margin-top:10px;overflow:auto"><table class="has-table" id="rep-table"><thead><tr><th>الدور</th><th>الخدمة</th><th>عدد السجلات</th></tr></thead><tbody></tbody></table></div></div>
 </div>
 
 
@@ -1284,6 +1296,212 @@ document.getElementById('has-export-csv')?.addEventListener('click', exportCSV);
     }
   });
 })();
+</script>
+
+
+<script>
+// v5: Tabs
+(function tabs(){
+  document.querySelectorAll('.has-tab').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.has-tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.has-panel').forEach(p=>p.classList.remove('show'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.tab).classList.add('show');
+  }));
+})();
+
+// v5: Signature pad (canvas) - attach when opening service modal if a .sig-canvas exists
+function attachSignature(canvas){
+  let drawing = false, ctx = canvas.getContext('2d');
+  ctx.lineWidth = 2; ctx.lineCap = 'round';
+  const getPos = e => {
+    const r = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+    return {x, y};
+  };
+  const start = e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+  const move = e => { if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+  const end = ()=> drawing = false;
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', e=>{start(e); e.preventDefault();}, {passive:false});
+  canvas.addEventListener('touchmove', e=>{move(e); e.preventDefault();}, {passive:false});
+  canvas.addEventListener('touchend', end);
+}
+function ensureSignatureHooks(){
+  const c = document.querySelector('#has-service-modal .sig-canvas');
+  if(c && !c.dataset.bound){ c.width = c.clientWidth; c.height = c.clientHeight; attachSignature(c); c.dataset.bound='1'; }
+  const clearBtn = document.getElementById('sig-clear');
+  if(clearBtn && !clearBtn.dataset.bound){
+    clearBtn.dataset.bound='1';
+    clearBtn.onclick = ()=>{
+      const ctx = c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height);
+    };
+  }
+}
+
+// v5: inject signature + validation into selected service templates after modal open
+const _openServiceModal = window.openServiceModal;
+window.openServiceModal = function(id, title){
+  _openServiceModal(id, title);
+  // Add signature to key forms
+  const svcBody = document.getElementById('svc-body');
+  if(!svcBody) return;
+  // Simple validation attributes for common inputs
+  svcBody.querySelectorAll('input[placeholder="التاريخ"]').forEach(i=> i.type='date');
+  svcBody.querySelectorAll('input[placeholder="المدينة"]').forEach(i=> i.setAttribute('pattern','.{2,}'));
+  svcBody.querySelectorAll('input[placeholder="رقم الهوية/السجل (اختياري)"]').forEach(i=> i.setAttribute('pattern','[0-9]{8,}'));
+  // Add signature section to forms that send approvals/requests
+  if(['prince-sponsorship','sponsor','funding-intake','approve-events','approve-initiatives','security-screening'].includes(id)){
+    const sig = document.createElement('div');
+    sig.className='sig-wrap';
+    sig.innerHTML = `<div class="has-muted">التوقيع الإلكتروني (اختياري)</div>
+      <canvas class="sig-canvas"></canvas>
+      <div class="sig-toolbar"><button id="sig-clear" class="has-chip" type="button">مسح التوقيع</button></div>`;
+    const form = svcBody.querySelector('form') || svcBody;
+    form.appendChild(sig);
+    ensureSignatureHooks();
+  }
+};
+
+// v5: Save signature image with submission if present
+(function patchSubmitCapture(){
+  const modal = document.getElementById('has-service-modal');
+  if(!modal) return;
+  modal.addEventListener('submit', (e)=>{
+    const c = modal.querySelector('.sig-canvas');
+    if(c){
+      try{
+        const dataUrl = c.toDataURL('image/png');
+        window.__lastSignature = dataUrl;
+      }catch{ window.__lastSignature = null; }
+    }
+  });
+})();
+
+// v5: extend saveSubmission to include signature and status, and broadcast updates
+const _saveSubmission = window.saveSubmission;
+window.saveSubmission = function(role, serviceId, data){
+  if(window.__lastSignature){ data['signature'] = window.__lastSignature; }
+  data['status'] = 'Pending';
+  _saveSubmission(role, serviceId, data);
+  try{ document.dispatchEvent(new CustomEvent('has-submissions-updated')); }catch{}
+  window.__lastSignature = null;
+};
+
+// v5: Workflow inbox rendering
+function canModerate(role){
+  return ['emirate','government','funder'].includes(role);
+}
+function mapServiceName(id){
+  // fallback to id if title not found in current DOM
+  const card = Array.from(document.querySelectorAll('#has-services2 .has-card')).find(c=> (c.textContent||'').includes(id));
+  if(card){ const b = card.querySelector('b'); if(b) return b.textContent.trim(); }
+  return id;
+}
+function renderWorkflow(role){
+  const tbody = document.querySelector('#wf-table tbody'); if(!tbody) return;
+  tbody.innerHTML = '';
+  const store = getSubmissions();
+  const myRole = role; // current role
+  // Flatten entries
+  Object.keys(store).forEach(r=>{
+    Object.keys(store[r]).forEach(svc=>{
+      (store[r][svc]||[]).forEach(entry=>{
+        const tr = document.createElement('tr');
+        const fields = Object.keys(entry.data).filter(k=>k!=='signature' && k!=='status').slice(0,5).map(k=>`${k}: ${entry.data[k]}`).join(' · ');
+        const ts = new Date(entry.ts).toLocaleString();
+        const canAct = canModerate(myRole);
+        const status = entry.data.status || 'Pending';
+        tr.innerHTML = `<td>${r}</td><td>${mapServiceName(svc)}</td><td>${ts}</td><td>${fields}</td>
+                        <td class="wf-status">${status}</td><td class="wf-actions"></td>`;
+        const tdAct = tr.querySelector('.wf-actions');
+        if(canAct){
+          const ok = document.createElement('button'); ok.className='has-chip'; ok.textContent='اعتماد';
+          const no = document.createElement('button'); no.className='has-chip'; no.textContent='رفض';
+          ok.onclick = ()=>{ entry.data.status='Approved'; persist(); tr.querySelector('.wf-status').textContent='Approved'; toast('تم الاعتماد'); };
+          no.onclick = ()=>{ entry.data.status='Rejected'; persist(); tr.querySelector('.wf-status').textContent='Rejected'; toast('تم الرفض'); };
+          tdAct.append(ok,no);
+        } else {
+          tdAct.textContent = '—';
+        }
+        tbody.appendChild(tr);
+      });
+    });
+  });
+  function persist(){
+    try{
+      const key='has-submissions'; localStorage.setItem(key, JSON.stringify(store));
+      document.dispatchEvent(new CustomEvent('has-submissions-updated'));
+    }catch{}
+  }
+}
+
+// v5: Reports
+function renderReports(){
+  const store = getSubmissions();
+  // Aggregate
+  const agg = {}; // role -> service -> count
+  Object.keys(store).forEach(role=>{
+    agg[role] = agg[role] || {};
+    Object.keys(store[role]).forEach(svc=>{
+      agg[role][svc] = (store[role][svc]||[]).length;
+    });
+  });
+  // Table
+  const tbody = document.querySelector('#rep-table tbody'); if(tbody){ tbody.innerHTML=''; }
+  Object.keys(agg).forEach(role=>{
+    Object.keys(agg[role]).forEach(svc=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${role}</td><td>${mapServiceName(svc)}</td><td>${agg[role][svc]}</td>`;
+      tbody.appendChild(tr);
+    });
+  });
+  // Chart (roles total)
+  const canvas = document.getElementById('chart-roles');
+  if(canvas){
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    const roles = Object.keys(agg);
+    const totals = roles.map(r=> Object.values(agg[r]).reduce((a,b)=>a+b,0));
+    const max = Math.max(1, ...totals);
+    const w = canvas.width, h = canvas.height;
+    const barW = Math.max(20, Math.floor((w - 60) / Math.max(1, roles.length)));
+    roles.forEach((r,i)=>{
+      const x = 40 + i*barW + 6*i;
+      const y = h - 40;
+      const bh = Math.round((totals[i] / max) * (h - 80));
+      ctx.fillStyle = '#5AA044';
+      ctx.fillRect(x, y - bh, barW, bh);
+      ctx.fillStyle = '#333';
+      ctx.fillText(r, x, y + 14);
+      ctx.fillText(totals[i], x + barW/2 - 6, y - bh - 6);
+    });
+    // Axes
+    ctx.strokeStyle = '#999'; ctx.beginPath(); ctx.moveTo(30,h-40); ctx.lineTo(w-20,h-40); ctx.stroke();
+  }
+}
+
+// v5: Re-render workflow/reports on updates
+document.addEventListener('has-submissions-updated', ()=>{
+  try{
+    const m = JSON.parse(localStorage.getItem('has-demo-user')||'{}');
+    if(m && m.role){
+      renderWorkflow(m.role);
+      renderReports();
+    }
+  }catch{}
+});
+
+// v5: Also render them on account open
+const _openAccountFull_v5 = window.openAccountFull;
+window.openAccountFull = function(m){
+  _openAccountFull_v5(m);
+  renderWorkflow(m.role);
+  renderReports();
+};
 </script>
 
 </body>
