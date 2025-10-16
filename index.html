@@ -79,6 +79,23 @@ a.logo-link:hover{transform:translateY(-1px) scale(1.03); filter:drop-shadow(0 1
 .has-muted{color:#6B7280}
 .has-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(0,0,0,.12);border-radius:999px;padding:6px 10px;background:#fff}
 
+
+/* --- Hasseef v3: service modal + dark auto --- */
+.has-modal2{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:10000}
+.has-modal2.show{display:flex}
+.has-dialog2{background:#fff;border-radius:14px;max-width:720px;width:94vw;padding:16px;border:1px solid rgba(0,0,0,.06)}
+.has-form{display:grid;gap:10px}
+.has-form-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.has-form-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.has-input, .has-select, .has-textarea{width:100%;padding:10px 12px;border:1px solid rgba(0,0,0,.16);border-radius:10px;background:#fff}
+/* simple dark scheme */
+@media (prefers-color-scheme: dark){
+  :root{color-scheme:dark}
+  body{background:#0f1215;color:#d5dae0}
+  .has-dialog, .has-dialog2, .has-topbar, #has-account-full{background:#11151a;color:#d5dae0}
+  .has-card, .has-chip, .has-tag, .has-input, .has-select, .has-textarea{background:#1a1f25;color:#d5dae0;border-color:#2a313a}
+}
+
 </style>
 </head>
 <body>
@@ -643,6 +660,7 @@ function updateNationalKpis(){
     <div class="has-accounts" id="has-demo-accounts"></div>
     <hr style="border:0;border-top:1px solid rgba(0,0,0,.08);margin:10px 0"/>
     <form id="has-login-form" class="has-grid has-grid-2">
+      <input name="region" placeholder="المنطقة/الجهة (اختياري)"/>
       <input name="username" placeholder="اسم المستخدم (مثال: emirate)" required/>
       <input name="password" type="password" placeholder="كلمة المرور (1234)" required/>
       <button class="has-tag" type="submit"><b>دخول</b></button>
@@ -829,6 +847,299 @@ function openAccountFull(m){
     const m = JSON.parse(localStorage.getItem('has-demo-user')||'null');
     if(m && m.role){ openAccountFull(m); }
   }catch{}
+})();
+</script>
+
+
+<!-- v3: Service Modal -->
+<div class="has-modal2" id="has-service-modal">
+  <div class="has-dialog2">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <b id="svc-title">خدمة</b>
+      <button id="svc-close" class="has-chip">إغلاق</button>
+    </div>
+    <div id="svc-body" style="margin-top:10px"></div>
+  </div>
+</div>
+
+
+<script>
+// v3: Dark mode auto (apply 'dark' class on html if prefers dark)
+(function(){
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+  } catch(e){}
+})();
+
+// v3: Extend login to capture region/org
+(function(){
+  const form = document.getElementById('has-login-form');
+  if(!form) return;
+  const originalSubmitHandlers = [];
+  // We won't override existing; our handler will precede openAccountFull
+  form.addEventListener('submit', (e)=>{
+    // our code will run after existing attached listener in file order;
+    // we just ensure region gets into stored session later in openAccountFull.
+  });
+})();
+
+// v3: Define service templates
+const SERVICE_TPL = {
+  'regional-dashboard': `
+    <div class="has-form has-form-3">
+      <div class="has-card"><small>مبادرات</small><div class="v">128</div></div>
+      <div class="has-card"><small>مشاريع</small><div class="v">36</div></div>
+      <div class="has-card"><small>فعاليات</small><div class="v">22</div></div>
+    </div>
+    <div class="has-muted" style="margin-top:10px">عرض موجز لأداء المنطقة الحالي.</div>
+  `,
+  'approve-initiatives': `
+    <form class="has-form">
+      <select class="has-select"><option>مبادرة 1 (قيد المراجعة)</option><option>مبادرة 2</option></select>
+      <div class="has-form has-form-2">
+        <button class="has-chip" type="button" onclick="alert('تم الاعتماد')">اعتماد</button>
+        <button class="has-chip" type="button" onclick="alert('أُعيدت للمراجعة')">إعادة للمراجعة</button>
+      </div>
+    </form>
+  `,
+  'prince-sponsorship': `
+    <form class="has-form">
+      <input class="has-input" placeholder="اسم المشروع/الفعالية" required/>
+      <input class="has-input" placeholder="الجهة المنظمة" required/>
+      <div class="has-form has-form-2">
+        <input class="has-input" placeholder="التاريخ"/>
+        <input class="has-input" placeholder="المدينة"/>
+      </div>
+      <textarea class="has-textarea" rows="4" placeholder="مذكرة موجزة"></textarea>
+      <button class="has-chip" type="button" onclick="alert('أُرسلت طلبات الرعاية')">إرسال الطلب</button>
+    </form>
+  `,
+  'security-screening': `
+    <form class="has-form">
+      <input class="has-input" placeholder="اسم المتحدث/الفعالية" required/>
+      <input class="has-input" placeholder="رقم الهوية/السجل (اختياري)"/>
+      <button class="has-chip" type="button" onclick="alert('تم إرسال المسح الأمني')">إرسال المسح</button>
+    </form>
+  `,
+  'challenge-request': `
+    <form class="has-form">
+      <input class="has-input" placeholder="عنوان التحدي" required/>
+      <textarea class="has-textarea" rows="4" placeholder="وصف المشكلة والتأثير"></textarea>
+      <button class="has-chip" type="button" onclick="alert('تم نشر التحدي')">نشر التحدي</button>
+    </form>
+  `,
+  'approve-events': `
+    <form class="has-form">
+      <select class="has-select"><option>فعالية A</option><option>فعالية B</option></select>
+      <div class="has-form has-form-2">
+        <button class="has-chip" type="button" onclick="alert('تم الاعتماد')">اعتماد</button>
+        <button class="has-chip" type="button" onclick="alert('تم الرفض')">رفض</button>
+      </div>
+    </form>
+  `,
+  'request-solutions': `
+    <form class="has-form">
+      <input class="has-input" placeholder="وصف الحل المطلوب" required/>
+      <textarea class="has-textarea" rows="4" placeholder="المخرجات المتوقعة/الميزانية"></textarea>
+      <button class="has-chip" type="button" onclick="alert('تم إرسال الطلب')">إرسال</button>
+    </form>
+  `,
+  'csr-report': `
+    <form class="has-form">
+      <input class="has-input" placeholder="اسم المنشأة" required/>
+      <input class="has-input" placeholder="الفترة (2025-Q4)" required/>
+      <input class="has-input" placeholder="حجم الإنفاق (ر.س)" required/>
+      <textarea class="has-textarea" rows="3" placeholder="ملخص الأثر/الجهات المستفيدة"></textarea>
+      <button class="has-chip" type="button" onclick="alert('تم توليد مسودة CSR')">توليد مسودة</button>
+    </form>
+  `,
+  'sponsor': `
+    <form class="has-form">
+      <input class="has-input" placeholder="اسم الفعالية/المشروع" required/>
+      <input class="has-input" placeholder="الجهة المنظمة" required/>
+      <div class="has-form has-form-2">
+        <input class="has-input" placeholder="التاريخ"/>
+        <input class="has-input" placeholder="المدينة"/>
+      </div>
+      <button class="has-chip" type="button" onclick="alert('تم إرسال طلب الرعاية')">إرسال طلب</button>
+    </form>
+  `,
+  'jobs': `
+    <form class="has-form">
+      <input class="has-input" placeholder="المسمى الوظيفي" required/>
+      <div class="has-form has-form-2">
+        <input class="has-input" placeholder="الموقع"/>
+        <input class="has-input" placeholder="الراتب (اختياري)"/>
+      </div>
+      <textarea class="has-textarea" rows="3" placeholder="وصف مختصر"></textarea>
+      <button class="has-chip" type="button" onclick="alert('تم نشر الوظيفة')">نشر</button>
+    </form>
+  `,
+  'publish-opps': `
+    <form class="has-form">
+      <input class="has-input" placeholder="عنوان الفرصة" required/>
+      <div class="has-form has-form-3">
+        <input class="has-input" placeholder="المدينة"/>
+        <input class="has-input" placeholder="التاريخ"/>
+        <input class="has-input" placeholder="عدد المتطوعين"/>
+      </div>
+      <button class="has-chip" type="button" onclick="alert('تم نشر الفرصة')">نشر</button>
+    </form>
+  `,
+  'manage-projects': `
+    <div class="has-form">
+      <div class="has-card"><b>مشروع "وطن"</b><div class="has-muted">حالة: جاري</div></div>
+      <div class="has-card"><b>برنامج "أثر"</b><div class="has-muted">حالة: بدء</div></div>
+      <button class="has-chip" type="button" onclick="alert('أُضيف مشروع')">+ إضافة مشروع</button>
+    </div>
+  `,
+  'funding-intake': `
+    <form class="has-form">
+      <input class="has-input" placeholder="اسم المبادرة" required/>
+      <input class="has-input" placeholder="قيمة التمويل المطلوبة (ر.س)" required/>
+      <textarea class="has-textarea" rows="3" placeholder="وصف موجز"></textarea>
+      <button class="has-chip" type="button" onclick="alert('تم تقديم الطلب')">تقديم</button>
+    </form>
+  `,
+  'academic-review': `
+    <form class="has-form">
+      <input class="has-input" placeholder="الموضوع/المجال" required/>
+      <textarea class="has-textarea" rows="4" placeholder="تفاصيل الطلب"></textarea>
+      <button class="has-chip" type="button" onclick="alert('تم إرسال الطلب')">إرسال</button>
+    </form>
+  `,
+  'coop-training': `
+    <form class="has-form">
+      <input class="has-input" placeholder="اسم الطالب/المتدرب" required/>
+      <input class="has-input" placeholder="الكلية/القسم" required/>
+      <button class="has-chip" type="button" onclick="alert('تم تسجيل التدريب')">تسجيل</button>
+    </form>
+  `,
+  'research-listing': `
+    <div class="has-form">
+      <div class="has-card"><b>الذكاء الاصطناعي في الخدمات</b><div class="has-muted">قابل للتطبيق</div></div>
+      <div class="has-card"><b>الطاقة المتجددة في المناطق الجافة</b><div class="has-muted">قابل للتطبيق</div></div>
+    </div>
+  `,
+  'grant-criteria': `
+    <form class="has-form">
+      <textarea class="has-textarea" rows="4" placeholder="صياغة/تحديث معايير المنح"></textarea>
+      <button class="has-chip" type="button" onclick="alert('تم حفظ المعايير')">حفظ</button>
+    </form>
+  `,
+  'grant-portfolio': `
+    <div class="has-form">
+      <div class="has-card"><b>منحة تعليم رقمي</b><div class="has-muted">2025</div></div>
+      <div class="has-card"><b>منحة تمكين اجتماعي</b><div class="has-muted">2025</div></div>
+    </div>
+  `,
+  'find-projects': `
+    <form class="has-form">
+      <input class="has-input" placeholder="كلمة مفتاحية"/>
+      <select class="has-select"><option>قطاع: تعليمي</option><option>اقتصادي</option><option>اجتماعي</option></select>
+      <button class="has-chip" type="button" onclick="alert('تمت المطابقة (تجريبي)')">مطابقة</button>
+    </form>
+  `,
+  'partner-oversight': `
+    <div class="has-form">
+      <div class="has-card"><b>تكاملات نشطة</b><div class="has-muted">5</div></div>
+      <div class="has-card"><b>تنبيهات</b><div class="has-muted">3</div></div>
+    </div>
+  `,
+  'partner-kpis': `
+    <div class="has-form has-form-3">
+      <div class="has-card"><small>رضا الشركاء</small><div class="v">91%</div></div>
+      <div class="has-card"><small>زمن الاستجابة</small><div class="v">2.3ي</div></div>
+      <div class="has-card"><small>نسبة الإنجاز</small><div class="v">88%</div></div>
+    </div>
+  `,
+  'policy-notices': `
+    <div class="has-form">
+      <div class="has-card"><b>تحديث لائحة الرعايات</b><div class="has-muted">إلزام الإبلاغ المسبق</div></div>
+    </div>
+  `,
+  'add-initiative': `
+    <form class="has-form">
+      <input class="has-input" placeholder="اسم المبادرة" required/>
+      <textarea class="has-textarea" rows="3" placeholder="وصف مختصر"></textarea>
+      <button class="has-chip" type="button" onclick="alert('تمت إضافة المبادرة')">إضافة</button>
+    </form>
+  `,
+  'volunteer': `
+    <form class="has-form">
+      <input class="has-input" placeholder="اسم الفعالية/الجهة" required/>
+      <div class="has-form has-form-2">
+        <input class="has-input" placeholder="تاريخ البدء"/>
+        <input class="has-input" placeholder="ساعات التطوع"/>
+      </div>
+      <button class="has-chip" type="button" onclick="alert('تم تسجيل التطوع')">تسجيل</button>
+    </form>
+  `,
+  'jobs-list': `
+    <div class="has-form">
+      <div class="has-card"><b>منسق برامج</b><div class="has-muted">الرياض · دوام كامل</div></div>
+      <div class="has-card"><b>محاسب</b><div class="has-muted">حائل · جزئي</div></div>
+    </div>
+  `
+};
+
+// v3: Hook "فتح" buttons to open service modal with template
+(function attachServiceOpeners(){
+  const container = document.getElementById('has-services2');
+  if(!container) return;
+  // Delegate after rendering
+  const observer = new MutationObserver(()=>{
+    container.querySelectorAll('button.has-chip').forEach(btn=>{
+      if(btn.dataset.bound) return;
+      btn.dataset.bound = '1';
+      btn.addEventListener('click', (e)=>{
+        const card = e.currentTarget.closest('.has-card');
+        const idMatch = card?.querySelector('.has-muted')?.textContent || '';
+        const id = (idMatch.match(/\((.*?)\)/)||['',''])[1];
+        openServiceModal(id, card?.querySelector('b')?.textContent || 'خدمة');
+      });
+    });
+  });
+  observer.observe(container, {childList:true, subtree:true});
+})();
+
+function openServiceModal(id, title){
+  const modal = document.getElementById('has-service-modal');
+  const body = document.getElementById('svc-body');
+  const ttl = document.getElementById('svc-title');
+  ttl.textContent = title;
+  body.innerHTML = SERVICE_TPL[id] || `<div class="has-muted">نموذج الخدمة غير متوفر (تجريبي).</div>`;
+  modal.classList.add('show');
+  document.getElementById('svc-close').onclick = ()=> modal.classList.remove('show');
+}
+
+// v3: When logging in via pills/form, capture region if entered and display it beside role
+(function captureRegion(){
+  // intercept openAccountFull to inject region badge if region provided
+  const _open = window.openAccountFull;
+  window.openAccountFull = function(m){
+    // fetch region from last login form if exists
+    try{
+      const form = document.getElementById('has-login-form');
+      if(form && form.region && form.region.value.trim()){
+        m.region = form.region.value.trim();
+        localStorage.setItem('has-demo-user', JSON.stringify(m));
+      } else {
+        const cached = JSON.parse(localStorage.getItem('has-demo-user')||'null');
+        if(cached && cached.region) m.region = cached.region;
+      }
+    }catch{}
+    _open(m);
+    // then add region chip if available
+    try{
+      if(m.region){
+        const badge = document.getElementById('has-role-badge');
+        badge.textContent = (m.role||'—') + ' · ' + m.region;
+      }
+    }catch{}
+  };
 })();
 </script>
 
