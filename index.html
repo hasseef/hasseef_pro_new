@@ -1,1303 +1,187 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>منصة حصيف | نموذج واجهة موحّدة</title>
-  <meta name="description" content="النسخة البرمجية (ملف واحد) لواجهة منصة حصيف مع الوضع الليلي، مؤشرات أداء حية، شعارات الشركاء، حساب الإمارة، وحسابات الشركاء الاستراتيجيين، وربط التواصل." />
-
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            hasseef: {
-              /* Brand palette from identity (light & logo-friendly) */
-              green: '#5AA044',
-              greenSoft: '#F2FAEC',
-              gold: '#F8BE43',
-              goldSoft: '#FFF7E5',
-              dark: '#222222',
-              gray: '#6B7280',
-              graySoft: '#F7F9FC'
-            }
-          },
-          boxShadow: {
-            soft: '0 10px 30px rgba(0,0,0,0.08)'
-          },
-          fontFamily: {
-            cairo: ['Cairo', 'system-ui', 'ui-sans-serif']
-          }
-        }
-      }
-    }
-  </script>
-  <!-- Google Font (Cairo) -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-
-  <style>
-    html { scroll-behavior: smooth; }
-    .container { max-width: 1200px; }
-    /* ====== Dark mode overrides (gentle/dim to preserve logo clarity) ====== */
-    html.dark body { background-color: #0b1220; color: #e5e7eb; }
-    html.dark .bg-white { background-color: #0f1629 !important; }
-    html.dark .border { border-color: rgba(255,255,255,0.12) !important; }
-    html.dark .text-hasseef-gray { color: #cbd5e1 !important; }
-    html.dark header { background-color: rgba(15,22,41,0.8) !important; }
-    html.dark .bg-hasseef-graySoft { background-color: rgba(255,255,255,0.06) !important; }
-    html.dark .bg-hasseef-greenSoft { background-color: rgba(46,200,166,0.16) !important; }
-    html.dark .bg-hasseef-goldSoft { background-color: rgba(231,198,106,0.15) !important; }
-  </style>
-  <style>
-    html { scroll-behavior: smooth; }
-    .container { max-width: 1200px; }
-    /* Dark mode (kept subtle) */
-    html.dark body { background-color: #101418; color: #1f2937; }
-    html.dark .bg-white { background-color: #fdfdfd !important; }
-    html.dark .border { border-color: rgba(0,0,0,0.08) !important; }
-    html.dark header { background-color: rgba(255,255,255,0.85) !important; }
-    html.dark .bg-hasseef-graySoft { background-color: #F2F6FB !important; }
-    html.dark .bg-hasseef-greenSoft { background-color: #F4FBF2 !important; }
-    html.dark .bg-hasseef-goldSoft { background-color: #FFF8E9 !important; }
-
-    /* High-contrast mode */
-    html.hc * { outline: 1.5px dashed rgba(0,0,0,0.25); outline-offset: 2px; }
-    html.hc a, html.hc button { text-decoration: underline; }
-
-    /* Loader */
-    #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; z-index: 70; }
-    #loader .dot { width: 10px; height: 10px; border-radius: 9999px; background: #5AA044; margin: 0 4px; animation: b 1s infinite alternate; }
-    #loader .dot:nth-child(2){ animation-delay: .15s }
-    #loader .dot:nth-child(3){ animation-delay: .3s }
-    @keyframes b { from{ transform: translateY(0) } to { transform: translateY(-8px) } }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>منصة حصيف · Hasseef Platform — Leadership Demo</title>
+<link rel="stylesheet" href="styles/theme.css"/>
+<style>
+.hero{padding:56px 0;background:linear-gradient(180deg, #ffffff 0%, #F7F9FC 100%)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand span{font-weight:900}
+.logo-grid{display:grid;gap:12px;grid-template-columns:repeat(6,minmax(0,1fr))}
+.logo-box{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:8px;display:flex;align-items:center;justify-content:center}
+.kpi-grid{display:grid;gap:12px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.tabbar{display:flex;flex-wrap:wrap;gap:8px}
+.tabbar .tab{border:1px solid rgba(0,0,0,.12);border-radius:12px;padding:8px 12px;background:#fff;cursor:pointer;font-size:13px}
+.tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:60}
+.modal .dialog{background:#fff;border-radius:16px;padding:18px;max-width:520px;width:100%}
+.modal.show{display:flex}
+@media (max-width:768px){ .grid-3{grid-template-columns:1fr} .kpi-grid{grid-template-columns:1fr} .logo-grid{grid-template-columns:repeat(3,1fr)} }
+</style>
 </head>
-<body class=\"font-cairo text-hasseef-dark bg-white\">
-  <div id=\"loader\"><div class=\"dot\"></div><div class=\"dot\"></div><div class=\"dot\"></div></div>
-  <!-- ====== Header / Navbar ====== -->
-  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-hasseef-graySoft">
-    <div class="container mx-auto px-4">
-      <div class="flex items-center justify-between py-3">
-        <a href="#home" class="flex items-center gap-2">
-          <img src=\"assets/hasseef.png\" alt=\"حصيف\" class=\"h-9 w-auto\"/> <span class=\"font-extrabold text-lg tracking-wide\">منصة حصيف</span>
-        </a>
-        <nav class="hidden md:flex items-center gap-6 text-sm">
-          <a href="#about" class="hover:text-hasseef-green">عن المنصة</a>
-          <a href="#accounts" class="hover:text-hasseef-green">الحسابات</a>
-          <a href="#mgmt" class="hover:text-hasseef-green">إدارة المنصة</a>
-          <a href="#pricing" class="hover:text-hasseef-green">الاشتراكات</a>
-          <a href="#sponsors" class="hover:text-hasseef-green">الرعاة</a>
-          <a href="#stories" class="hover:text-hasseef-green">قصص نجاح</a>
-          <a href="#contact" class="hover:text-hasseef-green">تواصل</a>
-          <button id="themeToggle" type="button" class="ms-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border" title="الوضع الليلي">
-            <span class="text-xs">الوضع</span>
-            <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8-9h1M3 12H2m14.95 6.364l.707.707M5.343 6.343l-.707-.707m12.021 0l.707-.707M5.343 17.657l-.707.707"/></svg>
-          </button>
-        <button id=\"hcToggle\" type=\"button\" class=\"ms-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border\" title=\"وضع تباين مرتفع\">
-            <span class=\"text-xs\">تباين</span>
-          </button>
-        </nav>
-        <div id=\"authButtons\" class=\"hidden md:flex items-center gap-2\">
-          <button id=\"signupBtn\" type=\"button\" class=\"inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border\">تسجيل</button>
-          <button id=\"loginBtn\" type=\"button\" class=\"inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border\">دخول</button>
-          <div id=\"userMenu\" class=\"hidden items-center gap-2\">
-            <span class=\"text-xs text-hasseef-gray\">مرحبًا، <strong id=\"navUser\">—</strong></span>
-            <button id=\"logoutBtn\" class=\"inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border\">خروج</button>
-          </div>
-        </div>
-        <button id=\"menuBtn\" class=\"md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border text-hasseef-dark\">
-          <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-6 h-6\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h16M4 18h16\"/></svg>
-        </button>
-      </div>
-      <div id="mobileNav" class="hidden md:hidden pb-3">
-        <div class="grid gap-2 text-sm">
-          <a href="#about" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">عن المنصة</a>
-          <a href="#accounts" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">الحسابات</a>
-          <a href="#mgmt" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">إدارة المنصة</a>
-          <a href="#pricing" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">الاشتراكات</a>
-          <a href="#sponsors" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">الرعاة</a>
-          <a href="#stories" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">قصص نجاح</a>
-          <a href="#contact" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">تواصل</a>
-          <button id="themeToggleMobile" class="mt-2 px-3 py-2 rounded-xl border">تبديل الوضع</button>
-        </div>
-      </div>
+<body>
+<header>
+  <div class="container" style="display:flex;align-items:center;gap:12px;justify-content:space-between;padding:10px 0;">
+    <div class="brand">
+      <img class="logo" src="assets/logos/hasseef.png" alt="حصيف"/>
+      <span>منصة حصيف</span>
     </div>
-  </header>
-
-  <!-- ====== Hero ====== -->
-  <section id="home" class="relative overflow-hidden">
-    <div class="absolute inset-0 pointer-events-none select-none" aria-hidden="true">
-      <div class="absolute -left-24 -top-24 w-96 h-96 rounded-full bg-hasseef-greenSoft blur-3xl"></div>
-      <div class="absolute -right-24 -bottom-24 w-96 h-96 rounded-full bg-hasseef-goldSoft blur-3xl"></div>
-    </div>
-    <div class="container mx-auto px-4 py-16 md:py-24">
-      <div class="grid md:grid-cols-2 gap-10 items-center">
-        <div>
-          <h1 class="text-3xl md:text-5xl font-extrabold leading-tight">
-            منصة وطنية للتكامل التنموي
-            <span class="text-hasseef-green">— حصيف</span>
-          </h1>
-          <p class="mt-4 text-hasseef-gray leading-relaxed">
-            نموذج عمل مبتكر يمكّن الأفراد والقطاعات والجامعات والجهات الحكومية والمانحين من التعاون الذكي لتحقيق مستهدفات رؤية المملكة 2030 عبر أدوات علمية وتنفيذية عملية.
-          </p>
-          <div class="mt-6 flex flex-wrap gap-3">
-            <a href="#accounts" class="px-5 py-3 rounded-xl bg-hasseef-green text-white font-semibold shadow-soft">ابدأ من الحساب المناسب</a>
-            <a href="https://hasseef.github.io/Hasseef_new/#account-funder" class="px-5 py-3 rounded-xl border font-semibold hover:bg-hasseef-graySoft" target="_blank" rel="noopener">مرجع الهوية البصرية</a>
-          </div>
-          <div class="mt-6 text-xs text-hasseef-gray">
-            * هذه نسخة ملف واحد (index.html) قابلة للرفع على GitHub — للمراجعة والعرض.
-          </div>
-        </div>
-        <div class="relative">
-          <div class="rounded-3xl border bg-white shadow-soft p-6">
-            <div class="grid grid-cols-3 gap-4">
-              <div class=\"col-span-3 flex items-center justify-between gap-3\"><div class=\"text-sm font-bold\">لوحات مؤشرات حية</div><div class=\"flex items-center gap-2 text-xs\"><label for=\"kpiProfile\">منظور:</label><select id=\"kpiProfile\" class=\"rounded-lg border px-2 py-1\"><option value=\"national\">وطني</option><option value=\"hail\">منطقة حائل</option><option value=\"private\">القطاع الخاص</option><option value=\"nonprofit\">القطاع غير الربحي</option></select></div></div>
-              <div class="rounded-2xl bg-hasseef-graySoft p-4">
-                <div class="text-xs text-hasseef-gray">التوظيف</div>
-                <div class="text-2xl font-extrabold"><span id="kpi-employment">+18%</span></div>
-              </div>
-              <div class="rounded-2xl bg-hasseef-graySoft p-4">
-                <div class="text-xs text-hasseef-gray">التكامل</div>
-                <div class="text-2xl font-extrabold"><span id="kpi-integration">92%</span></div>
-              </div>
-              <div class="rounded-2xl bg-hasseef-graySoft p-4">
-                <div class="text-xs text-hasseef-gray">المشاريع</div>
-                <div class="text-2xl font-extrabold"><span id="kpi-projects">1,240</span></div>
-              </div>
-              <div class="col-span-3 rounded-2xl bg-hasseef-goldSoft p-4">
-                <div class="text-xs text-hasseef-gray">محاذاة أهداف رؤية 2030</div>
-                <div class="flex items-center gap-2 mt-1 w-full">
-                  <div id="bar-1" class="h-2 rounded bg-hasseef-green" style="width:66%"></div>
-                  <div id="bar-2" class="h-2 rounded bg-emerald-300" style="width:17%"></div>
-                  <div id="bar-3" class="h-2 rounded bg-emerald-100" style="width:17%"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <nav style="display:flex;align-items:center;gap:10px">
+      <a href="#overview" data-i="nav_overview">نظرة عامة</a>
+      <a href="#accounts" data-i="nav_accounts">الحسابات</a>
+      <a href="#partners" data-i="nav_partners">الشركاء</a>
+      <a href="#dashboard" data-i="nav_dashboard">لوحة</a>
+      <a href="mailto:info@talbiya.sa" class="btn">info@talbiya.sa</a>
+      <div class="lang-toggle">
+        <button id="lang-ar" class="active">عربي</button>
+        <button id="lang-en">EN</button>
       </div>
-    </div>
-  </section>
-
-  <!-- ====== About ====== -->
-  <section id="about" class="py-16 md:py-24 bg-hasseef-graySoft">
-    <div class="container mx-auto px-4">
-      <div class="grid md:grid-cols-2 gap-10 items-start">
-        <div>
-          <h2 class="text-2xl md:text-3xl font-extrabold">عن المنصة</h2>
-          <p class="mt-4 text-hasseef-gray leading-relaxed">
-            مبادرة تنموية انطلقت من منطقة حائل بدعم من القيادة، كاستجابة مجتمعية واعية لتحقيق مستهدفات رؤية المملكة 2030. تمكّن المنصة أصحاب الحلول من المشاركة، وتربط المشاريع بالجهات ذات العلاقة، وتوفر أدوات قياس الأداء والشفافية، مع لوحات مؤشرات وتقارير ديناميكية.
-          </p>
-          <ul class="mt-4 space-y-2 text-hasseef-dark/80">
-            <li class="flex gap-2 items-start">
-              <span class="mt-1 inline-block w-2 h-2 rounded-full bg-hasseef-green"></span>
-              ربط المشاريع بأهداف الرؤية (الاستراتيجية – الفرعية – التفصيلية).
-            </li>
-            <li class="flex gap-2 items-start">
-              <span class="mt-1 inline-block w-2 h-2 rounded-full bg-hasseef-green"></span>
-              تقارير المسؤولية الاجتماعية للشركات وربطها بالجهات الحكومية.
-            </li>
-            <li class="flex gap-2 items-start">
-              <span class="mt-1 inline-block w-2 h-2 rounded-full bg-hasseef-green"></span>
-              آلية آمنة وسهلة للتبرعات والتمويل والاستثمار عبر الإنترنت.
-            </li>
-          </ul>
-        </div>
-        <div class="rounded-3xl border bg-white p-6 shadow-soft">
-          <h3 class="font-bold text-lg">نطاق الحسابات المستهدفة</h3>
-          <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-            <div class="p-3 rounded-xl bg-hasseef-greenSoft">الأفراد</div>
-            <div class="p-3 rounded-xl bg-hasseef-greenSoft">القطاع الخاص</div>
-            <div class="p-3 rounded-xl bg-hasseef-greenSoft">القطاع غير الربحي</div>
-            <div class="p-3 rounded-xl bg-hasseef-greenSoft">الجامعات</div>
-            <div class="p-3 rounded-xl bg-hasseef-greenSoft">الحكومة</div>
-            <div class="p-3 rounded-xl bg-hasseef-greenSoft">المانحون</div>
-          </div>
-          <div class="mt-6 text-xs text-hasseef-gray">
-            * تشمل هذه النسخة ربطًا بالشركاء الاستراتيجيين (مركز أداء، المركز الوطني لتنمية القطاع غير الربحي، وزارة الاقتصاد والتخطيط، وزارة المالية، وزارة الداخلية، وزارة الثقافة، وغيرها).
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ====== Accounts ====== -->
-  <section id="accounts" class="py-16 md:py-24">
-    <div class="container mx-auto px-4">
-      <div class="flex items-end justify-between gap-6">
-        <div>
-          <h2 class="text-2xl md:text-3xl font-extrabold">الحسابات والخدمات الأساسية</h2>
-          <p class="mt-2 text-hasseef-gray">اختر الحساب لاستعراض الخدمات والصلاحيات وروابط التكامل.</p>
-        </div>
-        <div class="hidden md:flex items-center gap-2 text-xs text-hasseef-gray">
-          <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-hasseef-goldSoft">هوية موحّدة</span>
-          <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-hasseef-greenSoft">تكامل بيني</span>
-        </div>
-      </div>
-
-      <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Emirate Account (new) -->
-        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="emirate">
-          <div class="flex items-center justify-between">
-            <h3 class="font-extrabold">حساب الإمارة</h3>
-            <span class="text-xs px-2 py-1 rounded bg-hasseef-goldSoft">إشراف مناطقي</span>
-          </div>
-          <p class="mt-2 text-sm text-hasseef-gray">استعراض مشاريع المنطقة، اعتماد الفعاليات، متابعة الفرص، والتكامل مع الشركاء.</p>
-          <ul class="mt-4 text-sm space-y-2">
-            <li>• لوحة مبادرات ومشاريع المنطقة</li>
-            <li>• متابعة الوظائف والتدريب والتطوع</li>
-            <li>• تقارير مؤشرات إقليمية وربط بالجهات</li>
-          </ul>
-          <div class="mt-4 flex gap-2">
-            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-emirate">عرض التفاصيل</button>
-            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
-          </div>
-        </div>
-
-        <!-- Other accounts -->
-        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="individual">
-          <div class="flex items-center justify-between">
-            <h3 class="font-extrabold">حساب الأفراد</h3>
-            <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">مبادراتي</span>
-          </div>
-          <p class="mt-2 text-sm text-hasseef-gray">إدراج مبادرة وفق نموذج اللبنات التسعة وربطها ببرامج وأهداف الرؤية.</p>
-          <ul class="mt-4 text-sm space-y-2">
-            <li>• إدراج المبادرات والمشاريع</li>
-            <li>• تتبع القبول والاعتماد</li>
-            <li>• الالتحاق بالفرص (وظائف، تدريب، تطوع)</li>
-          </ul>
-          <div class="mt-4 flex gap-2">
-            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-individual">عرض التفاصيل</button>
-            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="private">
-          <div class="flex items-center justify-between">
-            <h3 class="font-extrabold">حساب القطاع الخاص</h3>
-            <span class="text-xs px-2 py-1 rounded bg-hasseef-goldSoft">تقارير المسؤولية</span>
-          </div>
-          <p class="mt-2 text-sm text-hasseef-gray">تقارير المسؤولية الاجتماعية وربط دعم المشاريع بالجهات الحكومية.</p>
-          <ul class="mt-4 text-sm space-y-2">
-            <li>• فرص منح ورعاية</li>
-            <li>• تقارير الأثر والتوافق مع الرؤية</li>
-            <li>• إدارة المحفظة والشهادات</li>
-          </ul>
-          <div class="mt-4 flex gap-2">
-            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-private">عرض التفاصيل</button>
-            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="nonprofit">
-          <div class="flex items-center justify-between">
-            <h3 class="font-extrabold">حساب القطاع غير الربحي</h3>
-            <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">حوكمة وأثر</span>
-          </div>
-          <p class="mt-2 text-sm text-hasseef-gray">فرص التمويل، إدارة المشاريع، قياس الأداء، وجذب المتطوعين.</p>
-          <ul class="mt-4 text-sm space-y-2">
-            <li>• نشر الفرص (وظائف/تطوع/تدريب)</li>
-            <li>• تمويل واستثمار ومتابعة الأداء</li>
-            <li>• تقارير للجهات الشريكة</li>
-          </ul>
-          <div class="mt-4 flex gap-2">
-            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-nonprofit">عرض التفاصيل</button>
-            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="university">
-          <div class="flex items-center justify-between">
-            <h3 class="font-extrabold">حساب الجامعات</h3>
-            <span class="text-xs px-2 py-1 rounded bg-hasseef-goldSoft">تعزيز علمي</span>
-          </div>
-          <p class="mt-2 text-sm text-hasseef-gray">تعزيز علمي للمشاريع، شراكات، فرص تدريب تعاوني، ودور استشاري.</p>
-          <ul class="mt-4 text-sm space-y-2">
-            <li>• اعتماد علمي وتقييم المشاريع</li>
-            <li>• تسويق البرامج والبحوث</li>
-            <li>• إدارة مرافق للإيجار والاستثمار</li>
-          </ul>
-          <div class="mt-4 flex gap-2">
-            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-university">عرض التفاصيل</button>
-            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="government">
-          <div class="flex items-center justify-between">
-            <h3 class="font-extrabold">حساب الحكومة</h3>
-            <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">تحسين الفاعلية</span>
-          </div>
-          <p class="mt-2 text-sm text-hasseef-gray">إدارة المبادرات الحكومية وربطها بأهداف الرؤية واعتماد الفعاليات.</p>
-          <ul class="mt-4 text-sm space-y-2">
-            <li>• إدارة المبادرات والفعاليات</li>
-            <li>• طلب حلول من القطاعات المختلفة</li>
-            <li>• تقارير الأداء والتكامل الإقليمي</li>
-          </ul>
-          <div class="mt-4 flex gap-2">
-            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-government">عرض التفاصيل</button>
-            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="funder">
-          <div class="flex items-center justify-between">
-            <h3 class="font-extrabold">حساب المانحين</h3>
-            <span class="text-xs px-2 py-1 rounded bg-hasseef-goldSoft">محفظة وتمويل</span>
-          </div>
-          <p class="mt-2 text-sm text-hasseef-gray">فرص المنح، محفظة المانح، تقارير، وقياس الأثر للمشاريع الممولة.</p>
-          <ul class="mt-4 text-sm space-y-2">
-            <li>• استعراض الفرص وفق المعايير</li>
-            <li>• متابعة الأثر والمؤشرات</li>
-            <li>• تقارير رقابية وشهادات</li>
-          </ul>
-          <div class="mt-4 flex gap-2">
-            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-funder">عرض التفاصيل</button>
-            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Strategic Partners logos -->
-      <div class="mt-12">
-        <h3 class="font-extrabold text-lg mb-4">الشركاء الاستراتيجيون</h3>
-        <div class=\"grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-sm items-center\">
-          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10\" src=\"assets/vision2030.png\" alt=\"Vision 2030\"/></div>
-          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10\" src=\"assets/hasseef.png\" alt=\"Hasseef\"/></div>
-          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10\" src=\"assets/talbiya.png\" alt=\"Talbiya Initiative\"/></div>
-          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10 opacity-60\" src=\"https://via.placeholder.com/160x40?text=NPOC\" alt=\"المركز الوطني لتنمية القطاع غير الربحي\"/></div>
-          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10 opacity-60\" src=\"https://via.placeholder.com/160x40?text=Adaa\" alt=\"مركز أداء\"/></div>
-          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10 opacity-60\" src=\"https://via.placeholder.com/160x40?text=Partners\" alt=\"Partners\"/></div>
-        </div></div>
-          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=Adaa" alt="مركز أداء"/><div class="sr-only">مركز أداء</div></div>
-          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MEP" alt="وزارة الاقتصاد والتخطيط"/><div class="sr-only">وزارة الاقتصاد والتخطيط</div></div>
-          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MOF" alt="وزارة المالية"/><div class="sr-only">وزارة المالية</div></div>
-          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MOI" alt="وزارة الداخلية"/><div class="sr-only">وزارة الداخلية</div></div>
-          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MOC" alt="وزارة الثقافة"/><div class="sr-only">وزارة الثقافة</div></div>
-        </div>
-      </div>
-
-      <!-- Strategic partner accounts (new) -->
-      <div class="mt-10">
-        <h3 class="font-extrabold text-lg mb-4">حسابات الشركاء الاستراتيجيين</h3>
-        <div class=\"grid md:grid-cols-2 lg:grid-cols-3 gap-6\">
-          <div class=\"rounded-2xl border p-6\">
-            <div class=\"flex items-center justify-between\">
-              <h4 class=\"font-bold\">حساب المركز الوطني لتنمية القطاع غير الربحي</h4>
-              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
-            </div>
-            <p class=\"mt-2 text-sm text-hasseef-gray\">متابعة دعم القطاع، تقارير الأثر، وتكامل موافقات البرامج.</p>
-            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-npoc\">عرض التفاصيل</button></div>
-          </div></h4>
-              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
-            </div>
-            <p class="mt-2 text-sm text-hasseef-gray">متابعة دعم القطاع، تقارير الأثر، وتكامل موافقات البرامج.</p>
-          </div>
-          <div class=\"rounded-2xl border p-6\">
-            <div class=\"flex items-center justify-between\">
-              <h4 class=\"font-bold\">حساب مركز أداء</h4>
-              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
-            </div>
-            <p class=\"mt-2 text-sm text-hasseef-gray\">مؤشرات الأداء الوطني للمشاريع وتكامل القياس.</p>
-            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-adaa\">عرض التفاصيل</button></div>
-          </div></h4>
-              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
-            </div>
-            <p class="mt-2 text-sm text-hasseef-gray">مؤشرات الأداء الوطني للمشاريع وتكامل القياس.</p>
-          </div>
-          <div class=\"rounded-2xl border p-6\">
-            <div class=\"flex items-center justify-between\">
-              <h4 class=\"font-bold\">حساب وزارة الاقتصاد والتخطيط</h4>
-              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
-            </div>
-            <p class=\"mt-2 text-sm text-hasseef-gray\">مواءمة المبادرات مع الخطط الاقتصادية ومتابعة المؤشرات.</p>
-            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-mep\">عرض التفاصيل</button></div>
-          </div></h4>
-              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
-            </div>
-            <p class="mt-2 text-sm text-hasseef-gray">مواءمة المبادرات مع الخطط الاقتصادية ومتابعة المؤشرات.</p>
-          </div>
-          <div class=\"rounded-2xl border p-6\">
-            <div class=\"flex items-center justify-between\">
-              <h4 class=\"font-bold\">حساب وزارة المالية</h4>
-              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
-            </div>
-            <p class=\"mt-2 text-sm text-hasseef-gray\">إشراف مالي وتقارير الامتثال للمشاريع المدعومة.</p>
-            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-mof\">عرض التفاصيل</button></div>
-          </div></h4>
-              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
-            </div>
-            <p class="mt-2 text-sm text-hasseef-gray">إشراف مالي وتقارير الامتثال للمشاريع المدعومة.</p>
-          </div>
-          <div class=\"rounded-2xl border p-6\">
-            <div class=\"flex items-center justify-between\">
-              <h4 class=\"font-bold\">حساب وزارة الداخلية</h4>
-              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
-            </div>
-            <p class=\"mt-2 text-sm text-hasseef-gray\">تكامل مناطقي مع إمارات المناطق ومؤشرات السلامة.</p>
-            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-moi\">عرض التفاصيل</button></div>
-          </div></h4>
-              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
-            </div>
-            <p class="mt-2 text-sm text-hasseef-gray">تكامل مناطقي مع إمارات المناطق ومؤشرات السلامة.</p>
-          </div>
-          <div class=\"rounded-2xl border p-6\">
-            <div class=\"flex items-center justify-between\">
-              <h4 class=\"font-bold\">حساب وزارة الثقافة</h4>
-              <span class=\"text-xs px-2 py-1 rounded bg-hasseef-greenSoft\">شريك</span>
-            </div>
-            <p class=\"mt-2 text-sm text-hasseef-gray\">متابعة المشاريع الثقافية والفعاليات.</p>
-            <div class=\"mt-4\"><button class=\"hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm\" data-modal=\"modal-moc\">عرض التفاصيل</button></div>
-          </div></h4>
-              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
-            </div>
-            <p class="mt-2 text-sm text-hasseef-gray">متابعة المشاريع الثقافية والفعاليات.</p>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ====== Platform Management ====== -->
-  <section id="mgmt" class="py-16 md:py-24 bg-hasseef-greenSoft/50">
-    <div class="container mx-auto px-4">
-      <h2 class="text-2xl md:text-3xl font-extrabold">إدارة المنصة والدعم الفني</h2>
-      <p class="mt-2 text-hasseef-gray">لوحة موحّدة للمشرف مع قنوات دعم ومقترحات تحسين من المستخدمين.</p>
-
-      <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="rounded-2xl border bg-white p-5">
-          <h4 class="font-bold">لوحة المشرف العام</h4>
-          <ul class="mt-3 text-sm space-y-2 text-hasseef-gray">
-            <li>• إدارة الحسابات والصلاحيات</li>
-            <li>• تقارير إجمالية ولوحات مؤشرات</li>
-            <li>• إدارة المحتوى والصفحات</li>
-          </ul>
-        </div>
-        <div class="rounded-2xl border bg-white p-5">
-          <h4 class="font-bold">نظام الإشعارات</h4>
-          <ul class="mt-3 text-sm space-y-2 text-hasseef-gray">
-            <li>• موافقات واعتمادات</li>
-            <li>• أحداث مهمة ومهل زمنية</li>
-            <li>• تنبيهات تكامل API</li>
-          </ul>
-        </div>
-        <div class="rounded-2xl border bg-white p-5">
-          <h4 class="font-bold">الدعم الفني</h4>
-          <ul class="mt-3 text-sm space-y-2 text-hasseef-gray">
-            <li>• تذاكر دعم ومتابعة الحالة</li>
-            <li>• قاعدة معرفة وإرشادات</li>
-            <li>• تصنيف المقترحات حسب الأثر</li>
-          </ul>
-        </div>
-        <div class="rounded-2xl border bg-white p-5">
-          <h4 class="font-bold">واجهات التكامل (محاكاة)</h4>
-          <ul class="mt-3 text-sm space-y-2 text-hasseef-gray">
-            <li>• OAuth 2.0 / Webhooks</li>
-            <li>• REST API موثّق</li>
-            <li>• قوالب تبادل بيانات JSON</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Feedback Form -->
-      <div class="mt-10 rounded-3xl border bg-white p-6 shadow-soft">
-        <div class="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h4 class="font-bold">اقترح تحسينًا</h4>
-            <p class="text-sm text-hasseef-gray">صوّت على الأفكار وشاركنا مقترحاتك لتحسين تجربة المنصة.</p>
-          </div>
-          <a href="#contact" class="px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm">أرسل اقتراحًا</a>
-        </div>
-
-        <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="ideas">
-          <div class="rounded-xl border p-4">
-            <div class="text-sm font-bold">دعم لوحة للمؤشرات الإقليمية</div>
-            <p class="mt-1 text-xs text-hasseef-gray">عرض المقارنات بين المناطق وإبراز الشركات الأكثر مساهمة.</p>
-            <div class="mt-3 flex items-center gap-2 text-xs">
-              <button class="vote px-3 py-1 rounded-full border" data-v="1">+ تصويت</button>
-              <span class="count text-hasseef-gray">12</span>
-            </div>
-          </div>
-          <div class="rounded-xl border p-4">
-            <div class="text-sm font-bold">تحسين تجربة الأجهزة الذكية</div>
-            <p class="mt-1 text-xs text-hasseef-gray">تحسين عناصر اللمس وتقليل خطوات الوصول للخدمة.</p>
-            <div class="mt-3 flex items-center gap-2 text-xs">
-              <button class="vote px-3 py-1 rounded-full border" data-v="1">+ تصويت</button>
-              <span class="count text-hasseef-gray">27</span>
-            </div>
-          </div>
-          <div class="rounded-xl border p-4">
-            <div class="text-sm font-bold">إضافة وضع ليلي</div>
-            <p class="mt-1 text-xs text-hasseef-gray">تحسين الوصولية وتوفير استهلاك الطاقة.</p>
-            <div class="mt-3 flex items-center gap-2 text-xs">
-              <button class="vote px-3 py-1 rounded-full border" data-v="1">+ تصويت</button>
-              <span class="count text-hasseef-gray">8</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ====== Pricing (Subscriptions) ====== -->
-  <section id="pricing" class="py-16 md:py-24">
-    <div class="container mx-auto px-4">
-      <div class="text-center">
-        <h2 class="text-2xl md:text-3xl font-extrabold">خطط الاشتراك لكل حساب</h2>
-        <p class="mt-2 text-hasseef-gray">أساسي – متقدم – متميز. جميع الخطط قابلة للتوسّع.</p>
-      </div>
-
-      <div class="mt-10 grid md:grid-cols-3 gap-6">
-        <div class="rounded-3xl border p-6">
-          <div class="text-sm font-bold text-hasseef-gray">أساسي</div>
-          <div class="mt-1 text-3xl font-extrabold">مجاني</div>
-          <ul class="mt-4 text-sm space-y-2">
-            <li>• الوصول للخدمات الأساسية</li>
-            <li>• نموذج اللبنات التسعة</li>
-            <li>• حساب واحد</li>
-          </ul>
-          <a href="#contact" class="mt-6 inline-block px-4 py-2 rounded-xl border">جرّبه الآن</a>
-        </div>
-        <div class="rounded-3xl border p-6 bg-hasseef-goldSoft">
-          <div class="text-sm font-bold text-hasseef-gray">متقدم</div>
-          <div class="mt-1 text-3xl font-extrabold">299 ر.س / شهر</div>
-          <ul class="mt-4 text-sm space-y-2">
-            <li>• تكاملات API محدودة</li>
-            <li>• تقارير ولوحات مؤشرات</li>
-            <li>• دعم فني قياسي</li>
-          </ul>
-          <a href="#contact" class="mt-6 inline-block px-4 py-2 rounded-xl bg-hasseef-green text-white">ابدأ الآن</a>
-        </div>
-        <div class="rounded-3xl border p-6">
-          <div class="text-sm font-bold text-hasseef-gray">متميز</div>
-          <div class="mt-1 text-3xl font-extrabold">مخصص</div>
-          <ul class="mt-4 text-sm space-y-2">
-            <li>• تكاملات متقدمة</li>
-            <li>• دعم مخصص وSLA</li>
-            <li>• تخصيص الهوية والخصائص</li>
-          </ul>
-          <a href="#contact" class="mt-6 inline-block px-4 py-2 rounded-xl border">اطلب عرض سعر</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ====== Sponsors Tiers ====== -->
-  <section id="sponsors" class="py-16 md:py-24 bg-hasseef-graySoft">
-    <div class="container mx-auto px-4">
-      <div class="text-center">
-        <h2 class="text-2xl md:text-3xl font-extrabold">فئات رعاة المنصة</h2>
-        <p class="mt-2 text-hasseef-gray">فرصة وطنية تنموية تسويقية للبنوك والشركات الكبرى وغيرهم.</p>
-      </div>
-
-      <div class="mt-10 grid md:grid-cols-5 gap-6 text-sm">
-        <div class="rounded-2xl border bg-white p-5">
-          <div class="font-bold">استراتيجي</div>
-          <ul class="mt-2 space-y-1 text-hasseef-gray">
-            <li>• قيادة المحتوى التوعوي</li>
-            <li>• ظهور موسّع في اللوحات</li>
-            <li>• تقارير أثر مخصصة</li>
-          </ul>
-        </div>
-        <div class="rounded-2xl border bg-white p-5">
-          <div class="font-bold">بلاتيني</div>
-          <ul class="mt-2 space-y-1 text-hasseef-gray">
-            <li>• مساحات إعلانية رئيسة</li>
-            <li>• ندوات مشتركة</li>
-            <li>• شراكات طويلة الأجل</li>
-          </ul>
-        </div>
-        <div class="rounded-2xl border bg-white p-5">
-          <div class="font-bold">ذهبي</div>
-          <ul class="mt-2 space-y-1 text-hasseef-gray">
-            <li>• ظهور على صفحات الحسابات</li>
-            <li>• تقارير دورية للأثر</li>
-            <li>• دعوات رسمية للفعاليات</li>
-          </ul>
-        </div>
-        <div class="rounded-2xl border bg-white p-5">
-          <div class="font-bold">فضي</div>
-          <ul class="mt-2 space-y-1 text-hasseef-gray">
-            <li>• شارات راعي في الواجهة</li>
-            <li>• مشاركات محتوى مشتركة</li>
-          </ul>
-        </div>
-        <div class="rounded-2xl border bg-white p-5">
-          <div class="font-bold">برونزي</div>
-          <ul class="mt-2 space-y-1 text-hasseef-gray">
-            <li>• إدراج في قائمة الرعاة</li>
-            <li>• شكر في النشرات الدورية</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ====== Success Stories ====== -->
-  <section id="stories" class="py-16 md:py-24">
-    <div class="container mx-auto px-4">
-      <div class="flex items-end justify-between gap-6">
-        <div>
-          <h2 class="text-2xl md:text-3xl font-extrabold">قصص نجاح مختصرة</h2>
-          <p class="mt-2 text-hasseef-gray">عينات توضيحية قابلة للاستبدال بالبيانات الحقيقية.</p>
-        </div>
-        <div class="text-xs text-hasseef-gray">* بيانات تمثيلية</div>
-      </div>
-
-      <div class="mt-8 grid md:grid-cols-3 gap-6">
-        <div class="rounded-2xl border p-5 bg-white">
-          <div class="text-sm font-bold">منصة سجلها — اعتماد وطني</div>
-          <p class="mt-2 text-xs text-hasseef-gray">أُدرجت ضمن منتج MVPLAB في البرنامج الوطني لتنمية تقنية المعلومات؛ أكثر من 400 منشأة مستفيدة.</p>
-        </div>
-        <div class="rounded-2xl border p-5 bg-white">
-          <div class="text-sm font-bold">بودكاست الإعاقة — تمكين الوعي</div>
-          <p class="mt-2 text-xs text-hasseef-gray">محتوى مرئي على يوتيوب، ملف تسويقي جاهز للشراكات والرعايات.</p>
-        </div>
-        <div class="rounded-2xl border p-5 bg-white">
-          <div class="text-sm font-bold">معرض تلبية — حاضنة مجتمعية</div>
-          <p class="mt-2 text-xs text-hasseef-gray">تطوير التشبيك وإتاحة فرص التدريب التعاوني لطلاب الجامعات والكليات.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ====== Contact ====== -->
-  <section id="contact" class="py-16 md:py-24 bg-hasseef-greenSoft/40">
-    <div class="container mx-auto px-4">
-      <div class="grid md:grid-cols-2 gap-10 items-start">
-        <div>
-          <h2 class="text-2xl md:text-3xl font-extrabold">تواصل معنا</h2>
-          <p class="mt-2 text-hasseef-gray">للاشتراك، طلب عرض سعر، أو إرسال مقترح تحسين.</p>
-          <div class="mt-6 grid grid-cols-2 gap-3 text-sm">
-            <div class="rounded-2xl border bg-white p-4">
-              <div class="font-bold">البريد</div>
-              <div class="text-hasseef-gray"><a class="underline" href="mailto:info@talbiya.sa">info@talbiya.sa</a></div>
-            </div>
-            <div class="rounded-2xl border bg-white p-4">
-              <div class="font-bold">الهاتف</div>
-              <div class="text-hasseef-gray">+966-5X-XXX-XXXX</div>
-            </div>
-          </div>
-        </div>
-        <form id="contactForm" class="rounded-3xl border bg-white p-6 shadow-soft grid gap-4">
-          <div class="grid gap-2">
-            <label class="text-sm">الاسم</label>
-            <input required class="w-full rounded-xl border px-3 py-2" placeholder="اسمك الثلاثي">
-          </div>
-          <div class="grid gap-2">
-            <label class="text-sm">البريد الإلكتروني</label>
-            <input required type="email" class="w-full rounded-xl border px-3 py-2" placeholder="you@example.com">
-          </div>
-          <div class="grid gap-2">
-            <label class="text-sm">اختر الحساب</label>
-            <select class="w-full rounded-xl border px-3 py-2">
-              <option>الأفراد</option>
-              <option>القطاع الخاص</option>
-              <option>القطاع غير الربحي</option>
-              <option>الجامعات</option>
-              <option>الحكومة</option>
-              <option>المانحون</option>
-              <option>الإمارة</option>
-            </select>
-          </div>
-          <div class="grid gap-2">
-            <label class="text-sm">رسالتك</label>
-            <textarea required class="w-full min-h-[120px] rounded-xl border px-3 py-2" placeholder="اكتب تفاصيل طلبك أو مقترحك..."></textarea>
-          </div>
-          <button class="mt-2 px-5 py-3 rounded-xl bg-hasseef-green text-white font-semibold">إرسال</button>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <footer class="py-8 border-t">
-    <div class="container mx-auto px-4">
-      <div class="flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-hasseef-gray">
-        <div>© <span id="year"></span> منصة حصيف – جميع الحقوق محفوظة.</div>
-        <div class="flex items-center gap-4">
-          <a class="hover:text-hasseef-green" href="#about">عن المنصة</a>
-          <a class="hover:text-hasseef-green" href="#accounts">الحسابات</a>
-          <a class="hover:text-hasseef-green" href="#pricing">الاشتراكات</a>
-          <a class="hover:text-hasseef-green" href="#contact">تواصل</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- ====== Dashboard (interactive accounts) ====== -->
-  <section id="dashboard" class="py-16 md:py-24 hidden">
-    <div class="container mx-auto px-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-2xl md:text-3xl font-extrabold">لوحتي</h2>
-        <div class="text-sm text-hasseef-gray">مرحبًا، <span id="userName">ضيف</span> · الدور: <span id="userRole">—</span></div>
-      </div>
-
-      <div class="mt-6 rounded-2xl border bg-white p-4">
-        <!-- مساحة عمل الخدمة حسب الدور -->
-        <div id="service-workspace" class="hidden mb-6 rounded-xl border p-4 bg-white"></div>
-
-        <h3 class="font-bold mb-3">خدمات الحساب</h3>
-        <div id="role-services" class="grid md:grid-cols-3 gap-3"></div>
-        <hr class="my-4"/>
-
-        <div class="flex flex-wrap gap-2">
-          <button class="tabBtn px-3 py-1.5 rounded-xl border active" data-tab="tab-overview">نظرة عامة</button>
-          <button class="tabBtn px-3 py-1.5 rounded-xl border" data-tab="tab-initiatives">مبادراتي</button>
-          <button class="tabBtn px-3 py-1.5 rounded-xl border" data-tab="tab-opps">فرص</button>
-        </div>
-        <div class="mt-4">
-          <div id="tab-overview" class="tabPanel">
-            <div class="grid md:grid-cols-3 gap-4">
-              <div class="rounded-xl border p-4"><div class="text-xs text-hasseef-gray">عدد المبادرات</div><div class="text-2xl font-extrabold" id="stat-initiatives">0</div></div>
-              <div class="rounded-xl border p-4"><div class="text-xs text-hasseef-gray">طلبات قيد المراجعة</div><div class="text-2xl font-extrabold" id="stat-pending">0</div></div>
-              <div class="rounded-xl border p-4"><div class="text-xs text-hasseef-gray">فرص مقترحة</div><div class="text-2xl font-extrabold" id="stat-opps">0</div></div>
-            </div>
-          </div>
-          <div id="tab-initiatives" class="tabPanel hidden">
-            <form id="form-initiative" class="grid gap-3 md:grid-cols-2">
-              <input class="rounded-xl border px-3 py-2" placeholder="اسم المبادرة" required/>
-              <select class="rounded-xl border px-3 py-2">
-                <option>تعليمي</option><option>ثقافي</option><option>اجتماعي</option><option>اقتصادي</option>
-              </select>
-              <textarea class="md:col-span-2 rounded-xl border px-3 py-2" placeholder="وصف مختصر" required></textarea>
-              <div class="md:col-span-2 grid md:grid-cols-3 gap-3">
-                <input class="rounded-xl border px-3 py-2" placeholder="اللبنة: الجمهور المستهدف"/>
-                <input class="rounded-xl border px-3 py-2" placeholder="اللبنة: القيمة المقترحة"/>
-                <input class="rounded-xl border px-3 py-2" placeholder="اللبنة: القنوات"/>
-              </div>
-              <button class="md:col-span-2 px-4 py-2 rounded-xl bg-hasseef-green text-white">حفظ المبادرة</button>
-            </form>
-            <div class="mt-6">
-              <h4 class="font-bold">قائمة المبادرات</h4>
-              <div id="list-initiatives" class="mt-2 grid gap-3"></div>
-            </div>
-          </div>
-          <div id="tab-opps" class="tabPanel hidden">
-            <div class="text-sm text-hasseef-gray">(تجريبي) فرص مقترحة بناءً على دورك ومنطقتك.</div>
-            <div id="list-opps" class="mt-3 grid md:grid-cols-2 gap-3"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ====== Modals: per account details ====== -->
-  <!-- Individual Modal -->
-  <div id="modal-individual" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between">
-        <h3 class="font-extrabold">تفاصيل حساب الأفراد</h3>
-        <button class="hs-close text-hasseef-gray">إغلاق</button>
-      </div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div>
-          <div class="font-bold mb-2">الخدمات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• إدراج المبادرة (اللبنات التسعة)</li>
-            <li>• ربط المبادرة ببرامج الرؤية وأهدافها</li>
-            <li>• التقديم على فرص (وظائف، تدريب، تطوع)</li>
-          </ul>
-        </div>
-        <div>
-          <div class="font-bold mb-2">الصلاحيات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• إنشاء/تعديل/حذف مبادرة قبل الاعتماد</li>
-            <li>• متابعة حالات الاعتماد والإشعارات</li>
-            <li>• تنزيل تقارير مبسطة</li>
-          </ul>
-        </div>
-      </div>
-    </div>
+    </nav>
   </div>
+</header>
 
-  <!-- Private Modal -->
-  <div id="modal-private" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items_center justify-between">
-        <h3 class="font-extrabold">تفاصيل حساب القطاع الخاص</h3>
-        <button class="hs-close text-hasseef-gray">إغلاق</button>
-      </div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div>
-          <div class="font-bold mb-2">الخدمات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• تقارير المسؤولية الاجتماعية</li>
-            <li>• فرص منح ورعاية مرتبطة بالرؤية</li>
-            <li>• إدارة المحفظة والشهادات</li>
-          </ul>
+<section class="hero" id="overview">
+  <div class="container">
+    <div class="grid grid-2" style="align-items:center">
+      <div>
+        <h1 data-i="hero_title">منصة حصيف — الممكن الوطني للشراكات والأثر</h1>
+        <p style="color:var(--gray)" data-i="hero_sub">
+          نموذج قيادي تفاعلي يبرز قيمة المنصة ضمن مستهدفات رؤية 2030 ويعرض الحسابات والخدمات والمؤشرات الحية.
+        </p>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <a href="#dashboard" class="btn btn-primary" data-i="cta_open_dashboard">افتح اللوحة</a>
+          <button id="toggleHC" class="btn" data-i="cta_high_contrast">تباين مرتفع</button>
         </div>
-        <div>
-          <div class="font-bold mb-2">الصلاحيات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• اعتماد المشاريع الممولة</li>
-            <li>• متابعة الأثر ومؤشرات الأداء</li>
-            <li>• تكاملات مع الجهات الحكومية</li>
-          </ul>
+        <div style="margin-top:14px">
+          <small data-i="hero_note">هذا النموذج يعمل محليًا دون اتصال ويصلح للعرض الرسمي.</small>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Nonprofit Modal -->
-  <div id="modal-nonprofit" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items_center justify-between">
-        <h3 class="font-extrabold">تفاصيل حساب القطاع غير الربحي</h3>
-        <button class="hs-close text-hasseef-gray">إغلاق</button>
-      </div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div>
-          <div class="font-bold mb-2">الخدمات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• نشر فرص (وظائف/تطوع/تدريب)</li>
-            <li>• إدارة التمويل والاستثمار</li>
-            <li>• تقارير حوكمة وأثر</li>
-          </ul>
+      <div class="card">
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="caption" data-i="kpi1">نمو التوظيف</div>
+            <div class="value" id="kpi-employment">+18%</div>
+            <div class="progress"><div class="bar" id="bar-1" style="width:62%"></div></div>
+          </div>
+          <div class="kpi">
+            <div class="caption" data-i="kpi2">تكامل الشركاء</div>
+            <div class="value" id="kpi-integration">92%</div>
+            <div class="progress"><div class="bar" id="bar-2" style="width:50%"></div></div>
+          </div>
+          <div class="kpi">
+            <div class="caption" data-i="kpi3">مشاريع مدعومة</div>
+            <div class="value" id="kpi-projects">1,240</div>
+            <div class="progress"><div class="bar" id="bar-3" style="width:40%"></div></div>
+          </div>
         </div>
-        <div>
-          <div class="font-bold mb-2">الصلاحيات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• اعتماد المشاريع الداخلية</li>
-            <li>• إدارة الشركاء والجهات المانحة</li>
-            <li>• تكامل مع الجامعات للاستشارات العلمية</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- University Modal -->
-  <div id="modal-university" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items_center justify-between">
-        <h3 class="font-extrabold">تفاصيل حساب الجامعات</h3>
-        <button class="hs-close text-hasseef-gray">إغلاق</button>
-      </div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div>
-          <div class="font-bold mb-2">الخدمات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• تعزيز علمي للمشاريع وقبولها</li>
-            <li>• تسويق البرامج والمبادرات البحثية</li>
-            <li>• إدارة مرافق للإيجار والاستثمار</li>
-          </ul>
-        </div>
-        <div>
-          <div class="font-bold mb-2">الصلاحيات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• إصدار تقارير علمية معتمدة</li>
-            <li>• إدارة فريق استشاري وتحصيل العوائد</li>
-            <li>• تكامل مع الجهات الممولة والحكومية</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Government Modal -->
-  <div id="modal-government" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify_center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between">
-        <h3 class="font-extrabold">تفاصيل حساب الحكومة</h3>
-        <button class="hs-close text-hasseef-gray">إغلاق</button>
-      </div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div>
-          <div class="font-bold mb-2">الخدمات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• إدارة المبادرات وربطها بأهداف الرؤية (3 مستويات)</li>
-            <li>• اعتماد الفعاليات وإدارة الشركاء</li>
-            <li>• طلب حلول من القطاع الخاص/الجامعات/غير الربحي</li>
-          </ul>
-        </div>
-        <div>
-          <div class="font-bold mb-2">الصلاحيات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• قبول/رفض الشراكات الاستراتيجية للفعاليات</li>
-            <li>• إصدار تقارير إقليمية ومؤشرات الأداء</li>
-            <li>• لوحة إشراف على المشاريع الممولة</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Funder Modal -->
-  <div id="modal-funder" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items_center justify-between">
-        <h3 class="font-extrabold">تفاصيل حساب المانحين</h3>
-        <button class="hs-close text-hasseef-gray">إغلاق</button>
-      </div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div>
-          <div class="font-bold mb-2">الخدمات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• فرص منح وفق معايير المانح</li>
-            <li>• محفظة مانح وتقارير أثر</li>
-            <li>• شهادات وإثباتات إنجاز</li>
-          </ul>
-        </div>
-        <div>
-          <div class="font-bold mb-2">الصلاحيات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• اعتماد تمويل المشاريع</li>
-            <li>• متابعة الأداء عبر مؤشرات مخصصة</li>
-            <li>• تكامل مع أنظمة المحاسبة والتدقيق</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Emirate Modal -->
-  <div id="modal-emirate" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between">
-        <h3 class="font-extrabold">تفاصيل حساب الإمارة</h3>
-        <button class="hs-close text-hasseef-gray">إغلاق</button>
-      </div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div>
-          <div class="font-bold mb-2">الخدمات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• اعتماد الفعاليات وإدارة المشاركات</li>
-            <li>• استعراض المشاريع والتمويلات في المنطقة</li>
-            <li>• تقارير داعمي المنطقة وأثرهم</li>
-          </ul>
-        </div>
-        <div>
-          <div class="font-bold mb-2">الصلاحيات</div>
-          <ul class="space-y-1 text-hasseef-gray">
-            <li>• قبول/رفض الشراكات الاستراتيجية</li>
-            <li>• متابعة مؤشرات الأداء الإقليمية</li>
-            <li>• ربط مع الجهات الحكومية والجامعات</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ====== Scripts ====== -->
-  <script>
-    // Year
-    document.getElementById('year').textContent = new Date().getFullYear();
-
-    // Mobile menu toggle
-    const menuBtn = document.getElementById('menuBtn');
-    const mobileNav = document.getElementById('mobileNav');
-    menuBtn?.addEventListener('click', () => mobileNav.classList.toggle('hidden'));
-
-    // Modal control
-    const openButtons = document.querySelectorAll('.hs-open');
-    const closeSelector = '.hs-close';
-    const modalClass = 'hs-modal';
-
-    openButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.getAttribute('data-modal');
-        const modal = document.getElementById(id);
-        if (!modal) return;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      });
-    });
-
-    document.addEventListener('click', (e) => {
-      const target = e.target;
-      if (target.closest && target.closest(closeSelector)) {
-        const modal = target.closest('.' + modalClass);
-        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
-      }
-      const m = target.classList && target.classList.contains(modalClass);
-      if (m) { target.classList.add('hidden'); target.classList.remove('flex'); }
-    });
-
-    // Upvote ideas (demo only)
-    document.querySelectorAll('#ideas .vote').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const count = btn.parentElement.querySelector('.count');
-        const n = parseInt(count.textContent || '0', 10) + 1;
-        count.textContent = n;
-        btn.setAttribute('disabled', 'true');
-        btn.classList.add('opacity-50');
-      });
-    });
-
-    // THEME + HC: persist with localStorage
-    const root = document.documentElement;
-    const themeToggle = document.getElementById('themeToggle');
-    const themeToggleMobile = document.getElementById('themeToggleMobile');
-    const hcToggle = document.getElementById('hcToggle');
-    function applyTheme(t){ t==='dark' ? root.classList.add('dark') : root.classList.remove('dark'); }
-    function toggleTheme(){ const t = localStorage.getItem('theme')==='dark' ? 'light' : 'dark'; localStorage.setItem('theme', t); applyTheme(t); }
-    function applyHC(v){ v==='1' ? root.classList.add('hc') : root.classList.remove('hc'); }
-    function toggleHC(){ const v = localStorage.getItem('hc')==='1' ? '0' : '1'; localStorage.setItem('hc', v); applyHC(v); }
-    applyTheme(localStorage.getItem('theme')||'light');
-    applyHC(localStorage.getItem('hc')||'0');
-    themeToggle?.addEventListener('click', toggleTheme);
-    themeToggleMobile?.addEventListener('click', toggleTheme);
-    hcToggle?.addEventListener('click', toggleHC);
-    themeToggle?.addEventListener('click', toggleTheme);
-    themeToggleMobile?.addEventListener('click', toggleTheme);
-
-    // KPI Profiles & Animations (enhanced)
-    const kpiProfiles = {
-      national: { employment: 18, integration: 92, projects: 1240 },
-      hail: { employment: 22, integration: 88, projects: 260 },
-      private: { employment: 12, integration: 95, projects: 740 },
-      nonprofit: { employment: 9, integration: 86, projects: 340 }
-    };
-    let kpiTimers = [];
-    function animateNumber(el, base, variance=5){
-      if(!el) return; let current = base;
-      const t = setInterval(()=>{ const delta = (Math.random()*variance - variance/2); current = Math.max(0, current + delta);
-        if(el.id==='kpi-projects'){ el.textContent = Math.round(current).toLocaleString('en-US'); }
-        else if(el.id==='kpi-integration'){ el.textContent = (current).toFixed(1)+'%'; }
-        else { el.textContent = (current>0?'+':'') + current.toFixed(1)+'%'; }
-      }, 2200 + Math.random()*600);
-      kpiTimers.push(t);
-    }
-    function clearTimers(){ kpiTimers.forEach(clearInterval); kpiTimers = []; }
-    function setProfile(p){
-      clearTimers();
-      const b = kpiProfiles[p] || kpiProfiles.national;
-      document.getElementById('kpi-employment').textContent = `+${b.employment}%`;
-      document.getElementById('kpi-integration').textContent = `${b.integration}%`;
-      document.getElementById('kpi-projects').textContent = b.projects.toLocaleString('en-US');
-      animateNumber(document.getElementById('kpi-employment'), b.employment);
-      animateNumber(document.getElementById('kpi-integration'), b.integration);
-      animateNumber(document.getElementById('kpi-projects'), b.projects, 20);
-    }
-    setProfile('national');
-    document.getElementById('kpiProfile')?.addEventListener('change', (e)=> setProfile(e.target.value));
-
-    // Bars update (kept)
-    function animateBars(){
-      const b1 = document.getElementById('bar-1');
-      const b2 = document.getElementById('bar-2');
-      const b3 = document.getElementById('bar-3');
-      setInterval(()=>{
-        const a = Math.floor(50 + Math.random()*30);
-        const b = Math.floor((100-a)/2);
-        const c = 100 - a - b;
-        if(b1) b1.style.width = a+'%';
-        if(b2) b2.style.width = b+'%';
-        if(b3) b3.style.width = c+'%';
-      }, 3000);
-    }
-    animateBars();
-
-    // Contact form -> mailto
-    const form = document.getElementById('contactForm');
-    if(form){
-      form.addEventListener('submit', (e)=>{
-        e.preventDefault();
-        const [name,email,account,message] = Array.from(form.querySelectorAll('input,select,textarea')).map(el=>encodeURIComponent(el.value));
-        const subject = `استفسار من ${decodeURIComponent(name)}`;
-        const body = `الحساب: ${decodeURIComponent(account)}%0D%0Aالبريد: ${decodeURIComponent(email)}%0D%0A%0D%0A${decodeURIComponent(message)}`;
-        window.location.href = `mailto:info@talbiya.sa?subject=${subject}&body=${body}`;
-      });
-    }
-
-    // Loader hide
-    window.addEventListener('load', ()=>{
-      const l = document.getElementById('loader');
-      if(l){ setTimeout(()=> l.style.display = 'none', 800); }
-    });
-  </script>
-  <!-- Partner Modals -->
-  <div id="modal-npoc" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between"><h3 class="font-extrabold">المركز الوطني لتنمية القطاع غير الربحي</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• توثيق برامج الحوكمة والأثر</li><li>• منح الموافقات الرقمية</li><li>• لوحات متابعة دعم المناطق</li></ul></div>
-        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• مراجعة واعتماد التقارير</li><li>• إدارة مؤشرات الأداء للقطاع</li><li>• الربط مع حسابات الجمعيات</li></ul></div>
-      </div>
-    </div>
-  </div>
-  <div id="modal-adaa" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between"><h3 class="font-extrabold">مركز أداء</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• تكامل لوحات مؤشرات وطنية</li><li>• نماذج قياس للأثر التنموي</li><li>• تقارير مقارنة بينية</li></ul></div>
-        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• ضبط مؤشرات قياس موحدة</li><li>• مشاركة النتائج مع الشركاء</li><li>• تنبيهات أداء للجهات</li></ul></div>
-      </div>
-    </div>
-  </div>
-  <div id="modal-mep" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between"><h3 class="font-extrabold">وزارة الاقتصاد والتخطيط</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• محاذاة المبادرات مع الخطط</li><li>• متابعة مؤشرات الاقتصاد</li><li>• تقارير فجوات القطاع/المنطقة</li></ul></div>
-        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• اعتماد المواءمة الاستراتيجية</li><li>• مشاركة سياسات وتوصيات</li><li>• تكامل بيانات مع الجهات</li></ul></div>
-      </div>
-    </div>
-  </div>
-  <div id="modal-mof" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between"><h3 class="font-extrabold">وزارة المالية</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• تتبع الصرف والالتزام</li><li>• تقارير الأثر المالي</li><li>• تدقيق دعم المشاريع</li></ul></div>
-        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• مراجعة واعتماد الصرف</li><li>• سياسات وإشعارات امتثال</li><li>• تكامل مع محافظ المانحين</li></ul></div>
-      </div>
-    </div>
-  </div>
-  <div id="modal-moi" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between"><h3 class="font-extrabold">وزارة الداخلية</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• اعتماد الفعاليات في المناطق</li><li>• لوحات مؤشرات السلامة</li><li>• إدارة المشاركات مع الإمارة</li></ul></div>
-        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• قبول/رفض الشراكات</li><li>• تنسيق بين إمارات المناطق</li><li>• تقارير موحدة للأمن والسلامة</li></ul></div>
-      </div>
-    </div>
-  </div>
-  <div id="modal-moc" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between"><h3 class="font-extrabold">وزارة الثقافة</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
-      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
-        <div><div class="font-bold mb-2">الخدمات</div><ul class="space-y-1 text-hasseef-gray"><li>• اعتماد الفعاليات الثقافية</li><li>• إدارة المنح الثقافية</li><li>• متابعة الأثر الإبداعي</li></ul></div>
-        <div><div class="font-bold mb-2">الصلاحيات</div><ul class="space-y-1 text-hasseef-gray"><li>• تنسيق مع الجهات الراعية</li><li>• سياسات المحتوى الثقافي</li><li>• تقارير قطاع الثقافة</li></ul></div>
-      </div>
-    </div>
-  </div>
-  <script>
-    // --- Interactive app state ---
-    const App = {
-      user: JSON.parse(localStorage.getItem('user')||'null'),
-      initiatives: JSON.parse(localStorage.getItem('initiatives')||'[]'),
-      opps: [
-        {title:'تطوع في ملتقى الشباب', kind:'اجتماعي'},
-        {title:'برنامج حاضنة مشاريع ناشئة', kind:'اقتصادي'},
-        {title:'مبادرة نادي قرّاء الجامعات', kind:'تعليمي'}
-      ]
-    };
-
-    // Router (hash)
-    function route(){
-      const hash = location.hash.replace('#','');
-      const dash = document.getElementById('dashboard');
-      if(hash==='dashboard'){ dash?.classList.remove('hidden'); window.scrollTo(0,0); }
-      else { dash?.classList.add('hidden'); }
-    }
-    window.addEventListener('hashchange', route);
-
-    // Login modal open
-    document.getElementById('loginBtn')?.addEventListener('click', ()=>{
-      const m = document.getElementById('modal-login'); m.classList.remove('hidden'); m.classList.add('flex');
-    });
-
-    // Generic close for login modal
-    document.querySelectorAll('#modal-login .hs-close').forEach(btn=>btn.addEventListener('click',()=>{
-      const mdl = document.getElementById('modal-login'); mdl.classList.add('hidden'); mdl.classList.remove('flex');
-    }));
-
-    // Login submit
-    document.getElementById('loginForm')?.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const emailOrName = (e.target.querySelector('[name="emailOrName"]').value||'').trim();
-      const password = (e.target.querySelector('[name="password"]').value||'').trim();
-      const roleSel = (e.target.querySelector('[name="role"]').value||'individual');
-      // إذا كان بريدًا إلكترونيًا واُدخلت كلمة مرور -> دخول فعلي من سجل المستخدمين
-      if(emailOrName.includes('@') && password){
-        try{ AppAuth.signin(emailOrName, password); } catch(err){ alert(err.message); return; }
-      } else {
-        // دخول تجريبي باسم ودور
-        App.user = {name: emailOrName||'ضيف', role: roleSel}; localStorage.setItem('user', JSON.stringify(App.user));
-      }
-      const u = AppAuth.user || App.user;
-      document.getElementById('userName').textContent = u.name; document.getElementById('userRole').textContent = u.role;
-      location.hash = 'dashboard';
-      const mdl = document.getElementById('modal-login'); mdl.classList.add('hidden'); mdl.classList.remove('flex');
-      ensureServicesContainer(); renderServices(); updateStats(); renderOpps(); renderList();
-    });
-
-    // Tabs
-    document.querySelectorAll('.tabBtn').forEach(btn=> btn.addEventListener('click',()=>{
-      document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelectorAll('.tabPanel').forEach(p=>p.classList.add('hidden'));
-      document.getElementById(btn.dataset.tab)?.classList.remove('hidden');
-    }));
-
-    // Initiatives form
-    document.getElementById('form-initiative')?.addEventListener('submit',(e)=>{
-      e.preventDefault();
-      const [name,cat,desc,b1,b2,b3] = Array.from(e.target.querySelectorAll('input,select,textarea')).map(el=>el.value);
-      const item = {id:Date.now(), name, cat, desc, blocks:{b1,b2,b3}, status:'قيد المراجعة'};
-      App.initiatives.push(item); localStorage.setItem('initiatives', JSON.stringify(App.initiatives));
-      e.target.reset(); renderList(); updateStats();
-    });
-
-    function renderList(){
-      const wrap = document.getElementById('list-initiatives'); if(!wrap) return; wrap.innerHTML='';
-      if(!App.initiatives.length){ wrap.innerHTML = '<div class="text-sm text-hasseef-gray">لا توجد مبادرات بعد.</div>'; return; }
-      App.initiatives.slice().reverse().forEach(it=>{
-        const card = document.createElement('div'); card.className='rounded-xl border p-3 bg-white';
-        card.innerHTML = `<div class="flex items-center justify-between"><div class="font-bold">${it.name}</div><span class="text-xs rounded-full px-2 py-0.5 bg-hasseef-goldSoft">${it.status}</span></div>
-          <div class="text-xs text-hasseef-gray mt-1">${it.cat} • ${it.desc}</div>
-          <div class="mt-2 grid md:grid-cols-3 gap-2 text-xs"><div class="rounded border p-2">${it.blocks.b1||'-'}</div><div class="rounded border p-2">${it.blocks.b2||'-'}</div><div class="rounded border p-2">${it.blocks.b3||'-'}</div></div>
-          <div class="mt-2 flex gap-2 text-xs"><button class="border px-2 py-1 rounded" data-act="approve">اعتماد</button><button class="border px-2 py-1 rounded" data-act="delete">حذف</button></div>`;
-        card.querySelector('[data-act="delete"]').addEventListener('click',()=>{ App.initiatives = App.initiatives.filter(x=>x.id!==it.id); localStorage.setItem('initiatives', JSON.stringify(App.initiatives)); renderList(); updateStats(); });
-        card.querySelector('[data-act="approve"]').addEventListener('click',()=>{ it.status='معتمد'; localStorage.setItem('initiatives', JSON.stringify(App.initiatives)); renderList(); });
-        wrap.appendChild(card);
-      });
-    }
-
-    function updateStats(){
-      const total = App.initiatives.length; const pending = App.initiatives.filter(i=>i.status==='قيد المراجعة').length; const opps = App.opps.length;
-      (document.getElementById('stat-initiatives')||{}).textContent = total;
-      (document.getElementById('stat-pending')||{}).textContent = pending;
-      (document.getElementById('stat-opps')||{}).textContent = opps;
-    }
-
-    function renderOpps(){
-      const wrap = document.getElementById('list-opps'); if(!wrap) return; wrap.innerHTML='';
-      App.opps.forEach(o=>{ const d=document.createElement('div'); d.className='rounded-xl border p-3 bg-white'; d.innerHTML=`<div class="font-bold text-sm">${o.title}</div><div class="text-xs text-hasseef-gray">${o.kind}</div>`; wrap.appendChild(d); });
-    }
-
-    // Restore session
-    (function init(){
-      route();
-      if(App.user){ document.getElementById('userName').textContent = App.user.name; document.getElementById('userRole').textContent = App.user.role; }
-      renderList(); updateStats(); renderOpps();
-    })();
-  </script>
-  
-  <!-- Login Modal -->
-  <div id="modal-login" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between"><h3 class="font-extrabold">تسجيل دخول</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
-      <form id="loginForm" class="mt-4 grid gap-3">
-        <input name="emailOrName" class="rounded-xl border px-3 py-2" placeholder="البريد الإلكتروني أو الاسم" required/>
-        <div class="grid md:grid-cols-2 gap-2">
-          <input name="password" type="password" class="rounded-xl border px-3 py-2" placeholder="كلمة المرور (لمن سجّل بحساب)"/>
-          <select name="role" class="rounded-xl border px-3 py-2">
-            <option value="individual">فرد</option>
-            <option value="private">قطاع خاص</option>
-            <option value="nonprofit">قطاع غير ربحي</option>
-            <option value="university">جامعة</option>
-            <option value="government">حكومة</option>
-            <option value="emirate">إمارة</option>
-            <option value="funder">مانح</option>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+          <label data-i="profile_label">المنظور:</label>
+          <select id="kpiProfile">
+            <option value="national">وطني</option>
+            <option value="hail">منطقة حائل</option>
+            <option value="private">القطاع الخاص</option>
+            <option value="nonprofit">القطاع غير الربحي</option>
           </select>
         </div>
-        <button class="px-4 py-2 rounded-xl bg-hasseef-green text-white">دخول</button>
-      </form>
+      </div>
     </div>
   </div>
+</section>
 
-  <!-- Sign Up Modal -->
-  <div id="modal-signup" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
-    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between"><h3 class="font-extrabold">تسجيل حساب</h3><button class="hs-close text-hasseef-gray">إغلاق</button></div>
-      <form id="signupForm" class="mt-4 grid gap-3">
-        <input name="name" class="rounded-xl border px-3 py-2" placeholder="الاسم الكامل" required/>
-        <input name="email" type="email" class="rounded-xl border px-3 py-2" placeholder="البريد الإلكتروني" required/>
-        <select name="role" class="rounded-xl border px-3 py-2" required>
+<section class="container" id="accounts" style="padding:32px 0">
+  <h2 style="margin-bottom:12px" data-i="acc_title">حسابات المنصة والخدمات</h2>
+  <p style="color:var(--gray)" data-i="acc_sub">يعرض هذا القسم الحسابات (حسب الدور) والخدمات الرئيسة لكل حساب.</p>
+  <div id="rolesGrid" class="grid grid-3"></div>
+</section>
+
+<section class="container" id="partners" style="padding:8px 0 24px">
+  <h2 style="margin-bottom:12px" data-i="partners_title">الشركاء الاستراتيجيون</h2>
+  <div class="logo-grid">
+    <div class="logo-box"><img src="assets/logos/Vision 2030.png" class="logo" alt="Vision 2030"/></div>
+    <div class="logo-box"><img src="assets/logos/hasseef.png" class="logo" alt="Hasseef"/></div>
+    <div class="logo-box"><img src="assets/logos/talbiya.png" class="logo" alt="Talbiya"/></div>
+    <div class="logo-box"><span style="opacity:.6">NPOC</span></div>
+    <div class="logo-box"><span style="opacity:.6">Adaa</span></div>
+    <div class="logo-box"><span style="opacity:.6">Partners</span></div>
+  </div>
+</section>
+
+<section id="dashboard" style="padding:32px 0 48px;background:#fff">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 data-i="dash_title">لوحتي</h2>
+      <div><small data-i="dash_user">مرحبًا، <b id="userName">ضيف</b> · الدور: <b id="userRole">—</b></small></div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div id="service-workspace" class="card" style="display:none;background:#fff"></div>
+
+      <h3 style="margin:4px 0 10px" data-i="dash_services">خدمات الحساب</h3>
+      <div id="role-services" class="grid grid-3"></div>
+      <hr/>
+      <div class="tabbar">
+        <button class="tab active" data-tab="tab-overview" data-i="tab_overview">نظرة عامة</button>
+        <button class="tab" data-tab="tab-initiatives" data-i="tab_initiatives">مبادراتي</button>
+        <button class="tab" data-tab="tab-opps" data-i="tab_opps">فرص</button>
+      </div>
+      <div style="margin-top:12px">
+        <div id="tab-overview">
+          <div class="grid kpi-grid">
+            <div class="card"><small data-i="dash_stat1">عدد المبادرات</small><div class="value" id="stat-initiatives">0</div></div>
+            <div class="card"><small data-i="dash_stat2">طلبات قيد المراجعة</small><div class="value" id="stat-pending">0</div></div>
+            <div class="card"><small data-i="dash_stat3">فرص مقترحة</small><div class="value" id="stat-opps">0</div></div>
+          </div>
+        </div>
+        <div id="tab-initiatives" style="display:none">
+          <form id="form-initiative" class="grid grid-2">
+            <input placeholder="اسم المبادرة" required/>
+            <select><option>تعليمي</option><option>ثقافي</option><option>اجتماعي</option><option>اقتصادي</option></select>
+            <textarea class="grid-col-span-2" placeholder="وصف مختصر" required></textarea>
+            <div class="grid grid-3">
+              <input placeholder="الجمهور المستهدف"/>
+              <input placeholder="القيمة المقترحة"/>
+              <input placeholder="القنوات"/>
+            </div>
+            <button class="btn btn-primary" style="margin-top:6px" data-i="btn_save">حفظ</button>
+          </form>
+          <div style="margin-top:12px">
+            <h3 data-i="list_title">قائمة المبادرات</h3>
+            <div id="list-initiatives" class="grid"></div>
+          </div>
+        </div>
+        <div id="tab-opps" style="display:none">
+          <small style="color:var(--gray)" data-i="opps_note">(تجريبي) فرص مقترحة بناءً على دورك ومنطقتك.</small>
+          <div id="list-opps" class="grid grid-2" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="container">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <small>© 2025 Hasseef</small>
+    <div style="display:flex;gap:8px">
+      <button id="toggleTheme" class="btn">Dark</button>
+      <button id="toggleHC2" class="btn">HC</button>
+    </div>
+  </div>
+</footer>
+
+<!-- Auth modals -->
+<div id="modal-login" class="modal">
+  <div class="dialog">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 data-i="login_title">تسجيل دخول</h3>
+      <button class="btn" onclick="closeModal('modal-login')">×</button>
+    </div>
+    <form id="loginForm" class="grid">
+      <input name="emailOrName" placeholder="البريد الإلكتروني أو الاسم" required/>
+      <div class="grid grid-2">
+        <input name="password" type="password" placeholder="كلمة المرور"/>
+        <select name="role">
           <option value="individual">فرد</option>
           <option value="private">قطاع خاص</option>
           <option value="nonprofit">قطاع غير ربحي</option>
@@ -1306,254 +190,386 @@
           <option value="emirate">إمارة</option>
           <option value="funder">مانح</option>
         </select>
-        <input name="region" class="rounded-xl border px-3 py-2" placeholder="المنطقة (اختياري)"/>
-        <input name="password" type="password" class="rounded-xl border px-3 py-2" placeholder="كلمة المرور" required/>
-        <button class="px-4 py-2 rounded-xl bg-hasseef-green text-white">إنشاء حساب</button>
-      </form>
-    </div>
+      </div>
+      <button class="btn btn-primary" data-i="btn_login">دخول</button>
+    </form>
   </div>
+</div>
 
-  <script>
-    // === Minimal Auth & Accounts (MVP, localStorage) ===
-    const $ = (s,sc)=> (sc||document).querySelector(s);
-    const $$ = (s,sc)=> Array.from((sc||document).querySelectorAll(s));
+<div id="modal-signup" class="modal">
+  <div class="dialog">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 data-i="signup_title">تسجيل حساب</h3>
+      <button class="btn" onclick="closeModal('modal-signup')">×</button>
+    </div>
+    <form id="signupForm" class="grid">
+      <input name="name" placeholder="الاسم الكامل" required/>
+      <input name="email" type="email" placeholder="البريد الإلكتروني" required/>
+      <select name="role" required>
+        <option value="individual">فرد</option>
+        <option value="private">قطاع خاص</option>
+        <option value="nonprofit">قطاع غير ربحي</option>
+        <option value="university">جامعة</option>
+        <option value="government">حكومة</option>
+        <option value="emirate">إمارة</option>
+        <option value="funder">مانح</option>
+      </select>
+      <input name="region" placeholder="المنطقة (اختياري)"/>
+      <input name="password" type="password" placeholder="كلمة المرور" required/>
+      <button class="btn btn-primary" data-i="btn_create">إنشاء حساب</button>
+    </form>
+  </div>
+</div>
 
-    const AppAuth = {
-      users: JSON.parse(localStorage.getItem('users')||'[]'),
-      get user(){ return JSON.parse(localStorage.getItem('user')||'null'); },
-      set user(v){ localStorage.setItem('user', JSON.stringify(v)); },
-      signup(data){
-        if(this.users.some(u=>u.email===data.email)) throw new Error('البريد مسجّل مسبقًا');
-        data.pw = btoa(data.password); delete data.password; this.users.push(data);
-        localStorage.setItem('users', JSON.stringify(this.users));
-        this.user = {name:data.name, email:data.email, role:data.role, region:data.region||''};
-      },
-      signin(email, password){
-        const u = this.users.find(u=>u.email===email && u.pw===btoa(password));
-        if(!u) throw new Error('بيانات الدخول غير صحيحة');
-        this.user = {name:u.name, email:u.email, role:u.role, region:u.region||''};
-      },
-      signout(){ localStorage.removeItem('user'); }
-    };
+<script>
+// i18n dictionary
+const i18n = {
+  ar:{
+    nav_overview:"نظرة عامة", nav_accounts:"الحسابات", nav_partners:"الشركاء", nav_dashboard:"لوحة",
+    hero_title:"منصة حصيف — الممكن الوطني للشراكات والأثر",
+    hero_sub:"نموذج قيادي تفاعلي يبرز قيمة المنصة ضمن مستهدفات رؤية 2030 ويعرض الحسابات والخدمات والمؤشرات الحية.",
+    cta_open_dashboard:"افتح اللوحة", cta_high_contrast:"تباين مرتفع",
+    hero_note:"هذا النموذج يعمل محليًا دون اتصال ويصلح للعرض الرسمي.",
+    kpi1:"نمو التوظيف", kpi2:"تكامل الشركاء", kpi3:"مشاريع مدعومة",
+    profile_label:"المنظور:",
+    acc_title:"حسابات المنصة والخدمات", acc_sub:"يعرض هذا القسم الحسابات (حسب الدور) والخدمات الرئيسة لكل حساب.",
+    partners_title:"الشركاء الاستراتيجيون",
+    dash_title:"لوحتي", dash_user:"مرحبًا، ",
+    dash_services:"خدمات الحساب",
+    tab_overview:"نظرة عامة", tab_initiatives:"مبادراتي", tab_opps:"فرص",
+    dash_stat1:"عدد المبادرات", dash_stat2:"طلبات قيد المراجعة", dash_stat3:"فرص مقترحة",
+    list_title:"قائمة المبادرات", opps_note:"(تجريبي) فرص مقترحة بناءً على دورك ومنطقتك.",
+    login_title:"تسجيل دخول", btn_login:"دخول", signup_title:"تسجيل حساب", btn_create:"إنشاء حساب"
+  },
+  en:{
+    nav_overview:"Overview", nav_accounts:"Accounts", nav_partners:"Partners", nav_dashboard:"Dashboard",
+    hero_title:"Hasseef Platform — National Enabler for Partnerships & Impact",
+    hero_sub:"A leadership-grade interactive demo highlighting value under Vision 2030 targets, with accounts, services, and live KPIs.",
+    cta_open_dashboard:"Open Dashboard", cta_high_contrast:"High Contrast",
+    hero_note:"This demo runs fully offline and is suitable for executive briefings.",
+    kpi1:"Employment Growth", kpi2:"Partner Integration", kpi3:"Supported Projects",
+    profile_label:"Profile:",
+    acc_title:"Platform Accounts & Services", acc_sub:"Accounts (by role) and their primary services.",
+    partners_title:"Strategic Partners",
+    dash_title:"My Dashboard", dash_user:"Welcome, ",
+    dash_services:"Account Services",
+    tab_overview:"Overview", tab_initiatives:"My Initiatives", tab_opps:"Opportunities",
+    dash_stat1:"Initiatives", dash_stat2:"Pending Requests", dash_stat3:"Suggested Opportunities",
+    list_title:"Initiatives List", opps_note:"(Demo) Suggested opportunities by your role and region.",
+    login_title:"Sign In", btn_login:"Sign In", signup_title:"Create Account", btn_create:"Create Account"
+  }
+};
+let currentLang='ar';
+function applyLang(lang){
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = (lang==='ar'?'rtl':'ltr');
+  document.querySelectorAll('[data-i]').forEach(el=>{
+    const key = el.getAttribute('data-i'); el.textContent = i18n[lang][key] || el.textContent;
+  });
+  document.getElementById('lang-ar').classList.toggle('active', lang==='ar');
+  document.getElementById('lang-en').classList.toggle('active', lang==='en');
+}
+document.getElementById('lang-ar').onclick = ()=>applyLang('ar');
+document.getElementById('lang-en').onclick = ()=>applyLang('en');
 
-    // UI bindings
-    function toggleAuthUI(){
-      const u = AppAuth.user;
-      const authBtns = $('#authButtons'); const menu = $('#userMenu');
-      if(u){ authBtns?.classList.remove('hidden'); $('#signupBtn')?.classList.add('hidden'); $('#loginBtn')?.classList.add('hidden'); menu?.classList.remove('hidden'); $('#navUser').textContent = u.name; }
-      else { authBtns?.classList.remove('hidden'); $('#signupBtn')?.classList.remove('hidden'); $('#loginBtn')?.classList.remove('hidden'); menu?.classList.add('hidden'); }
-    }
+// Theme & HC
+document.getElementById('toggleTheme').onclick = ()=> document.documentElement.classList.toggle('dark');
+document.getElementById('toggleHC').onclick = ()=> document.documentElement.classList.toggle('hc');
+document.getElementById('toggleHC2').onclick = ()=> document.documentElement.classList.toggle('hc');
 
-    $('#signupBtn')?.addEventListener('click', ()=>{ const m=$('#modal-signup'); m.classList.remove('hidden'); m.classList.add('flex'); });
-    $('#loginBtn')?.addEventListener('click', ()=>{ const m=$('#modal-login'); m.classList.remove('hidden'); m.classList.add('flex'); });
+// Modal helpers
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
-    // close buttons
-    $$('#modal-signup .hs-close, #modal-login .hs-close').forEach(b=> b.addEventListener('click', ()=>{ const mdl=b.closest('.hs-modal'); mdl.classList.add('hidden'); mdl.classList.remove('flex'); }));
+// Simple auth (localStorage)
+const App = {
+  users: JSON.parse(localStorage.getItem('users')||'[]'),
+  user: JSON.parse(localStorage.getItem('user')||'null'),
+  opps: [{title:'تطوع في ملتقى الشباب', kind:'اجتماعي'},{title:'برنامج حاضنة مشاريع ناشئة', kind:'اقتصادي'},{title:'مبادرة نادي قرّاء الجامعات', kind:'تعليمي'}],
+  save(){ localStorage.setItem('users', JSON.stringify(this.users)); localStorage.setItem('user', JSON.stringify(this.user)); }
+};
 
-    // signup submit
-    $('#signupForm')?.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const data = Object.fromEntries(fd.entries());
-      try{ AppAuth.signup(data); location.hash='dashboard'; $('#modal-signup').classList.add('hidden'); $('#modal-signup').classList.remove('flex'); afterLogin(); }
-      catch(err){ alert(err.message); }
+function openLogin(){ openModal('modal-login'); }
+function openSignup(){ openModal('modal-signup'); }
+
+// Fill roles cards
+fetch('data/Accounts.json').then(r=>r.json()).then(data=>{
+  const grid = document.getElementById('rolesGrid');
+  data.roles.forEach(role=>{
+    const card = document.createElement('div'); card.className='card';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><b>${role.ar}</b> · <small>${role.en}</small></div>
+        <span class="badge">Role</span>
+      </div>
+      <ul style="margin:10px 0 0;padding:0;list-style:none">
+        ${role.services.map(s=>`<li style="padding:6px 0;display:flex;justify-content:space-between"><span>${s.ar} · <small>${s.en}</small></span><button class="btn" data-role="${role.id}" data-srv="${s.id}">فتح</button></li>`).join('')}
+      </ul>`;
+    grid.appendChild(card);
+  });
+  grid.querySelectorAll('button[data-srv]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      if(!App.user){ openLogin(); return; }
+      openService(btn.dataset.srv);
+      location.hash = '#dashboard';
     });
+  });
+});
 
-    // login submit (reuse existing modal)
-    $('#loginForm')?.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const [nameOr, roleOr] = Array.from(e.target.querySelectorAll('input,select')).map(el=>el.value);
-      // If user typed email in name field, try real auth; otherwise fallback to demo role login
-      if(nameOr.includes('@')){
-        try{ AppAuth.signin(nameOr, roleOr); afterLogin(); $('#modal-login').classList.add('hidden'); $('#modal-login').classList.remove('flex'); location.hash='dashboard'; }
-        catch(err){ alert(err.message); }
-      } else {
-        // demo mode
-        const demo = {name:nameOr, role:roleOr}; App.user = demo; localStorage.setItem('user', JSON.stringify(demo)); afterLogin(); $('#modal-login').classList.add('hidden'); $('#modal-login').classList.remove('flex'); location.hash='dashboard';
+// KPIs
+fetch('data/KPIs.json').then(r=>r.json()).then(K=>{
+  function setProfile(p){
+    const b = K[p]||K.national;
+    document.getElementById('kpi-employment').textContent = `+${b.employment}%`;
+    document.getElementById('kpi-integration').textContent = `${b.integration}%`;
+    document.getElementById('kpi-projects').textContent = b.projects.toLocaleString('en-US');
+    // Bars
+    document.getElementById('bar-1').style.width = (50 + Math.random()*30)+'%';
+    document.getElementById('bar-2').style.width = (40 + Math.random()*30)+'%';
+    document.getElementById('bar-3').style.width = (30 + Math.random()*30)+'%';
+  }
+  document.getElementById('kpiProfile').addEventListener('change', e=> setProfile(e.target.value));
+  setProfile('national');
+});
+
+// Tabs
+document.querySelectorAll('.tabbar .tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tabbar .tab').forEach(b=>b.classList.remove('active'));
+    t.classList.add('active');
+    ['tab-overview','tab-initiatives','tab-opps'].forEach(id=> document.getElementById(id).style.display='none');
+    document.getElementById(t.dataset.tab).style.display='block';
+  });
+});
+
+// Login/Signup handlers
+document.getElementById('loginForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const emailOrName = e.target.emailOrName.value.trim();
+  const pw = e.target.password.value.trim();
+  const role = e.target.role.value;
+  if(emailOrName.includes('@') && pw){
+    const u = App.users.find(u=>u.email===emailOrName && u.pw===btoa(pw));
+    if(!u){ alert('بيانات الدخول غير صحيحة'); return; }
+    App.user = {name:u.name, email:u.email, role:u.role, region:u.region||''};
+  } else {
+    App.user = {name:emailOrName || 'ضيف', role};
+  }
+  App.save();
+  document.getElementById('userName').textContent = App.user.name;
+  document.getElementById('userRole').textContent = App.user.role;
+  closeModal('modal-login');
+  location.hash = '#dashboard';
+  renderServices(); updateStats(); renderOpps(); renderList();
+});
+document.getElementById('signupForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const fd = new FormData(e.target); const data = Object.fromEntries(fd.entries());
+  if(App.users.some(u=>u.email===data.email)){ alert('البريد مسجّل'); return; }
+  data.pw = btoa(data.password); delete data.password;
+  App.users.push(data); App.user = {name:data.name,email:data.email,role:data.role,region:data.region||''}; App.save();
+  document.getElementById('userName').textContent = App.user.name;
+  document.getElementById('userRole').textContent = App.user.role;
+  closeModal('modal-signup');
+  location.hash = '#dashboard';
+  renderServices(); updateStats(); renderOpps(); renderList();
+});
+
+// Workspace services (role actions)
+function openService(id){
+  const box = document.getElementById('service-workspace');
+  box.style.display='block';
+  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <b>${id}</b><button class="btn" id="closeWS">×</button>
+  </div>`;
+  switch(id){
+    case 'add-initiative':
+      html += `<form id="ws-add-init" class="grid grid-2">
+        <input placeholder="اسم المبادرة" required/>
+        <select><option>تعليمي</option><option>ثقافي</option><option>اجتماعي</option><option>اقتصادي</option></select>
+        <textarea class="grid-col-span-2" placeholder="وصف مختصر" required></textarea>
+        <button class="btn btn-primary">حفظ</button>
+      </form>`;
+      break;
+    case 'csr-report':
+      html += `<form id="ws-csr" class="grid grid-3">
+        <input placeholder="المنشأة" required/>
+        <input placeholder="الفترة (2025-Q4)" required/>
+        <input placeholder="حجم الإنفاق (ر.س)" required/>
+        <textarea class="grid-col-span-3" placeholder="ملاحظات/ربط مشاريع"></textarea>
+        <button class="btn btn-primary grid-col-span-3">توليد مسودة</button>
+      </form>`;
+      break;
+    case 'sponsor':
+      html += `<form id="ws-sponsor" class="grid grid-2">
+        <input placeholder="اسم الفعالية" required/>
+        <input placeholder="الجهة المنظمة" required/>
+        <input placeholder="التاريخ"/>
+        <input placeholder="المدينة"/>
+        <button class="btn btn-primary grid-col-span-2">إرسال الطلب</button>
+      </form>`;
+      break;
+    case 'publish-opps':
+      html += `<form id="ws-opp" class="grid grid-3">
+        <input placeholder="عنوان الفرصة" required/>
+        <select><option>وظيفة</option><option>تطوع</option><option>تدريب</option></select>
+        <input placeholder="القطاع/الفئة"/>
+        <textarea class="grid-col-span-3" placeholder="وصف مختصر"></textarea>
+        <button class="btn btn-primary grid-col-span-3">نشر</button>
+      </form>`;
+      break;
+    case 'manage-projects':
+      html += `<div id="ws-projects" class="grid"></div>
+      <form id="ws-add-proj" class="grid grid-3">
+        <input placeholder="اسم المشروع" required/>
+        <select><option>قيد التخطيط</option><option>قيد التنفيذ</option><option>مكتمل</option></select>
+        <button class="btn btn-primary">إضافة</button>
+      </form>`;
+      break;
+    case 'academic-review':
+      html += `<form id="ws-acad" class="grid">
+        <input placeholder="عنوان الدراسة" required/>
+        <textarea placeholder="ملخص"></textarea>
+        <button class="btn btn-primary">إصدار مسودة اعتماد</button>
+      </form>`;
+      break;
+    case 'coop-training':
+      html += `<form id="ws-coop" class="grid grid-2">
+        <input placeholder="المسمّى" required/>
+        <input placeholder="المدة (أسابيع)"/>
+        <button class="btn btn-primary grid-col-span-2">نشر</button>
+      </form>`;
+      break;
+    case 'approve-events':
+      html += `<div id="ws-events" class="grid"></div>`;
+      break;
+    case 'request-solutions':
+      html += `<form id="ws-sol" class="grid grid-2">
+        <input placeholder="عنوان التحدي" required/>
+        <textarea class="grid-col-span-2" placeholder="التفاصيل"></textarea>
+        <button class="btn btn-primary grid-col-span-2">نشر الطلب</button>
+      </form>`;
+      break;
+    case 'regional-dashboard':
+      html += `<div class="grid grid-3">
+        <div class="card"><small>مبادرات</small><div class="value" id="rg-init">0</div></div>
+        <div class="card"><small>وظائف/تطوع</small><div class="value" id="rg-opps">0</div></div>
+        <div class="card"><small>مشاريع</small><div class="value" id="rg-proj">0</div></div>
+      </div>`;
+      break;
+    case 'approve-initiatives':
+      html += `<div id="ws-approve" class="grid"></div>`;
+      break;
+    case 'grant-portfolio':
+      html += `<div class="grid grid-3">
+        <div class="card"><small>إجمالي التمويل</small><div class="value">1.2م</div></div>
+        <div class="card"><small>مشاريع نشطة</small><div class="value">7</div></div>
+        <div class="card"><small>مكتملة</small><div class="value">12</div></div>
+      </div>`;
+      break;
+    case 'find-projects':
+      html += `<form id="ws-find" class="grid grid-3">
+        <select><option>تعليمي</option><option>ثقافي</option><option>اجتماعي</option><option>اقتصادي</option></select>
+        <input placeholder="المنطقة"/>
+        <button class="btn btn-primary">بحث</button>
+      </form><div id="ws-results" class="grid" style="margin-top:8px"></div>`;
+      break;
+    default:
+      html += `<small>الخدمة غير معرّفة بعد.</small>`;
+  }
+  box.innerHTML = html;
+
+  document.getElementById('closeWS').onclick = ()=>{ box.style.display='none'; box.innerHTML=''; };
+  if(document.getElementById('ws-opp')){
+    document.getElementById('ws-opp').onsubmit = (e)=>{ e.preventDefault(); alert('تم النشر (تجريبي)'); };
+  }
+  if(document.getElementById('ws-events')){
+    const host=document.getElementById('ws-events'); ['مهرجان صيفي','ملتقى التطوع','معرض الجامعات'].forEach(n=>{
+      const c=document.createElement('div'); c.className='card'; c.innerHTML=`<div style="display:flex;justify-content:space-between"><div>${n}</div><div><button class="btn">قبول</button> <button class="btn">رفض</button></div></div>`; host.appendChild(c);
+    });
+  }
+  if(document.getElementById('ws-approve')){
+    const host=document.getElementById('ws-approve'); (App.initiatives||[]).forEach(it=>{
+      if(it.status==='قيد المراجعة'){
+        const c=document.createElement('div'); c.className='card'; c.innerHTML=`<div style="display:flex;justify-content:space-between"><div>${it.name}</div><button class="btn btn-primary">اعتماد</button></div>`;
+        c.querySelector('button').onclick=()=>{ it.status='معتمد'; localStorage.setItem('initiatives', JSON.stringify(App.initiatives)); c.remove(); alert('تم الاعتماد'); };
+        host.appendChild(c);
       }
     });
+  }
+}
 
-    $('#logoutBtn')?.addEventListener('click', ()=>{ AppAuth.signout(); toggleAuthUI(); location.hash=''; alert('تم تسجيل الخروج'); });
+// Role services cards (per user)
+const servicesByRole = {
+  individual:[{id:'add-initiative',title:'إضافة مبادرة'}],
+  private:[{id:'csr-report',title:'تقرير المسؤولية CSR'},{id:'sponsor',title:'رعاية فعالية'}],
+  nonprofit:[{id:'publish-opps',title:'نشر فرص'},{id:'manage-projects',title:'إدارة المشاريع'}],
+  university:[{id:'academic-review',title:'تعزيز علمي'},{id:'coop-training',title:'تدريب تعاوني'}],
+  government:[{id:'approve-events',title:'اعتماد الفعاليات'},{id:'request-solutions',title:'طلب حلول'}],
+  emirate:[{id:'regional-dashboard',title:'لوحة المنطقة'},{id:'approve-initiatives',title:'اعتماد مبادرات'}],
+  funder:[{id:'grant-portfolio',title:'محفظة المنح'},{id:'find-projects',title:'اعثر على مشاريع'}]
+};
+function renderServices(){
+  const grid = document.getElementById('role-services'); if(!grid) return;
+  grid.innerHTML = '';
+  if(!App.user){ grid.innerHTML = '<small style="color:var(--gray)">سجّل الدخول أولًا لعرض الخدمات</small>'; return; }
+  (servicesByRole[App.user.role]||[]).forEach(s=>{
+    const d=document.createElement('div'); d.className='card';
+    d.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><b>${s.title}</b><button class="btn" data-srv="${s.id}">فتح</button></div>`;
+    d.querySelector('button').onclick = ()=>openService(s.id);
+    grid.appendChild(d);
+  });
+}
 
-    function afterLogin(){
-      const u = AppAuth.user || App.user; // support old demo user
-      $('#userName').textContent = u?.name || 'ضيف';
-      $('#userRole').textContent = u?.role || '—';
-      toggleAuthUI();
-      ensureServicesContainer();
-      renderServices();
-      updateStats(); renderOpps(); renderList();
-    }
+// Initiatives
+App.initiatives = JSON.parse(localStorage.getItem('initiatives')||'[]');
+document.getElementById('form-initiative').addEventListener('submit', e=>{
+  e.preventDefault();
+  const [name,cat,desc,b1,b2,b3] = Array.from(e.target.querySelectorAll('input,select,textarea')).map(el=>el.value);
+  const item = {id:Date.now(), name, cat, desc, blocks:{b1,b2,b3}, status:'قيد المراجعة'};
+  App.initiatives.push(item); localStorage.setItem('initiatives', JSON.stringify(App.initiatives));
+  e.target.reset(); renderList(); updateStats(); alert('تم الحفظ');
+});
+function renderList(){
+  const wrap = document.getElementById('list-initiatives'); if(!wrap) return; wrap.innerHTML='';
+  if(!App.initiatives.length){ wrap.innerHTML = '<small style="color:var(--gray)">لا توجد مبادرات بعد.</small>'; return; }
+  App.initiatives.slice().reverse().forEach(it=>{
+    const card = document.createElement('div'); card.className='card';
+    card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><b>${it.name}</b><span class="badge">${it.status}</span></div>
+      <small style="color:var(--gray)">${it.cat} • ${it.desc}</small>
+      <div class="grid grid-3">
+        <div class="card">${it.blocks.b1||'-'}</div>
+        <div class="card">${it.blocks.b2||'-'}</div>
+        <div class="card">${it.blocks.b3||'-'}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" data-act="approve">اعتماد</button>
+        <button class="btn" data-act="delete">حذف</button>
+      </div>`;
+    card.querySelector('[data-act="delete"]').onclick=()=>{ App.initiatives = App.initiatives.filter(x=>x.id!==it.id); localStorage.setItem('initiatives', JSON.stringify(App.initiatives)); renderList(); updateStats(); };
+    card.querySelector('[data-act="approve"]').onclick=()=>{ it.status='معتمد'; localStorage.setItem('initiatives', JSON.stringify(App.initiatives)); renderList(); };
+    wrap.appendChild(card);
+  });
+}
+function updateStats(){
+  const total = App.initiatives.length; const pending = App.initiatives.filter(i=>i.status==='قيد المراجعة').length; const opps = App.opps.length;
+  document.getElementById('stat-initiatives').textContent = total;
+  document.getElementById('stat-pending').textContent = pending;
+  document.getElementById('stat-opps').textContent = opps;
+}
+function renderOpps(){
+  const wrap = document.getElementById('list-opps'); if(!wrap) return; wrap.innerHTML='';
+  App.opps.forEach(o=>{ const d=document.createElement('div'); d.className='card'; d.innerHTML=`<b>${o.title}</b><small style="color:var(--gray)">${o.kind}</small>`; wrap.appendChild(d); });
+}
 
-    // === Role Services ===
-    const servicesByRole = {
-      individual:[
-        {id:'add-initiative', title:'إضافة مبادرة', desc:'أنشئ مبادرة بنموذج اللبنات التسعة', act:()=>{ location.hash='dashboard'; document.querySelector('[data-tab="tab-initiatives"]').click(); }}
-      ],
-      private:[
-        {id:'csr-report', title:'تقرير المسؤولية', desc:'إعداد تقرير CSR وربط المشاريع المدعومة', act:()=>alert('نموذج تقرير CSR — (نموذج أولي)')},
-        {id:'sponsor', title:'رعاية فعالية', desc:'تقديم طلب رعاية واعتماد سريع', act:()=>location.href='#sponsors'}
-      ],
-      nonprofit:[
-        {id:'publish-opps', title:'نشر فرص', desc:'وظائف/تطوع/تدريب', act:()=>{ alert('واجهة نشر فرص — (نموذج أولي)'); }},
-        {id:'manage-projects', title:'إدارة المشاريع', desc:'تحديث مؤشرات الأداء', act:()=>{ alert('لوحة مشاريع — (نموذج أولي)'); }}
-      ],
-      university:[
-        {id:'academic-review', title:'تعزيز علمي', desc:'تقييم مبادرات وإصدار اعتماد', act:()=>alert('نموذج اعتماد علمي — (نموذج أولي)')},
-        {id:'coop-training', title:'تدريب تعاوني', desc:'نشر فرص تدريب للطلاب', act:()=>{ $('#tab-opps')?.classList.remove('hidden'); }}
-      ],
-      government:[
-        {id:'approve-events', title:'اعتماد الفعاليات', desc:'إدارة طلبات الفعاليات', act:()=>alert('قائمة الفعاليات — (نموذج أولي)')},
-        {id:'request-solutions', title:'طلب حلول', desc:'من القطاعات المختلفة', act:()=>alert('نموذج طلب حلول — (نموذج أولي)')}
-      ],
-      emirate:[
-        {id:'regional-dashboard', title:'لوحة المنطقة', desc:'مشاريع/وظائف/تطوع حسب المنطقة', act:()=>alert('لوحة منطقة — (نموذج أولي)')},
-        {id:'approve-initiatives', title:'اعتماد مبادرات', desc:'اعتماد مبادرات المواطنين والجمعيات', act:()=>{ location.hash='dashboard'; document.querySelector('[data-tab="tab-initiatives"]').click(); }}
-      ],
-      funder:[
-        {id:'grant-portfolio', title:'محفظة المنح', desc:'متابعة تمويل المشاريع', act:()=>alert('محفظة مانح — (نموذج أولي)')},
-        {id:'find-projects', title:'اعثر على مشاريع', desc:'مطابقة معايير المانح', act:()=>alert('مطابقة مشاريع — (نموذج أولي)')}
-      ]
-    };
-
-    function ensureServicesContainer(){
-      const host = document.querySelector('#dashboard .rounded-2xl.border.bg-white.p-4');
-      if(!host) return;
-      if(!document.getElementById('role-services')){
-        const h3 = document.createElement('h3'); h3.className='font-bold mb-3'; h3.textContent='خدمات الحساب'; host.prepend(h3);
-        const grid = document.createElement('div'); grid.id='role-services'; grid.className='grid md:grid-cols-3 gap-3'; host.insertBefore(grid, h3.nextSibling);
-        const hr = document.createElement('hr'); hr.className='my-4'; host.insertBefore(hr, grid.nextSibling);
-      }
-    }
-
-    function renderServices(){
-      const u = AppAuth.user || App.user; if(!u) return;
-      const grid = $('#role-services'); if(!grid) return; grid.innerHTML='';
-      (servicesByRole[u.role]||[]).forEach(s=>{
-        const d=document.createElement('div'); d.className='rounded-xl border p-4 bg-white';
-        d.innerHTML = `<div class="font-bold">${s.title}</div><div class="text-xs text-hasseef-gray mt-1">${s.desc}</div><button class="mt-3 px-3 py-1.5 rounded-xl bg-hasseef-green text-white text-xs">فتح</button>`;
-        d.querySelector('button').addEventListener('click', s.act);
-        grid.appendChild(d);
-      });
-    }
-
-    // === خدمة مساحة العمل لكل دور ===
-    function openService(id){
-      const box = document.getElementById('service-workspace'); if(!box) return;
-      box.classList.remove('hidden');
-      const closeBtn = '<button id="closeWS" class="mb-3 px-3 py-1.5 rounded-xl border text-xs">إغلاق المساحة</button>';
-      let html='';
-      switch(id){
-        case 'add-initiative':
-          html = `${closeBtn}<div class="font-bold mb-2">نموذج إضافة مبادرة (مبسط)</div>
-          <p class="text-xs text-hasseef-gray mb-2">يؤدي نفس ما في تبويب "مبادراتي" لكن من داخل الخدمات.</p>
-          <form id="ws-add-init" class="grid gap-2 md:grid-cols-2">
-            <input class="rounded-xl border px-3 py-2" placeholder="اسم المبادرة" required/>
-            <select class="rounded-xl border px-3 py-2"><option>تعليمي</option><option>ثقافي</option><option>اجتماعي</option><option>اقتصادي</option></select>
-            <textarea class="md:col-span-2 rounded-xl border px-3 py-2" placeholder="وصف مختصر" required></textarea>
-            <button class="md:col-span-2 px-4 py-2 rounded-xl bg-hasseef-green text-white">حفظ</button>
-          </form>`; break;
-        case 'csr-report':
-          html = `${closeBtn}<div class="font-bold mb-2">تقرير المسؤولية (CSR)</div>
-          <form id="ws-csr" class="grid gap-2 md:grid-cols-3">
-            <input class="rounded-xl border px-3 py-2" placeholder="المنشأة" required/>
-            <input class="rounded-xl border px-3 py-2" placeholder="الفترة (مثال: 2025-Q4)" required/>
-            <input class="rounded-xl border px-3 py-2" placeholder="حجم الإنفاق (ر.س)" required/>
-            <textarea class="md:col-span-3 rounded-xl border px-3 py-2" placeholder="ملاحظات/ربط مشاريع"></textarea>
-            <button class="md:col-span-3 px-4 py-2 rounded-xl bg-hasseef-green text-white">توليد مسودة</button>
-          </form>`; break;
-        case 'sponsor':
-          html = `${closeBtn}<div class="font-bold mb-2">طلب رعاية فعالية</div>
-          <form id="ws-sponsor" class="grid gap-2 md:grid-cols-2">
-            <input class="rounded-xl border px-3 py-2" placeholder="اسم الفعالية" required/>
-            <input class="rounded-xl border px-3 py-2" placeholder="الجهة المنظمة" required/>
-            <input class="rounded-xl border px-3 py-2" placeholder="التاريخ"/>
-            <input class="rounded-xl border px-3 py-2" placeholder="المدينة"/>
-            <button class="md:col-span-2 px-4 py-2 rounded-xl bg-hasseef-green text-white">إرسال الطلب</button>
-          </form>`; break;
-        case 'publish-opps':
-          html = `${closeBtn}<div class="font-bold mb-2">نشر فرصة</div>
-          <form id="ws-opp" class="grid gap-2 md:grid-cols-3">
-            <input class="rounded-xl border px-3 py-2" placeholder="عنوان الفرصة" required/>
-            <select class="rounded-xl border px-3 py-2"><option>وظيفة</option><option>تطوع</option><option>تدريب</option></select>
-            <input class="rounded-xl border px-3 py-2" placeholder="القطاع/الفئة"/>
-            <textarea class="md:col-span-3 rounded-xl border px-3 py-2" placeholder="وصف مختصر"></textarea>
-            <button class="md:col-span-3 px-4 py-2 rounded-xl bg-hasseef-green text-white">نشر</button>
-          </form>`; break;
-        case 'manage-projects':
-          html = `${closeBtn}<div class="font-bold mb-2">إدارة المشاريع</div>
-          <div class="text-xs text-hasseef-gray mb-2">نموذج أولي: إضافة سريعة وتحديث حالة.</div>
-          <div id="ws-projects" class="grid gap-2"></div>
-          <form id="ws-add-proj" class="grid md:grid-cols-3 gap-2 mt-2">
-            <input class="rounded-xl border px-3 py-2" placeholder="اسم المشروع" required/>
-            <select class="rounded-xl border px-3 py-2"><option>قيد التخطيط</option><option>قيد التنفيذ</option><option>مكتمل</option></select>
-            <button class="px-4 py-2 rounded-xl bg-hasseef-green text-white">إضافة</button>
-          </form>`; break;
-        case 'academic-review':
-          html = `${closeBtn}<div class="font-bold mb-2">تعزيز علمي</div>
-          <form id="ws-acad" class="grid gap-2">
-            <input class="rounded-xl border px-3 py-2" placeholder="عنوان الدراسة" required/>
-            <textarea class="rounded-xl border px-3 py-2" placeholder="ملخص"></textarea>
-            <button class="px-4 py-2 rounded-xl bg-hasseef-green text-white">إصدار مسودة اعتماد</button>
-          </form>`; break;
-        case 'coop-training':
-          html = `${closeBtn}<div class="font-bold mb-2">إتاحة تدريب تعاوني</div>
-          <form id="ws-coop" class="grid gap-2 md:grid-cols-2">
-            <input class="rounded-xl border px-3 py-2" placeholder="المسمّى" required/>
-            <input class="rounded-xl border px-3 py-2" placeholder="المدة (أسابيع)"/>
-            <button class="md:col-span-2 px-4 py-2 rounded-xl bg-hasseef-green text-white">نشر</button>
-          </form>`; break;
-        case 'approve-events':
-          html = `${closeBtn}<div class="font-bold mb-2">طلبات فعاليات (تجريبي)</div>
-          <div id="ws-events" class="grid gap-2"></div>`; break;
-        case 'request-solutions':
-          html = `${closeBtn}<div class="font-bold mb-2">طلب حلول</div>
-          <form id="ws-sol" class="grid gap-2 md:grid-cols-2">
-            <input class="rounded-xl border px-3 py-2" placeholder="عنوان التحدي" required/>
-            <textarea class="md:col-span-2 rounded-xl border px-3 py-2" placeholder="التفاصيل"></textarea>
-            <button class="md:col-span-2 px-4 py-2 rounded-xl bg-hasseef-green text-white">نشر الطلب</button>
-          </form>`; break;
-        case 'regional-dashboard':
-          html = `${closeBtn}<div class="font-bold mb-2">لوحة المنطقة (تجريبي)</div>
-          <div class="grid md:grid-cols-3 gap-3">
-            <div class="rounded-xl border p-3"><div class="text-xs text-hasseef-gray">مبادرات</div><div class="text-xl font-extrabold" id="rg-init">0</div></div>
-            <div class="rounded-xl border p-3"><div class="text-xs text-hasseef-gray">وظائف/تطوع</div><div class="text-xl font-extrabold" id="rg-opps">0</div></div>
-            <div class="rounded-xl border p-3"><div class="text-xs text-hasseef-gray">مشاريع</div><div class="text-xl font-extrabold" id="rg-proj">0</div></div>
-          </div>`; break;
-        case 'approve-initiatives':
-          html = `${closeBtn}<div class="font-bold mb-2">اعتماد المبادرات</div>
-          <div id="ws-approve" class="grid gap-2"></div>`; break;
-        case 'grant-portfolio':
-          html = `${closeBtn}<div class="font-bold mb-2">محفظة المانح</div>
-          <div class="text-xs text-hasseef-gray">(تجريبي) إجمالي تمويل ومشاريع مموّلة.</div>
-          <div class="grid md:grid-cols-3 gap-3 mt-2"><div class="rounded-xl border p-3"><div class="text-xs">إجمالي التمويل</div><div class="text-xl font-extrabold">1.2م</div></div><div class="rounded-xl border p-3"><div class="text-xs">مشاريع نشطة</div><div class="text-xl font-extrabold">7</div></div><div class="rounded-xl border p-3"><div class="text-xs">مكتملة</div><div class="text-xl font-extrabold">12</div></div></div>`; break;
-        case 'find-projects':
-          html = `${closeBtn}<div class="font-bold mb-2">اعثر على مشاريع</div>
-          <form id="ws-find" class="grid gap-2 md:grid-cols-3">
-            <select class="rounded-xl border px-3 py-2"><option>تعليمي</option><option>ثقافي</option><option>اجتماعي</option><option>اقتصادي</option></select>
-            <input class="rounded-xl border px-3 py-2" placeholder="المنطقة"/>
-            <button class="px-4 py-2 rounded-xl bg-hasseef-green text-white">بحث</button>
-          </form>
-          <div id="ws-results" class="mt-3 grid gap-2"></div>`; break;
-        default:
-          html = `${closeBtn}<div class="text-sm">الخدمة غير معرّفة بعد.</div>`;
-      }
-      box.innerHTML = html;
-
-      // سلوكيات مبسطة
-      document.getElementById('closeWS')?.addEventListener('click',()=>{ box.classList.add('hidden'); box.innerHTML=''; });
-      document.getElementById('ws-add-init')?.addEventListener('submit',(e)=>{ e.preventDefault(); alert('تم حفظ المبادرة (تجريبي)'); });
-      document.getElementById('ws-opp')?.addEventListener('submit',(e)=>{ e.preventDefault(); const t=e.target.querySelector('input').value; const r=document.getElementById('list-opps'); if(r){ const d=document.createElement('div'); d.className='rounded-xl border p-3 bg-white'; d.innerHTML=`<div class="font-bold text-sm">${t}</div><div class="text-xs text-hasseef-gray">مضافة الآن</div>`; r.prepend(d);} alert('تم نشر الفرصة'); });
-      if(document.getElementById('ws-events')){
-        const host=document.getElementById('ws-events'); ['مهرجان صيفي','ملتقى التطوع','معرض الجامعات'].forEach(n=>{ const c=document.createElement('div'); c.className='rounded border p-3 flex items-center justify-between text-sm'; c.innerHTML=`<div>${n}</div><div class="flex gap-2"><button class="px-2 py-1 rounded border">قبول</button><button class="px-2 py-1 rounded border">رفض</button></div>`; host.appendChild(c); });
-      }
-      if(document.getElementById('ws-approve')){
-        const host=document.getElementById('ws-approve'); (App.initiatives||[]).forEach(it=>{ if(it.status==='قيد المراجعة'){ const c=document.createElement('div'); c.className='rounded border p-3 flex items-center justify-between text-sm'; c.innerHTML=`<div>${it.name}</div><button class="px-2 py-1 rounded bg-hasseef-green text-white">اعتماد</button>`; c.querySelector('button').addEventListener('click',()=>{ it.status='معتمد'; localStorage.setItem('initiatives', JSON.stringify(App.initiatives)); c.remove(); alert('تم الاعتماد'); }); host.appendChild(c);} });
-      }
-    }
-
-    // Initialize
-    (function(){ toggleAuthUI(); if(AppAuth.user||App.user){ afterLogin(); } })();
-  </script>
+// Init
+(function init(){
+  // restore session
+  if(App.user){ document.getElementById('userName').textContent = App.user.name; document.getElementById('userRole').textContent = App.user.role; }
+  renderServices(); renderList(); updateStats(); renderOpps();
+  applyLang('ar');
+})();
+</script>
 </body>
 </html>
