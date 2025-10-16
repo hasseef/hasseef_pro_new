@@ -14,14 +14,14 @@
         extend: {
           colors: {
             hasseef: {
-              /* Lighter, logo-friendly palette */
-              green: '#2EC8A6',
-              greenSoft: '#ECFFFA',
-              gold: '#E7C66A',
-              goldSoft: '#FFF9E9',
-              dark: '#111827',
+              /* Brand palette from identity (light & logo-friendly) */
+              green: '#5AA044',
+              greenSoft: '#F2FAEC',
+              gold: '#F8BE43',
+              goldSoft: '#FFF7E5',
+              dark: '#222222',
               gray: '#6B7280',
-              graySoft: '#F5F7FB'
+              graySoft: '#F7F9FC'
             }
           },
           boxShadow: {
@@ -50,15 +50,38 @@
     html.dark .bg-hasseef-greenSoft { background-color: rgba(46,200,166,0.16) !important; }
     html.dark .bg-hasseef-goldSoft { background-color: rgba(231,198,106,0.15) !important; }
   </style>
+  <style>
+    html { scroll-behavior: smooth; }
+    .container { max-width: 1200px; }
+    /* Dark mode (kept subtle) */
+    html.dark body { background-color: #101418; color: #1f2937; }
+    html.dark .bg-white { background-color: #fdfdfd !important; }
+    html.dark .border { border-color: rgba(0,0,0,0.08) !important; }
+    html.dark header { background-color: rgba(255,255,255,0.85) !important; }
+    html.dark .bg-hasseef-graySoft { background-color: #F2F6FB !important; }
+    html.dark .bg-hasseef-greenSoft { background-color: #F4FBF2 !important; }
+    html.dark .bg-hasseef-goldSoft { background-color: #FFF8E9 !important; }
+
+    /* High-contrast mode */
+    html.hc * { outline: 1.5px dashed rgba(0,0,0,0.25); outline-offset: 2px; }
+    html.hc a, html.hc button { text-decoration: underline; }
+
+    /* Loader */
+    #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; z-index: 70; }
+    #loader .dot { width: 10px; height: 10px; border-radius: 9999px; background: #5AA044; margin: 0 4px; animation: b 1s infinite alternate; }
+    #loader .dot:nth-child(2){ animation-delay: .15s }
+    #loader .dot:nth-child(3){ animation-delay: .3s }
+    @keyframes b { from{ transform: translateY(0) } to { transform: translateY(-8px) } }
+  </style>
 </head>
-<body class="font-cairo text-hasseef-dark bg-white">
+<body class=\"font-cairo text-hasseef-dark bg-white\">
+  <div id=\"loader\"><div class=\"dot\"></div><div class=\"dot\"></div><div class=\"dot\"></div></div>
   <!-- ====== Header / Navbar ====== -->
   <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-hasseef-graySoft">
     <div class="container mx-auto px-4">
       <div class="flex items-center justify-between py-3">
         <a href="#home" class="flex items-center gap-2">
-          <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-hasseef-green text-white font-extrabold">ح</span>
-          <span class="font-extrabold text-lg tracking-wide">منصة حصيف</span>
+          <img src=\"assets/hasseef.png\" alt=\"حصيف\" class=\"h-9 w-auto\"/> <span class=\"font-extrabold text-lg tracking-wide\">منصة حصيف</span>
         </a>
         <nav class="hidden md:flex items-center gap-6 text-sm">
           <a href="#about" class="hover:text-hasseef-green">عن المنصة</a>
@@ -71,6 +94,9 @@
           <button id="themeToggle" type="button" class="ms-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border" title="الوضع الليلي">
             <span class="text-xs">الوضع</span>
             <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8-9h1M3 12H2m14.95 6.364l.707.707M5.343 6.343l-.707-.707m12.021 0l.707-.707M5.343 17.657l-.707.707"/></svg>
+          </button>
+        <button id=\"hcToggle\" type=\"button\" class=\"ms-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border\" title=\"وضع تباين مرتفع\">
+            <span class=\"text-xs\">تباين</span>
           </button>
         </nav>
         <button id="menuBtn" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border text-hasseef-dark">
@@ -329,8 +355,14 @@
       <!-- Strategic Partners logos -->
       <div class="mt-12">
         <h3 class="font-extrabold text-lg mb-4">الشركاء الاستراتيجيون</h3>
-        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-sm items-center">
-          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=NPOC" alt="المركز الوطني لتنمية القطاع غير الربحي"/><div class="sr-only">المركز الوطني لتنمية القطاع غير الربحي</div></div>
+        <div class=\"grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-sm items-center\">
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10\" src=\"assets/vision2030.png\" alt=\"Vision 2030\"/></div>
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10\" src=\"assets/hasseef.png\" alt=\"Hasseef\"/></div>
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10\" src=\"assets/talbiya.png\" alt=\"Talbiya Initiative\"/></div>
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10 opacity-60\" src=\"https://via.placeholder.com/160x40?text=NPOC\" alt=\"المركز الوطني لتنمية القطاع غير الربحي\"/></div>
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10 opacity-60\" src=\"https://via.placeholder.com/160x40?text=Adaa\" alt=\"مركز أداء\"/></div>
+          <div class=\"p-3 rounded-xl border text-center bg-white\"><img class=\"mx-auto h-10 opacity-60\" src=\"https://via.placeholder.com/160x40?text=Partners\" alt=\"Partners\"/></div>
+        </div></div>
           <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=Adaa" alt="مركز أداء"/><div class="sr-only">مركز أداء</div></div>
           <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MEP" alt="وزارة الاقتصاد والتخطيط"/><div class="sr-only">وزارة الاقتصاد والتخطيط</div></div>
           <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MOF" alt="وزارة المالية"/><div class="sr-only">وزارة المالية</div></div>
@@ -900,13 +932,20 @@
       });
     });
 
-    // THEME: persist with localStorage
+    // THEME + HC: persist with localStorage
     const root = document.documentElement;
     const themeToggle = document.getElementById('themeToggle');
     const themeToggleMobile = document.getElementById('themeToggleMobile');
+    const hcToggle = document.getElementById('hcToggle');
     function applyTheme(t){ t==='dark' ? root.classList.add('dark') : root.classList.remove('dark'); }
     function toggleTheme(){ const t = localStorage.getItem('theme')==='dark' ? 'light' : 'dark'; localStorage.setItem('theme', t); applyTheme(t); }
+    function applyHC(v){ v==='1' ? root.classList.add('hc') : root.classList.remove('hc'); }
+    function toggleHC(){ const v = localStorage.getItem('hc')==='1' ? '0' : '1'; localStorage.setItem('hc', v); applyHC(v); }
     applyTheme(localStorage.getItem('theme')||'light');
+    applyHC(localStorage.getItem('hc')||'0');
+    themeToggle?.addEventListener('click', toggleTheme);
+    themeToggleMobile?.addEventListener('click', toggleTheme);
+    hcToggle?.addEventListener('click', toggleHC);
     themeToggle?.addEventListener('click', toggleTheme);
     themeToggleMobile?.addEventListener('click', toggleTheme);
 
@@ -950,6 +989,12 @@
         window.location.href = `mailto:info@talbiya.sa?subject=${subject}&body=${body}`;
       });
     }
+
+    // Loader hide
+    window.addEventListener('load', ()=>{
+      const l = document.getElementById('loader');
+      if(l){ setTimeout(()=> l.style.display = 'none', 800); }
+    });
   </script>
 </body>
 </html>
