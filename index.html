@@ -125,6 +125,18 @@ a.logo-link:hover{transform:translateY(-1px) scale(1.03); filter:drop-shadow(0 1
 .chart-box{border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:12px;background:#fff}
 .dark .chart-box{background:#1a1f25;border-color:#2a313a}
 
+
+/* --- Hasseef v6: filters, print --- */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 16px}
+.filters .has-input, .filters .has-select{padding:6px 10px}
+.print-area{display:none}
+@media print{
+  body *{visibility:hidden}
+  #print-window, #print-window *{visibility:visible}
+  #print-window{position:fixed;inset:0;background:#fff;padding:24px}
+  .no-print{display:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -714,7 +726,7 @@ function updateNationalKpis(){
     <div class="has-muted" style="margin-bottom:8px">مؤشرات الحساب</div>
     <div id="has-role-kpis" class="has-kpis"></div>
   </div>
-  <div class="has-tabs"><button class="has-tab active" data-tab="panel-services">الخدمات</button><button class="has-tab" data-tab="panel-workflow">سير العمل</button><button class="has-tab" data-tab="panel-reports">التقارير</button></div><div id="panel-services" class="has-panel show"><div class="has-muted" style="margin:10px 0 8px">خدمات الحساب</div><div id="has-services2" class="has-services" style="display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))"></div></div><div id="panel-workflow" class="has-panel"><div class="has-muted" style="margin:10px 0 8px">صندوق الوارد لسير العمل</div><div class="has-card" style="overflow:auto"><table class="has-table" id="wf-table"><thead><tr><th>الدور</th><th>الخدمة</th><th>التاريخ</th><th>الحقول</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody></tbody></table></div></div><div id="panel-reports" class="has-panel"><div class="has-muted" style="margin:10px 0 8px">ملخّص الاستخدام</div><div class="chart-box"><canvas id="chart-roles" width="640" height="280"></canvas></div><div class="has-card" style="margin-top:10px;overflow:auto"><table class="has-table" id="rep-table"><thead><tr><th>الدور</th><th>الخدمة</th><th>عدد السجلات</th></tr></thead><tbody></tbody></table></div></div>
+  <div class="has-tabs"><button class="has-tab active" data-tab="panel-services">الخدمات</button><button class="has-tab" data-tab="panel-workflow">سير العمل</button><button class="has-tab" data-tab="panel-reports">التقارير</button></div><div id="panel-services" class="has-panel show"><div class="has-muted" style="margin:10px 0 8px">خدمات الحساب</div><div id="has-services2" class="has-services" style="display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))"></div></div><div id="panel-workflow" class="has-panel"><div class="has-muted" style="margin:10px 0 8px">صندوق الوارد لسير العمل</div><div class="filters no-print"><input id="wf-from" class="has-input" type="date"/><input id="wf-to" class="has-input" type="date"/><select id="wf-role" class="has-select"><option value="">كل الأدوار</option></select><select id="wf-svc" class="has-select"><option value="">كل الخدمات</option></select></div><div class="has-card" style="overflow:auto"><table class="has-table" id="wf-table"><thead><tr><th>الدور</th><th>الخدمة</th><th>التاريخ</th><th>الحقول</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody></tbody></table></div></div><div id="panel-reports" class="has-panel"><div class="has-muted" style="margin:10px 0 8px">ملخّص الاستخدام</div><div class="filters no-print"><input id="rep-from" class="has-input" type="date"/><input id="rep-to" class="has-input" type="date"/><select id="rep-role" class="has-select"><option value="">كل الأدوار</option></select><select id="rep-svc" class="has-select"><option value="">كل الخدمات</option></select><button id="rep-apply" class="has-btn">تطبيق</button></div><div class="chart-box"><canvas id="chart-roles" width="640" height="280"></canvas></div><div class="has-card" style="margin-top:10px;overflow:auto"><table class="has-table" id="rep-table"><thead><tr><th>الدور</th><th>الخدمة</th><th>عدد السجلات</th></tr></thead><tbody></tbody></table></div></div>
 </div>
 
 
@@ -1502,6 +1514,208 @@ window.openAccountFull = function(m){
   renderWorkflow(m.role);
   renderReports();
 };
+</script>
+
+
+<div id="print-window" class="print-area"></div>
+
+
+<script>
+// v6: Routing map (service -> roles who can moderate)
+const ROUTING = {
+  'funding-intake': ['funder'],
+  'approve-initiatives': ['emirate','government'],
+  'approve-events': ['government'],
+  'prince-sponsorship': ['emirate'],
+  'security-screening': ['emirate'],
+  // Others default to no moderation (submitter sees in workflow, moderators with global view not required)
+};
+
+// Utility: gen ID HAS-YYYYMMDD-XXXX
+function genId(){
+  const d = new Date();
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), da = String(d.getDate()).padStart(2,'0');
+  const n = Math.floor(Math.random()*9000)+1000;
+  return `HAS-${y}${m}${da}-${n}`;
+}
+
+// Strengthen validation inside openServiceModal (v5 override keeps working)
+const _openServiceModal_v6 = window.openServiceModal;
+window.openServiceModal = function(id, title){
+  _openServiceModal_v6(id, title);
+  const svcBody = document.getElementById('svc-body');
+  if(!svcBody) return;
+  // Tighten validation rules
+  svcBody.querySelectorAll('input[placeholder="قيمة التمويل المطلوبة (ر.س)"]').forEach(i=>{ i.type='number'; i.min='0'; i.required=true; });
+  svcBody.querySelectorAll('input[placeholder="عدد المتطوعين"]').forEach(i=>{ i.type='number'; i.min='1'; i.required=true; });
+  svcBody.querySelectorAll('input[placeholder="ساعات التطوع"]').forEach(i=>{ i.type='number'; i.min='1'; i.required=true; });
+  svcBody.querySelectorAll('input[placeholder="التاريخ"]').forEach(i=>{ i.type='date'; i.required=true; });
+  svcBody.querySelectorAll('input[placeholder="اسم المشروع/الفعالية"], input[placeholder="الجهة المنظمة"], input[placeholder="اسم المنشأة"], input[placeholder="عنوان التحدي"]').forEach(i=>{ i.required=true; });
+};
+
+// Override saveSubmission to include id + route + submittedBy
+const _saveSubmission_v6 = window.saveSubmission;
+window.saveSubmission = function(role, serviceId, data){
+  data['id'] = genId();
+  const route = ROUTING[serviceId] || [];
+  data['route'] = route;
+  try{
+    const user = JSON.parse(localStorage.getItem('has-demo-user')||'{}');
+    data['submittedBy'] = user.u || role;
+  }catch{ data['submittedBy'] = role; }
+  _saveSubmission_v6(role, serviceId, data);
+};
+
+// Workflow rendering with filters and scoped visibility
+function passesFilters(entry, svc, roleFilter, svcFilter, from, to){
+  const ts = new Date(entry.ts);
+  if(from && ts < from) return false;
+  if(to && ts > to) return false;
+  if(roleFilter && roleFilter !== entry.data.submittedBy && roleFilter !== entry.roleSubmitter) return false;
+  if(svcFilter && svcFilter !== svc) return false;
+  return true;
+}
+function renderWorkflow(role){
+  const tbody = document.querySelector('#wf-table tbody'); if(!tbody) return;
+  tbody.innerHTML = '';
+  const store = getSubmissions();
+  // Build select options (roles/services)
+  const roleSel = document.getElementById('wf-role');
+  const svcSel = document.getElementById('wf-svc');
+  const roles = new Set(), svcs = new Set();
+  Object.keys(store).forEach(r=>{ roles.add(r); Object.keys(store[r]).forEach(s=>svcs.add(s)); });
+  if(roleSel && roleSel.options.length<=1){ roles.forEach(r=>{ const o=document.createElement('option'); o.value=r; o.textContent=r; roleSel.appendChild(o); }); }
+  if(svcSel && svcSel.options.length<=1){ svcs.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; svcSel.appendChild(o); }); }
+
+  const rFrom = document.getElementById('wf-from')?.value ? new Date(document.getElementById('wf-from').value) : null;
+  const rTo   = document.getElementById('wf-to')?.value ? new Date(document.getElementById('wf-to').value) : null;
+  const rRole = document.getElementById('wf-role')?.value || '';
+  const rSvc  = document.getElementById('wf-svc')?.value || '';
+
+  // Build visible list
+  const canAct = ['emirate','government','funder'].includes(role);
+  Object.keys(store).forEach(submitterRole=>{
+    Object.keys(store[submitterRole]).forEach(svc=>{
+      (store[submitterRole][svc]||[]).forEach(entry=>{
+        entry.roleSubmitter = submitterRole;
+        const route = entry.data.route || [];
+        const isMine = (submitterRole===role);
+        const visibleToModerator = canAct && route.includes(role);
+        const visible = isMine || visibleToModerator;
+        if(!visible) return;
+        if(!passesFilters(entry, svc, rRole, rSvc, rFrom, rTo)) return;
+        const tr = document.createElement('tr');
+        const fields = Object.keys(entry.data).filter(k=>!['signature','status','route','id','submittedBy'].includes(k)).slice(0,5).map(k=>`${k}: ${entry.data[k]}`).join(' · ');
+        const ts = new Date(entry.ts).toLocaleString();
+        const status = entry.data.status || 'Pending';
+        tr.innerHTML = `<td>${submitterRole}</td><td>${mapServiceName(svc)}</td><td>${ts}</td><td>${fields}</td>
+                        <td class="wf-status">${status}<br/><small>${entry.data.id||''}</small></td><td class="wf-actions no-print"></td>`;
+        const tdAct = tr.querySelector('.wf-actions');
+        const printBtn = document.createElement('button'); printBtn.className='has-chip'; printBtn.textContent='طباعة';
+        printBtn.onclick = ()=> printEntry(entry, svc, submitterRole);
+        tdAct.appendChild(printBtn);
+        if(visibleToModerator){
+          const ok = document.createElement('button'); ok.className='has-chip'; ok.textContent='اعتماد';
+          const no = document.createElement('button'); no.className='has-chip'; no.textContent='رفض';
+          ok.onclick = ()=>{ entry.data.status='Approved'; persist(); tr.querySelector('.wf-status').firstChild.nodeValue='Approved'; toast('تم الاعتماد'); };
+          no.onclick = ()=>{ entry.data.status='Rejected'; persist(); tr.querySelector('.wf-status').firstChild.nodeValue='Rejected'; toast('تم الرفض'); };
+          tdAct.append(ok,no);
+        }
+        tbody.appendChild(tr);
+      });
+    });
+  });
+  function persist(){ try{ const key='has-submissions'; localStorage.setItem(key, JSON.stringify(store)); document.dispatchEvent(new CustomEvent('has-submissions-updated')); }catch{} }
+}
+document.getElementById('wf-from')?.addEventListener('change', ()=>{ try{ const m=JSON.parse(localStorage.getItem('has-demo-user')||'{}'); if(m.role) renderWorkflow(m.role);}catch{} });
+document.getElementById('wf-to')?.addEventListener('change', ()=>{ try{ const m=JSON.parse(localStorage.getItem('has-demo-user')||'{}'); if(m.role) renderWorkflow(m.role);}catch{} });
+document.getElementById('wf-role')?.addEventListener('change', ()=>{ try{ const m=JSON.parse(localStorage.getItem('has-demo-user')||'{}'); if(m.role) renderWorkflow(m.role);}catch{} });
+document.getElementById('wf-svc')?.addEventListener('change', ()=>{ try{ const m=JSON.parse(localStorage.getItem('has-demo-user')||'{}'); if(m.role) renderWorkflow(m.role);}catch{} });
+
+// Printable view
+function printEntry(entry, svc, submitterRole){
+  const w = document.getElementById('print-window');
+  const rows = Object.keys(entry.data).map(k=>`<tr><td>${k}</td><td>${(k==='signature')?'<img style="max-height:80px" src="'+entry.data[k]+'"/>':entry.data[k]}</td></tr>`).join('');
+  w.innerHTML = `<h2>طلب: ${entry.data.id||''}</h2>
+    <div>الدور المقدِّم: ${submitterRole} · الخدمة: ${mapServiceName(svc)} · الحالة: ${entry.data.status||'Pending'}</div>
+    <hr/>
+    <table class="has-table" style="width:100%"><tbody>${rows}</tbody></table>`;
+  window.print();
+}
+
+// Reports with filters
+function renderReports(){
+  const store = getSubmissions();
+  const roleSel = document.getElementById('rep-role');
+  const svcSel  = document.getElementById('rep-svc');
+  const roles = new Set(), svcs = new Set();
+  Object.keys(store).forEach(r=>{ roles.add(r); Object.keys(store[r]).forEach(s=>svcs.add(s)); });
+  if(roleSel && roleSel.options.length<=1){ roles.forEach(r=>{ const o=document.createElement('option'); o.value=r; o.textContent=r; roleSel.appendChild(o); }); }
+  if(svcSel && svcSel.options.length<=1){ svcs.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; svcSel.appendChild(o); }); }
+
+  const from = document.getElementById('rep-from')?.value ? new Date(document.getElementById('rep-from').value) : null;
+  const to   = document.getElementById('rep-to')?.value ? new Date(document.getElementById('rep-to').value) : null;
+  const rf   = roleSel?.value || '';
+  const sf   = svcSel?.value || '';
+
+  // Aggregate with filters
+  const agg = {};
+  Object.keys(store).forEach(role=>{
+    Object.keys(store[role]).forEach(svc=>{
+      (store[role][svc]||[]).forEach(entry=>{
+        const ts = new Date(entry.ts);
+        if(from && ts < from) return;
+        if(to && ts > to) return;
+        if(rf && rf!==role) return;
+        if(sf && sf!==svc) return;
+        agg[role] = agg[role] || {};
+        agg[role][svc] = (agg[role][svc]||0) + 1;
+      });
+    });
+  });
+
+  // Table
+  const tbody = document.querySelector('#rep-table tbody'); if(tbody){ tbody.innerHTML=''; }
+  Object.keys(agg).forEach(role=>{
+    Object.keys(agg[role]).forEach(svc=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${role}</td><td>${mapServiceName(svc)}</td><td>${agg[role][svc]}</td>`;
+      tbody.appendChild(tr);
+    });
+  });
+
+  // Chart (roles total)
+  const canvas = document.getElementById('chart-roles');
+  if(canvas){
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    const roles = Object.keys(agg);
+    const totals = roles.map(r=> Object.values(agg[r]).reduce((a,b)=>a+b,0));
+    const max = Math.max(1, ...totals);
+    const w = canvas.width, h = canvas.height;
+    const barW = Math.max(20, Math.floor((w - 60) / Math.max(1, roles.length)));
+    roles.forEach((r,i)=>{
+      const x = 40 + i*barW + 6*i;
+      const y = h - 40;
+      const bh = Math.round((totals[i] / max) * (h - 80));
+      ctx.fillStyle = '#5AA044';
+      ctx.fillRect(x, y - bh, barW, bh);
+      ctx.fillStyle = '#333';
+      ctx.fillText(r, x, y + 14);
+      ctx.fillText(totals[i], x + barW/2 - 6, y - bh - 6);
+    });
+    ctx.strokeStyle = '#999'; ctx.beginPath(); ctx.moveTo(30,h-40); ctx.lineTo(w-20,h-40); ctx.stroke();
+  }
+}
+document.getElementById('rep-apply')?.addEventListener('click', renderReports);
+
+// Ensure initial options populated
+document.addEventListener('has-submissions-updated', ()=>{
+  try{
+    const m = JSON.parse(localStorage.getItem('has-demo-user')||'{}');
+    if(m && m.role) renderWorkflow(m.role);
+  }catch{}
+});
 </script>
 
 </body>
