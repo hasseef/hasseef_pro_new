@@ -96,6 +96,20 @@ a.logo-link:hover{transform:translateY(-1px) scale(1.03); filter:drop-shadow(0 1
   .has-card, .has-chip, .has-tag, .has-input, .has-select, .has-textarea{background:#1a1f25;color:#d5dae0;border-color:#2a313a}
 }
 
+
+/* --- Hasseef v4: toasts, bilingual, export --- */
+.has-toast-wrap{position:fixed;inset-inline:0;top:8px;display:flex;justify-content:center;z-index:10001;pointer-events:none}
+.has-toast{background:#111;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,.2);opacity:.98;pointer-events:auto}
+.dark .has-toast{background:#0d1117;color:#e6edf3}
+.has-toolbar{display:flex;gap:8px;align-items:center}
+.has-btn{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:10px;padding:6px 10px;cursor:pointer}
+.dark .has-btn{background:#1a1f25;border-color:#2a313a;color:#e6edf3}
+.lang-switch{display:inline-flex;border:1px solid rgba(0,0,0,.12);border-radius:10px;overflow:hidden}
+.lang-switch button{padding:6px 10px;border:0;background:#fff;cursor:pointer}
+.lang-switch button.active{background:#F2FAEC;font-weight:700}
+.dark .lang-switch button{background:#1a1f25}
+.dark .lang-switch button.active{background:#26321f}
+
 </style>
 </head>
 <body>
@@ -244,7 +258,7 @@ a.logo-link:hover{transform:translateY(-1px) scale(1.03); filter:drop-shadow(0 1
 <footer class="container">
   <div style="display:flex;align-items:center;justify-content:space-between">
     <small>© 2025 Hasseef</small>
-    <div style="display:flex;gap:8px">
+    <div class="has-toolbar"><div class="lang-switch" id="lang-switch"><button id="lang-ar" class="active">عربي</button><button id="lang-en">EN</button></div><button id="has-export-json" class="has-btn">تصدير JSON</button><button id="has-export-csv" class="has-btn">تصدير CSV</button><button id="has-logout" class="has-chip">تسجيل الخروج</button><button id="has-close-full" class="has-chip">إغلاق</button></div>
       <button id="toggleTheme" class="btn">Dark</button>
       <button id="toggleHC2" class="btn">HC</button>
     </div>
@@ -602,7 +616,7 @@ function renderList(){
         <div class="card">${it.blocks.b2||'-'}</div>
         <div class="card">${it.blocks.b3||'-'}</div>
       </div>
-      <div style="display:flex;gap:8px">
+      <div class="has-toolbar"><div class="lang-switch" id="lang-switch"><button id="lang-ar" class="active">عربي</button><button id="lang-en">EN</button></div><button id="has-export-json" class="has-btn">تصدير JSON</button><button id="has-export-csv" class="has-btn">تصدير CSV</button><button id="has-logout" class="has-chip">تسجيل الخروج</button><button id="has-close-full" class="has-chip">إغلاق</button></div>
         <button class="btn" data-act="approve">اعتماد</button>
         <button class="btn" data-act="delete">حذف</button>
       </div>`;
@@ -670,12 +684,13 @@ function updateNationalKpis(){
 
 <!-- Hasseef v2: Full-page account view -->
 <div id="has-account-full" role="document" aria-label="شاشة الحساب">
-  <div class="has-topbar">
+  <div class="has-toast-wrap" id="has-toast-wrap" style="display:none"><div class="has-toast" id="has-toast"></div></div>
+<div class="has-topbar">
     <div class="title">
       <span id="has-role-badge" class="has-chip">—</span>
       <b id="has-role-title2">—</b>
     </div>
-    <div style="display:flex;gap:8px">
+    <div class="has-toolbar"><div class="lang-switch" id="lang-switch"><button id="lang-ar" class="active">عربي</button><button id="lang-en">EN</button></div><button id="has-export-json" class="has-btn">تصدير JSON</button><button id="has-export-csv" class="has-btn">تصدير CSV</button><button id="has-logout" class="has-chip">تسجيل الخروج</button><button id="has-close-full" class="has-chip">إغلاق</button></div>
       <button id="has-logout" class="has-chip">تسجيل الخروج</button>
       <button id="has-close-full" class="has-chip">إغلاق</button>
     </div>
@@ -1140,6 +1155,134 @@ function openServiceModal(id, title){
       }
     }catch{}
   };
+})();
+</script>
+
+
+<script>
+// v4: Bilingual
+const I18N = {
+  ar: {
+    logout: 'تسجيل الخروج', close: 'إغلاق', saved: 'تم الحفظ', submitted: 'تم الإرسال', exported: 'تم التصدير',
+    json: 'JSON', csv: 'CSV', service: 'خدمة', roleKPIs: 'مؤشرات الحساب', roleServices: 'خدمات الحساب',
+    tryAccounts: 'تجربة الحسابات', open: 'فتح'
+  },
+  en: {
+    logout: 'Logout', close: 'Close', saved: 'Saved', submitted: 'Submitted', exported: 'Exported',
+    json: 'JSON', csv: 'CSV', service: 'Service', roleKPIs: 'Account KPIs', roleServices: 'Account Services',
+    tryAccounts: 'Try Accounts', open: 'Open'
+  }
+};
+let CUR_LANG = 'ar';
+function setLang(lang){
+  CUR_LANG = lang;
+  document.getElementById('lang-ar').classList.toggle('active', lang==='ar');
+  document.getElementById('lang-en').classList.toggle('active', lang==='en');
+  // Top labels
+  document.querySelectorAll('#has-logout').forEach(el=>el.textContent = I18N[lang].logout);
+  document.querySelectorAll('#has-close-full').forEach(el=>el.textContent = I18N[lang].close);
+  const rk = document.querySelector('#has-account-full .has-section .has-muted'); // first label likely KPIs
+  if(rk) rk.textContent = (lang==='ar'? 'مؤشرات الحساب':'Account KPIs');
+  const rs = document.querySelectorAll('#has-account-full .has-section .has-muted')[1];
+  if(rs) rs.textContent = (lang==='ar'? 'خدمات الحساب':'Account Services');
+}
+document.getElementById('lang-switch')?.addEventListener('click', (e)=>{
+  if(e.target.id==='lang-ar') setLang('ar');
+  if(e.target.id==='lang-en') setLang('en');
+});
+
+// v4: Toast notifications
+function toast(msg){
+  const wrap = document.getElementById('has-toast-wrap');
+  const el = document.getElementById('has-toast');
+  if(!wrap || !el) return;
+  el.textContent = msg;
+  wrap.style.display='flex';
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>{ wrap.style.display='none'; }, 1800);
+}
+
+// v4: Per-role submissions storage
+function saveSubmission(role, serviceId, data){
+  try{
+    const key = 'has-submissions';
+    const store = JSON.parse(localStorage.getItem(key) || '{}');
+    if(!store[role]) store[role] = {};
+    if(!store[role][serviceId]) store[role][serviceId] = [];
+    store[role][serviceId].push({ts: Date.now(), data});
+    localStorage.setItem(key, JSON.stringify(store));
+    toast(I18N[CUR_LANG].saved);
+  }catch(e){ console.warn(e); }
+}
+function getSubmissions(){ try{ return JSON.parse(localStorage.getItem('has-submissions') || '{}'); }catch(e){ return {}; } }
+
+// v4: Export helpers
+function exportJSON(){
+  const data = getSubmissions();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='hasseef_submissions.json'; a.click();
+  URL.revokeObjectURL(url);
+  toast(I18N[CUR_LANG].exported + ' ' + I18N[CUR_LANG].json);
+}
+function exportCSV(){
+  const store = getSubmissions();
+  let rows = [['role','service','timestamp','field','value']];
+  Object.keys(store).forEach(role=>{
+    Object.keys(store[role]).forEach(svc=>{
+      store[role][svc].forEach(entry=>{
+        const ts = new Date(entry.ts).toISOString();
+        Object.keys(entry.data).forEach(k=>{
+          rows.push([role, svc, ts, k, (entry.data[k]||'').toString().replace(/[\n\r]+/g,' ')]);
+        });
+      });
+    });
+  });
+  const csv = rows.map(r=>r.map(x=>`"${x.replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='hasseef_submissions.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast(I18N[CUR_LANG].exported + ' ' + I18N[CUR_LANG].csv);
+}
+document.getElementById('has-export-json')?.addEventListener('click', exportJSON);
+document.getElementById('has-export-csv')?.addEventListener('click', exportCSV);
+
+// v4: Wire service forms submit inside modal to save
+(function interceptModalSubmits(){
+  const modal = document.getElementById('has-service-modal');
+  if(!modal) return;
+  modal.addEventListener('submit', (e)=>{
+    // capture data and save
+    e.preventDefault();
+    const m = JSON.parse(localStorage.getItem('has-demo-user')||'{}');
+    const role = m.role || 'guest';
+    const form = e.target;
+    const fields = form.querySelectorAll('input, textarea, select');
+    const data = {};
+    fields.forEach(f=>{ data[f.name || f.placeholder || f.type || 'field'] = f.value; });
+    // find service id from title hint (we put id in subtitle earlier)
+    const subtitle = modal.querySelector('.has-textarea, .has-select, .has-input'); // force keep
+    const idNode = document.querySelector('#has-services2 .has-card .has-muted');
+    let serviceId = 'service';
+    if(idNode){
+      const mId = idNode.textContent.match(/\((.*?)\)/);
+      if(mId) serviceId = mId[1];
+    }
+    saveSubmission(role, serviceId, data);
+    toast(I18N[CUR_LANG].submitted);
+  });
+})();
+
+// v4: Keep language persisted
+(function initLang(){
+  const lang = localStorage.getItem('has-lang') || 'ar';
+  setLang(lang);
+  document.getElementById('lang-switch')?.addEventListener('click', (e)=>{
+    if(e.target.tagName==='BUTTON'){
+      localStorage.setItem('has-lang', CUR_LANG);
+    }
+  });
 })();
 </script>
 
