@@ -3,14 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>منصة حصيف · Hasseef Platform — Leadership Single File</title>
+<title>منصة حصيف · Hasseef Platform — Single File v31_pro</title>
 <style>
-/* ======= Theme (inline) ======= */
-:root{
-  --green:#5AA044; --green-soft:#F2FAEC;
-  --gold:#F8BE43; --gold-soft:#FFF7E5;
-  --dark:#222; --gray:#6B7280; --gray-soft:#F7F9FC; --bg:#fff;
-}
+:root{ --green:#5AA044; --green-soft:#F2FAEC; --gold:#F8BE43; --gold-soft:#FFF7E5; --dark:#222; --gray:#6B7280; --gray-soft:#F7F9FC; --bg:#fff; }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Cairo,Arial,sans-serif;background:var(--bg);color:var(--dark)}
@@ -36,7 +31,6 @@ input,select,textarea{width:100%;padding:10px 12px;border:1px solid rgba(0,0,0,.
 .progress{height:10px;background:var(--gray-soft);border-radius:999px;overflow:hidden}
 .progress .bar{height:100%;background:var(--green);width:40%;transition:width .6s ease}
 footer{padding:24px 0;color:var(--gray)}
-/* UI helpers */
 .hero{padding:56px 0;background:linear-gradient(180deg,#ffffff 0%,#F7F9FC 100%)}
 .brand{display:flex;align-items:center;gap:10px}
 .brand span{font-weight:900}
@@ -52,23 +46,16 @@ footer{padding:24px 0;color:var(--gray)}
 .lang-toggle{display:inline-flex;gap:6px;border:1px solid rgba(0,0,0,.12);padding:4px;border-radius:12px}
 .lang-toggle button{border:0;background:transparent;padding:6px 10px;border-radius:8px;cursor:pointer}
 .lang-toggle button.active{background:var(--green-soft);color:var(--dark);font-weight:700}
-/* Accessibility modes */
 .hc *{outline:1px dashed rgba(0,0,0,.25);outline-offset:2px}
 .dark body{background:#101418;color:#1f2937}
 .dark .card, .dark header, .dark .btn, .dark input, .dark select, .dark textarea{background:#ffffff}
-/* Responsive */
-@media (max-width:768px){
-  .grid-3{grid-template-columns:1fr}
-  .kpi-grid{grid-template-columns:1fr}
-  .logo-grid{grid-template-columns:repeat(3,1fr)}
-}
+@media (max-width:768px){ .grid-3{grid-template-columns:1fr} .kpi-grid{grid-template-columns:1fr} .logo-grid{grid-template-columns:repeat(3,1fr)} }
 </style>
 </head>
 <body>
 <header>
   <div class="container" style="display:flex;align-items:center;gap:12px;justify-content:space-between;padding:10px 0;">
     <div class="brand">
-      <!-- Placeholder Logo (Hasseef) -->
       <svg width="42" height="42" viewBox="0 0 64 64" aria-label="Hasseef" role="img"><circle cx="32" cy="32" r="30" fill="#5AA044"/><text x="32" y="38" font-size="20" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif">ح</text></svg>
       <span>منصة حصيف</span>
     </div>
@@ -143,21 +130,12 @@ footer{padding:24px 0;color:var(--gray)}
 <section class="container" id="partners" style="padding:8px 0 24px">
   <h2 style="margin-bottom:12px" data-i="partners_title">الشركاء الاستراتيجيون</h2>
   <div class="logo-grid">
-    <!-- Vision 2030 placeholder -->
-    <div class="logo-box">
-      <svg width="100" height="40" viewBox="0 0 100 40" aria-label="Vision2030"><rect width="100" height="40" rx="8" fill="#F7F9FC"/><text x="50" y="26" text-anchor="middle" font-family="Arial" font-size="14" fill="#6B7280">Vision 2030</text></svg>
-    </div>
-    <!-- Hasseef placeholder -->
-    <div class="logo-box">
-      <svg width="100" height="40" viewBox="0 0 100 40" aria-label="Hasseef"><rect width="100" height="40" rx="8" fill="#F7F9FC"/><text x="50" y="26" text-anchor="middle" font-family="Arial" font-size="14" fill="#6B7280">Hasseef</text></svg>
-    </div>
-    <!-- Talbiya placeholder -->
-    <div class="logo-box">
-      <svg width="100" height="40" viewBox="0 0 100 40" aria-label="Talbiya"><rect width="100" height="40" rx="8" fill="#F7F9FC"/><text x="50" y="26" text-anchor="middle" font-family="Arial" font-size="14" fill="#6B7280">Talbiya</text></svg>
-    </div>
-    <div class="logo-box"><span style="opacity:.6">NPOC</span></div>
-    <div class="logo-box"><span style="opacity:.6">Adaa</span></div>
-    <div class="logo-box"><span style="opacity:.6">Partners</span></div>
+    <div class="logo-box"><svg width="100" height="40" viewBox="0 0 100 40"><rect width="100" height="40" rx="8" fill="#F7F9FC"/><text x="50" y="26" text-anchor="middle" font-family="Arial" font-size="14" fill="#6B7280">أداء (ADAA)</text></svg></div>
+    <div class="logo-box"><svg width="100" height="40" viewBox="0 0 100 40"><rect width="100" height="40" rx="8" fill="#F7F9FC"/><text x="50" y="26" text-anchor="middle" font-family="Arial" font-size="14" fill="#6B7280">Vision 2030</text></svg></div>
+    <div class="logo-box"><svg width="100" height="40" viewBox="0 0 100 40"><rect width="100" height="40" rx="8" fill="#F7F9FC"/><text x="50" y="26" text-anchor="middle" font-family="Arial" font-size="14" fill="#6B7280">Hasseef</text></svg></div>
+    <div class="logo-box"><svg width="100" height="40" viewBox="0 0 100 40"><rect width="100" height="40" rx="8" fill="#F7F9FC"/><text x="50" y="26" text-anchor="middle" font-family="Arial" font-size="14" fill="#6B7280">Talbiya</text></svg></div>
+    <div class="logo-box"><span style="opacity:.6">Monsha'at</span></div>
+    <div class="logo-box"><span style="opacity:.6">SDB</span></div>
   </div>
 </section>
 
@@ -223,7 +201,7 @@ footer{padding:24px 0;color:var(--gray)}
   </div>
 </footer>
 
-<!-- ======= Auth Modals (inline) ======= -->
+<!-- Auth Modals -->
 <div id="modal-login" class="modal">
   <div class="dialog">
     <div style="display:flex;justify-content:space-between;align-items:center">
@@ -242,6 +220,7 @@ footer{padding:24px 0;color:var(--gray)}
           <option value="government">حكومة</option>
           <option value="emirate">إمارة</option>
           <option value="funder">مانح</option>
+          <option value="partner">شريك استراتيجي</option>
         </select>
       </div>
       <button class="btn btn-primary" data-i="btn_login">دخول</button>
@@ -266,6 +245,7 @@ footer{padding:24px 0;color:var(--gray)}
         <option value="government">حكومة</option>
         <option value="emirate">إمارة</option>
         <option value="funder">مانح</option>
+        <option value="partner">شريك استراتيجي</option>
       </select>
       <input name="region" placeholder="المنطقة (اختياري)"/>
       <input name="password" type="password" placeholder="كلمة المرور" required/>
@@ -275,7 +255,7 @@ footer{padding:24px 0;color:var(--gray)}
 </div>
 
 <script>
-/* ======= i18n (inline) ======= */
+// i18n
 const i18n = {
   ar:{nav_overview:"نظرة عامة",nav_accounts:"الحسابات",nav_partners:"الشركاء",nav_dashboard:"لوحة",
       hero_title:"منصة حصيف — الممكن الوطني للشراكات والأثر",
@@ -314,8 +294,7 @@ function applyLang(lang){
   document.documentElement.lang = lang;
   document.documentElement.dir = (lang==='ar'?'rtl':'ltr');
   document.querySelectorAll('[data-i]').forEach(el=>{
-    const key = el.getAttribute('data-i');
-    el.textContent = i18n[lang][key] || el.textContent;
+    const key = el.getAttribute('data-i'); el.textContent = i18n[lang][key] || el.textContent;
   });
   document.getElementById('lang-ar').classList.toggle('active', lang==='ar');
   document.getElementById('lang-en').classList.toggle('active', lang==='en');
@@ -323,48 +302,77 @@ function applyLang(lang){
 document.getElementById('lang-ar').onclick = ()=>applyLang('ar');
 document.getElementById('lang-en').onclick = ()=>applyLang('en');
 
-/* ======= Theme & Accessibility ======= */
+// Theme & HC
 document.getElementById('toggleTheme').onclick = ()=> document.documentElement.classList.toggle('dark');
 document.getElementById('toggleHC').onclick = ()=> document.documentElement.classList.toggle('hc');
 document.getElementById('toggleHC2').onclick = ()=> document.documentElement.classList.toggle('hc');
 
-/* ======= Modal helpers ======= */
+// Modals
 function openModal(id){ document.getElementById(id).classList.add('show'); }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
-/* ======= App State (inline data) ======= */
+// KPIs data
 const KPIS = {
   national:{employment:18, integration:92, projects:1240},
   hail:{employment:22, integration:88, projects:260},
   private:{employment:12, integration:95, projects:740},
   nonprofit:{employment:9, integration:86, projects:340}
 };
+
+// ROLES
 const ROLES_DATA = {
   roles: [
-    {id:"individual", ar:"فرد", en:"Individual", services:[
-      {id:"add-initiative", ar:"إضافة مبادرة", en:"Add Initiative"},
-      {id:"my-initiatives", ar:"مبادراتي", en:"My Initiatives"}]},
+    {id:"emirate", ar:"إمارة المنطقة", en:"Emirate", services:[
+      {id:"regional-dashboard", ar:"لوحة المنطقة", en:"Regional Dashboard"},
+      {id:"approve-initiatives", ar:"اعتماد مبادرات", en:"Approve Initiatives"},
+      {id:"prince-sponsorship", ar:"رعاية سمو الأمير", en:"Prince Sponsorship"},
+      {id:"security-screening", ar:"المسح الأمني للمتحدثين/الفعاليات", en:"Security Screening"}
+    ]},
+    {id:"government", ar:"جهة حكومية", en:"Government", services:[
+      {id:"challenge-request", ar:"طرح تحديات/طلب حلول", en:"Challenge Request"},
+      {id:"approve-events", ar:"اعتماد الفعاليات", en:"Approve Events"},
+      {id:"request-solutions", ar:"طلب حلول وتنفيذ", en:"Request Solutions"},
+      {id:"gov-projects", ar:"مشاريع حكومية مرتبطة 6/27/96", en:"Gov Projects (6/27/96)"}
+    ]},
     {id:"private", ar:"قطاع خاص", en:"Private Sector", services:[
       {id:"csr-report", ar:"تقرير المسؤولية CSR", en:"CSR Report"},
-      {id:"sponsor", ar:"رعاية فعالية", en:"Sponsor an Event"}]},
+      {id:"sponsor", ar:"رعاية فعالية/مشروع", en:"Sponsor"},
+      {id:"jobs", ar:"نشر وظائف", en:"Jobs"},
+      {id:"facilities-market", ar:"مرافق الشركة (تأجير/استئجار)", en:"Facilities Market"}
+    ]},
     {id:"nonprofit", ar:"قطاع غير ربحي", en:"Nonprofit", services:[
-      {id:"publish-opps", ar:"نشر فرص", en:"Publish Opportunities"},
-      {id:"manage-projects", ar:"إدارة المشاريع", en:"Manage Projects"}]},
+      {id:"publish-opps", ar:"نشر فرص التطوع/التدريب", en:"Publish Opportunities"},
+      {id:"manage-projects", ar:"إدارة المبادرات والمشاريع", en:"Manage Projects"},
+      {id:"funding-intake", ar:"استقبال تمويل/تبرعات", en:"Funding Intake"},
+      {id:"npo-facilities", ar:"مرافق الجمعية", en:"Facilities"}
+    ]},
     {id:"university", ar:"جامعة", en:"University", services:[
-      {id:"academic-review", ar:"تعزيز علمي", en:"Academic Endorsement"},
-      {id:"coop-training", ar:"تدريب تعاوني", en:"Co-op Training"}]},
-    {id:"government", ar:"حكومة", en:"Government", services:[
-      {id:"approve-events", ar:"اعتماد الفعاليات", en:"Approve Events"},
-      {id:"request-solutions", ar:"طلب حلول", en:"Request Solutions"}]},
-    {id:"emirate", ar:"إمارة", en:"Emirate", services:[
-      {id:"regional-dashboard", ar:"لوحة المنطقة", en:"Regional Dashboard"},
-      {id:"approve-initiatives", ar:"اعتماد مبادرات", en:"Approve Initiatives"}]},
-    {id:"funder", ar:"مانح", en:"Funder", services:[
+      {id:"academic-review", ar:"استشارات علمية", en:"Academic Advisory"},
+      {id:"coop-training", ar:"تدريب تعاوني", en:"Co-op Training"},
+      {id:"research-listing", ar:"نشر أبحاث قابلة للتطبيق", en:"Applied Research"},
+      {id:"uni-facilities", ar:"مرافق أكاديمية", en:"Academic Facilities"}
+    ]},
+    {id:"funder", ar:"جهة تمويل/مانح", en:"Funder", services:[
+      {id:"grant-criteria", ar:"معايير المنح/التمويل", en:"Grant Criteria"},
       {id:"grant-portfolio", ar:"محفظة المنح", en:"Grant Portfolio"},
-      {id:"find-projects", ar:"اعثر على مشاريع", en:"Find Projects"}]}
+      {id:"find-projects", ar:"مطابقة مشاريع ومعايير", en:"Match Projects"},
+      {id:"impact-reports", ar:"تقارير أثر التمويل", en:"Impact Reports"}
+    ]},
+    {id:"individual", ar:"فرد", en:"Individual", services:[
+      {id:"add-initiative", ar:"إضافة مبادرة فردية", en:"Add Initiative"},
+      {id:"volunteer", ar:"التطوع وتوثيق الساعات", en:"Volunteering"},
+      {id:"jobs-list", ar:"فرص وظيفية", en:"Jobs"},
+      {id:"skills-check", ar:"فحص الميول والمهارات (تجريبي)", en:"Skills Check (beta)"}
+    ]},
+    {id:"partner", ar:"شريك استراتيجي", en:"Strategic Partner", services:[
+      {id:"partner-oversight", ar:"واجهة إشرافية للشريك", en:"Partner Oversight"},
+      {id:"partner-kpis", ar:"مؤشرات نجاح مخصصة", en:"Custom KPIs"},
+      {id:"policy-notices", ar:"تنبيهات سياسات/تكاملات", en:"Policy/Integrations Alerts"}
+    ]}
   ]
 };
-/* Local (no-backend) auth + state */
+
+// Local state
 const App = {
   users: JSON.parse(localStorage.getItem('users')||'[]'),
   user: JSON.parse(localStorage.getItem('user')||'null'),
@@ -377,7 +385,69 @@ const App = {
           localStorage.setItem('initiatives', JSON.stringify(this.initiatives)); }
 };
 
-/* ======= Roles cards ======= */
+// RBAC
+const RBAC = {
+  emirate:{ project:"vceda--", challenge:"vceda--", funding:"v---- -", event:"vceda--", permit:"vceda-d", facility:"vceda-d" },
+  government:{ project:"vceda--", challenge:"vceda--", funding:"vceda-d", event:"vceda-d", permit:"vceda-d" },
+  private:{ project:"vce---d", challenge:"v-----", funding:"v-cef-d", event:"vce--d", job:"vce--d" },
+  nonprofit:{ project:"vce---d", challenge:"vce--d", funding:"v-cef-d", event:"vce--d", volunteer:"vce--d" },
+  university:{ project:"vce-a-d", challenge:"v--a--", research:"vce-a-d", training:"vce--d", consult:"vce--d" },
+  funder:{ funding:"vceaf--", project:"v--a--", sponsor:"v--a--" },
+  individual:{ project:"vce---d", volunteer:"vce---", job:"v---- -" },
+  partner:{ partner:"vcea--d", kpi:"v-----" }
+};
+function can(role, component, action){
+  const map = {view:0, create:1, edit:2, approve:3, fund:4, assign:5, delete:6};
+  const p = (RBAC[role]||{})[component]; if(!p) return false;
+  const ch = p[map[action]]; return !!(ch && ch!=='-');
+}
+
+// Component cards
+const CardTemplates = {
+  project:(p)=>`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <b>مشروع: ${p.name||'—'}</b>
+        <span class="badge">[${p.stage||'مسودة'}]</span>
+      </div>
+      <small>الجهة: ${p.owner||'—'} | المؤشر الوطني: ${p.kpi||'—'}</small>
+      <p style="margin:.5rem 0;color:var(--gray)">${p.desc||''}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn"${!can(App.user?.role,'project','fund')?' disabled':''}>طلب تمويل</button>
+        <button class="btn"${!can(App.user?.role,'project','approve')?' disabled':''}>إصدار تقرير أثر</button>
+        <button class="btn">إرفاق مستند</button>
+      </div>
+    </div>`,
+  challenge:(c)=>`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <b>تحدّي: ${c.title||'—'}</b>
+        <span class="badge">[${c.state||'مفتوح'}]</span>
+      </div>
+      <small>القطاع: ${c.sector||'—'} | إغلاق: ${c.deadline||'—'}</small>
+      <p style="margin:.5rem 0;color:var(--gray)">${c.desc||''}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn">تقديم حل</button>
+        <button class="btn">طرح استفسار</button>
+        <button class="btn">متابعة</button>
+      </div>
+    </div>`,
+  funding:(f)=>`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <b>تمويل: ${f.project||'—'}</b>
+        <span class="badge">[${f.state||'قيد التدقيق'}]</span>
+      </div>
+      <small>المانح: ${f.funder||'—'} | النوع: ${f.kind||'—'}</small>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn"${!can(App.user?.role,'funding','approve')?' disabled':''}>اعتماد الدفعة</button>
+        <button class="btn">طلب مستند</button>
+        <button class="btn"${!can(App.user?.role,'funding','delete')?' disabled':''}>تعليق/رفض</button>
+      </div>
+    </div>`
+};
+
+// Roles grid
 (function renderRoles(){
   const grid = document.getElementById('rolesGrid');
   ROLES_DATA.roles.forEach(role=>{
@@ -401,7 +471,7 @@ const App = {
   });
 })();
 
-/* ======= KPIs ======= */
+// KPIs behavior
 (function initKPIs(){
   function setProfile(p){
     const b = KPIS[p]||KPIS.national;
@@ -416,7 +486,7 @@ const App = {
   setProfile('national');
 })();
 
-/* ======= Tabs ======= */
+// Tabs
 document.querySelectorAll('.tabbar .tab').forEach(t=>{
   t.addEventListener('click', ()=>{
     document.querySelectorAll('.tabbar .tab').forEach(b=>b.classList.remove('active'));
@@ -426,7 +496,7 @@ document.querySelectorAll('.tabbar .tab').forEach(t=>{
   });
 });
 
-/* ======= Login/Signup ======= */
+// Auth
 document.getElementById('loginForm').addEventListener('submit', e=>{
   e.preventDefault();
   const emailOrName = e.target.emailOrName.value.trim();
@@ -446,6 +516,7 @@ document.getElementById('loginForm').addEventListener('submit', e=>{
   location.hash = '#dashboard';
   renderServices(); updateStats(); renderOpps(); renderList();
 });
+
 document.getElementById('signupForm').addEventListener('submit', e=>{
   e.preventDefault();
   const fd = new FormData(e.target); const data = Object.fromEntries(fd.entries());
@@ -461,16 +532,18 @@ document.getElementById('signupForm').addEventListener('submit', e=>{
   renderServices(); updateStats(); renderOpps(); renderList();
 });
 
-/* ======= Role services ======= */
+// Services per role
 const servicesByRole = {
-  individual:[{id:'add-initiative',title:'إضافة مبادرة'}],
-  private:[{id:'csr-report',title:'تقرير المسؤولية CSR'},{id:'sponsor',title:'رعاية فعالية'}],
-  nonprofit:[{id:'publish-opps',title:'نشر فرص'},{id:'manage-projects',title:'إدارة المشاريع'}],
-  university:[{id:'academic-review',title:'تعزيز علمي'},{id:'coop-training',title:'تدريب تعاوني'}],
-  government:[{id:'approve-events',title:'اعتماد الفعاليات'},{id:'request-solutions',title:'طلب حلول'}],
-  emirate:[{id:'regional-dashboard',title:'لوحة المنطقة'},{id:'approve-initiatives',title:'اعتماد مبادرات'}],
-  funder:[{id:'grant-portfolio',title:'محفظة المنح'},{id:'find-projects',title:'اعثر على مشاريع'}]
+  individual:[{id:'add-initiative',title:'إضافة مبادرة'},{id:'volunteer',title:'التطوع'},{id:'jobs-list',title:'وظائف'}],
+  private:[{id:'csr-report',title:'تقرير المسؤولية CSR'},{id:'sponsor',title:'رعاية فعالية/مشروع'},{id:'jobs',title:'نشر وظائف'},{id:'facilities-market',title:'مرافق الشركة'}],
+  nonprofit:[{id:'publish-opps',title:'نشر فرص'},{id:'manage-projects',title:'إدارة المشاريع'},{id:'funding-intake',title:'استقبال تمويل'}],
+  university:[{id:'academic-review',title:'استشارات علمية'},{id:'coop-training',title:'تدريب تعاوني'},{id:'research-listing',title:'أبحاث تطبيقية'}],
+  government:[{id:'challenge-request',title:'طرح تحديات'},{id:'approve-events',title:'اعتماد الفعاليات'},{id:'request-solutions',title:'طلب حلول'},{id:'gov-projects',title:'مشاريع حكومية 6/27/96'}],
+  emirate:[{id:'regional-dashboard',title:'لوحة المنطقة'},{id:'approve-initiatives',title:'اعتماد مبادرات'},{id:'prince-sponsorship',title:'رعاية سمو الأمير'},{id:'security-screening',title:'مسح أمني'}],
+  funder:[{id:'grant-criteria',title:'معايير المنح'},{id:'grant-portfolio',title:'محفظة المنح'},{id:'find-projects',title:'مطابقة مشاريع'},{id:'impact-reports',title:'تقارير الأثر'}],
+  partner:[{id:'partner-oversight',title:'واجهة الشريك'},{id:'partner-kpis',title:'مؤشرات الشريك'},{id:'policy-notices',title:'تنبيهات السياسات'}]
 };
+
 function renderServices(){
   const grid = document.getElementById('role-services'); if(!grid) return;
   grid.innerHTML = '';
@@ -483,7 +556,7 @@ function renderServices(){
   });
 }
 
-/* ======= Workspace per-service ======= */
+// Workspace per service
 function openService(id){
   const box = document.getElementById('service-workspace');
   box.style.display='block';
@@ -496,6 +569,11 @@ function openService(id){
         <input placeholder="اسم المبادرة" required/>
         <select><option>تعليمي</option><option>ثقافي</option><option>اجتماعي</option><option>اقتصادي</option></select>
         <textarea class="grid-col-span-2" placeholder="وصف مختصر" required></textarea>
+        <div class="grid grid-3">
+          <select><option>هدف 1..6</option></select>
+          <select><option>هدف فرعي 1..27</option></select>
+          <select><option>هدف تفصيلي 1..96</option></select>
+        </div>
         <button class="btn btn-primary">حفظ</button>
       </form>`; break;
     case 'csr-report':
@@ -503,16 +581,16 @@ function openService(id){
         <input placeholder="المنشأة" required/>
         <input placeholder="الفترة (2025-Q4)" required/>
         <input placeholder="حجم الإنفاق (ر.س)" required/>
-        <textarea class="grid-col-span-3" placeholder="ملاحظات/ربط مشاريع"></textarea>
+        <textarea class="grid-col-span-3" placeholder="ملاحظات/ربط مشاريع (6/27/96)"></textarea>
         <button class="btn btn-primary grid-col-span-3">توليد مسودة</button>
       </form>`; break;
     case 'sponsor':
       html += `<form id="ws-sponsor" class="grid grid-2">
-        <input placeholder="اسم الفعالية" required/>
+        <input placeholder="اسم الفعالية/المشروع" required/>
         <input placeholder="الجهة المنظمة" required/>
         <input placeholder="التاريخ"/>
         <input placeholder="المدينة"/>
-        <button class="btn btn-primary grid-col-span-2">إرسال الطلب</button>
+        <button class="btn btn-primary grid-col-span-2">إرسال طلب الرعاية</button>
       </form>`; break;
     case 'publish-opps':
       html += `<form id="ws-opp" class="grid grid-3">
@@ -543,11 +621,17 @@ function openService(id){
       </form>`; break;
     case 'approve-events':
       html += `<div id="ws-events" class="grid"></div>`; break;
-    case 'request-solutions':
-      html += `<form id="ws-sol" class="grid grid-2">
+    case 'challenge-request':
+      html += `<form id="ws-challenge" class="grid grid-2">
         <input placeholder="عنوان التحدي" required/>
         <textarea class="grid-col-span-2" placeholder="التفاصيل"></textarea>
-        <button class="btn btn-primary grid-col-span-2">نشر الطلب</button>
+        <button class="btn btn-primary grid-col-span-2">نشر التحدي</button>
+      </form>`; break;
+    case 'request-solutions':
+      html += `<form id="ws-sol" class="grid grid-2">
+        <input placeholder="عنوان الطلب" required/>
+        <textarea class="grid-col-span-2" placeholder="الاحتياج والتوقيت"></textarea>
+        <button class="btn btn-primary grid-col-span-2">إرسال</button>
       </form>`; break;
     case 'regional-dashboard':
       html += `<div class="grid grid-3">
@@ -557,6 +641,22 @@ function openService(id){
       </div>`; break;
     case 'approve-initiatives':
       html += `<div id="ws-approve" class="grid"></div>`; break;
+    case 'prince-sponsorship':
+      html += `<form id="ws-prince" class="grid grid-2">
+        <input placeholder="اسم الجهة/الفعالية" required/>
+        <input placeholder="التاريخ"/>
+        <textarea class="grid-col-span-2" placeholder="موجز الأثر المتوقع (ربط 6/27/96)"></textarea>
+        <button class="btn btn-primary grid-col-span-2">طلب رعاية سمو الأمير</button>
+      </form>`; break;
+    case 'security-screening':
+      html += `<form id="ws-sec" class="grid">
+        <input placeholder="اسم المتحدث/الفعالية" required/>
+        <input placeholder="الهوية/السجل (اختياري)"/>
+        <textarea placeholder="روابط أو ملاحظات داعمة"></textarea>
+        <button class="btn btn-primary">بدء المسح الأمني (تجريبي)</button>
+      </form>`; break;
+    case 'grant-criteria':
+      html += `<div class="card"><b>معايير المنح</b><p style="color:var(--gray)">ارفع ملفات المعايير أو حدّد أوزان التقييم.</p></div>`; break;
     case 'grant-portfolio':
       html += `<div class="grid grid-3">
         <div class="card"><small>إجمالي التمويل</small><div class="value">1.2م</div></div>
@@ -569,6 +669,13 @@ function openService(id){
         <input placeholder="المنطقة"/>
         <button class="btn btn-primary">بحث</button>
       </form><div id="ws-results" class="grid" style="margin-top:8px"></div>`; break;
+    case 'partner-oversight':
+      html += `<div class="grid grid-3">
+        <div class="card"><small>مؤشر 1</small><div class="value">—</div></div>
+        <div class="card"><small>مؤشر 2</small><div class="value">—</div></div>
+        <div class="card"><small>برامج نشطة</small><div class="value">—</div></div>
+      </div>
+      <small style="color:var(--gray)">هذه الصفحة تُهيّأ لكل شريك (أداء، منشآت، بنك التنمية …).</small>`; break;
     default:
       html += `<small>الخدمة غير معرّفة بعد.</small>`;
   }
@@ -597,7 +704,9 @@ function openService(id){
   }
 }
 
-/* ======= Initiatives (local) ======= */
+App.initiatives = App.initiatives || [];
+
+// Initiatives handlers
 document.getElementById('form-initiative').addEventListener('submit', e=>{
   e.preventDefault();
   const [name,cat,desc,b1,b2,b3] = Array.from(e.target.querySelectorAll('input,select,textarea')).map(el=>el.value);
@@ -605,6 +714,7 @@ document.getElementById('form-initiative').addEventListener('submit', e=>{
   App.initiatives.push(item); App.save();
   e.target.reset(); renderList(); updateStats(); alert('تم الحفظ');
 });
+
 function renderList(){
   const wrap = document.getElementById('list-initiatives'); if(!wrap) return; wrap.innerHTML='';
   if(!App.initiatives.length){ wrap.innerHTML = '<small style="color:var(--gray)">لا توجد مبادرات بعد.</small>'; return; }
@@ -626,6 +736,7 @@ function renderList(){
     wrap.appendChild(card);
   });
 }
+
 function updateStats(){
   const total = App.initiatives.length;
   const pending = App.initiatives.filter(i=>i.status==='قيد المراجعة').length;
@@ -640,14 +751,23 @@ function renderOpps(){
     d.innerHTML=`<b>${o.title}</b><small style="color:var(--gray)">${o.kind}</small>`; wrap.appendChild(d); });
 }
 
-/* ======= Init ======= */
+// Extra national KPIs
+function updateNationalKpis(){
+  const funded = 37, volunteeringOpen = 122, licensedEvents = 18;
+  const host = document.querySelector('#tab-overview .grid.kpi-grid');
+  const add = (label,val)=>{ const c=document.createElement('div'); c.className='card';
+    c.innerHTML=`<small>${label}</small><div class="value">${val}</div>`; host.appendChild(c); };
+  add('المشاريع الممولة', funded);
+  add('فرص التطوع المفتوحة', volunteeringOpen);
+  add('الفعاليات المرخصة', licensedEvents);
+}
+
+// Init
 (function init(){
-  if(App.user){
-    document.getElementById('userName').textContent = App.user.name;
-    document.getElementById('userRole').textContent = App.user.role;
-  }
+  if(App.user){ document.getElementById('userName').textContent = App.user.name; document.getElementById('userRole').textContent = App.user.role; }
   renderServices(); renderList(); updateStats(); renderOpps();
-  applyLang('ar'); // default Arabic; use EN toggle for English
+  updateNationalKpis();
+  applyLang('ar');
 })();
 </script>
 </body>
