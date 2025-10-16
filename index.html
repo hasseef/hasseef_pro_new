@@ -1099,5 +1099,99 @@
       </div>
     </div>
   </div>
+  <script>
+    // --- Interactive app state ---
+    const App = {
+      user: JSON.parse(localStorage.getItem('user')||'null'),
+      initiatives: JSON.parse(localStorage.getItem('initiatives')||'[]'),
+      opps: [
+        {title:'تطوع في ملتقى الشباب', kind:'اجتماعي'},
+        {title:'برنامج حاضنة مشاريع ناشئة', kind:'اقتصادي'},
+        {title:'مبادرة نادي قرّاء الجامعات', kind:'تعليمي'}
+      ]
+    };
+
+    // Router (hash)
+    function route(){
+      const hash = location.hash.replace('#','');
+      const dash = document.getElementById('dashboard');
+      if(hash==='dashboard'){ dash?.classList.remove('hidden'); window.scrollTo(0,0); }
+      else { dash?.classList.add('hidden'); }
+    }
+    window.addEventListener('hashchange', route);
+
+    // Login modal open
+    document.getElementById('loginBtn')?.addEventListener('click', ()=>{
+      const m = document.getElementById('modal-login'); m.classList.remove('hidden'); m.classList.add('flex');
+    });
+
+    // Generic close for login modal
+    document.querySelectorAll('#modal-login .hs-close').forEach(btn=>btn.addEventListener('click',()=>{
+      const mdl = document.getElementById('modal-login'); mdl.classList.add('hidden'); mdl.classList.remove('flex');
+    }));
+
+    // Login submit
+    document.getElementById('loginForm')?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const [name, role] = Array.from(e.target.querySelectorAll('input,select')).map(el=>el.value);
+      App.user = {name, role}; localStorage.setItem('user', JSON.stringify(App.user));
+      document.getElementById('userName').textContent = name;
+      document.getElementById('userRole').textContent = role;
+      location.hash = 'dashboard';
+      const mdl = document.getElementById('modal-login'); mdl.classList.add('hidden'); mdl.classList.remove('flex');
+      updateStats(); renderOpps(); renderList();
+    });
+
+    // Tabs
+    document.querySelectorAll('.tabBtn').forEach(btn=> btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tabPanel').forEach(p=>p.classList.add('hidden'));
+      document.getElementById(btn.dataset.tab)?.classList.remove('hidden');
+    }));
+
+    // Initiatives form
+    document.getElementById('form-initiative')?.addEventListener('submit',(e)=>{
+      e.preventDefault();
+      const [name,cat,desc,b1,b2,b3] = Array.from(e.target.querySelectorAll('input,select,textarea')).map(el=>el.value);
+      const item = {id:Date.now(), name, cat, desc, blocks:{b1,b2,b3}, status:'قيد المراجعة'};
+      App.initiatives.push(item); localStorage.setItem('initiatives', JSON.stringify(App.initiatives));
+      e.target.reset(); renderList(); updateStats();
+    });
+
+    function renderList(){
+      const wrap = document.getElementById('list-initiatives'); if(!wrap) return; wrap.innerHTML='';
+      if(!App.initiatives.length){ wrap.innerHTML = '<div class="text-sm text-hasseef-gray">لا توجد مبادرات بعد.</div>'; return; }
+      App.initiatives.slice().reverse().forEach(it=>{
+        const card = document.createElement('div'); card.className='rounded-xl border p-3 bg-white';
+        card.innerHTML = `<div class="flex items-center justify-between"><div class="font-bold">${it.name}</div><span class="text-xs rounded-full px-2 py-0.5 bg-hasseef-goldSoft">${it.status}</span></div>
+          <div class="text-xs text-hasseef-gray mt-1">${it.cat} • ${it.desc}</div>
+          <div class="mt-2 grid md:grid-cols-3 gap-2 text-xs"><div class="rounded border p-2">${it.blocks.b1||'-'}</div><div class="rounded border p-2">${it.blocks.b2||'-'}</div><div class="rounded border p-2">${it.blocks.b3||'-'}</div></div>
+          <div class="mt-2 flex gap-2 text-xs"><button class="border px-2 py-1 rounded" data-act="approve">اعتماد</button><button class="border px-2 py-1 rounded" data-act="delete">حذف</button></div>`;
+        card.querySelector('[data-act="delete"]').addEventListener('click',()=>{ App.initiatives = App.initiatives.filter(x=>x.id!==it.id); localStorage.setItem('initiatives', JSON.stringify(App.initiatives)); renderList(); updateStats(); });
+        card.querySelector('[data-act="approve"]').addEventListener('click',()=>{ it.status='معتمد'; localStorage.setItem('initiatives', JSON.stringify(App.initiatives)); renderList(); });
+        wrap.appendChild(card);
+      });
+    }
+
+    function updateStats(){
+      const total = App.initiatives.length; const pending = App.initiatives.filter(i=>i.status==='قيد المراجعة').length; const opps = App.opps.length;
+      (document.getElementById('stat-initiatives')||{}).textContent = total;
+      (document.getElementById('stat-pending')||{}).textContent = pending;
+      (document.getElementById('stat-opps')||{}).textContent = opps;
+    }
+
+    function renderOpps(){
+      const wrap = document.getElementById('list-opps'); if(!wrap) return; wrap.innerHTML='';
+      App.opps.forEach(o=>{ const d=document.createElement('div'); d.className='rounded-xl border p-3 bg-white'; d.innerHTML=`<div class="font-bold text-sm">${o.title}</div><div class="text-xs text-hasseef-gray">${o.kind}</div>`; wrap.appendChild(d); });
+    }
+
+    // Restore session
+    (function init(){
+      route();
+      if(App.user){ document.getElementById('userName').textContent = App.user.name; document.getElementById('userRole').textContent = App.user.role; }
+      renderList(); updateStats(); renderOpps();
+    })();
+  </script>
 </body>
 </html>
