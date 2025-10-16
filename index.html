@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>منصة حصيف | نموذج واجهة موحّدة</title>
-  <meta name="description" content="النسخة البرمجية الأولية (ملف واحد) لواجهة منصة حصيف، تشمل الحسابات والخدمات والصلاحيات، وإدارة المنصة، والاشتراكات، وفئات الرعاية، والدعم الفني." />
+  <meta name="description" content="النسخة البرمجية (ملف واحد) لواجهة منصة حصيف مع الوضع الليلي، مؤشرات أداء حية، شعارات الشركاء، حساب الإمارة، وحسابات الشركاء الاستراتيجيين، وربط التواصل." />
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,13 +14,14 @@
         extend: {
           colors: {
             hasseef: {
-              green: '#147D64',
-              greenSoft: '#E6F4F1',
-              gold: '#C6A44A',
-              goldSoft: '#FBF7EA',
-              dark: '#0F172A',
-              gray: '#64748B',
-              graySoft: '#F1F5F9'
+              /* Lighter, logo-friendly palette */
+              green: '#2EC8A6',
+              greenSoft: '#ECFFFA',
+              gold: '#E7C66A',
+              goldSoft: '#FFF9E9',
+              dark: '#111827',
+              gray: '#6B7280',
+              graySoft: '#F5F7FB'
             }
           },
           boxShadow: {
@@ -39,6 +40,15 @@
   <style>
     html { scroll-behavior: smooth; }
     .container { max-width: 1200px; }
+    /* ====== Dark mode overrides (gentle/dim to preserve logo clarity) ====== */
+    html.dark body { background-color: #0b1220; color: #e5e7eb; }
+    html.dark .bg-white { background-color: #0f1629 !important; }
+    html.dark .border { border-color: rgba(255,255,255,0.12) !important; }
+    html.dark .text-hasseef-gray { color: #cbd5e1 !important; }
+    html.dark header { background-color: rgba(15,22,41,0.8) !important; }
+    html.dark .bg-hasseef-graySoft { background-color: rgba(255,255,255,0.06) !important; }
+    html.dark .bg-hasseef-greenSoft { background-color: rgba(46,200,166,0.16) !important; }
+    html.dark .bg-hasseef-goldSoft { background-color: rgba(231,198,106,0.15) !important; }
   </style>
 </head>
 <body class="font-cairo text-hasseef-dark bg-white">
@@ -58,6 +68,10 @@
           <a href="#sponsors" class="hover:text-hasseef-green">الرعاة</a>
           <a href="#stories" class="hover:text-hasseef-green">قصص نجاح</a>
           <a href="#contact" class="hover:text-hasseef-green">تواصل</a>
+          <button id="themeToggle" type="button" class="ms-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border" title="الوضع الليلي">
+            <span class="text-xs">الوضع</span>
+            <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8-9h1M3 12H2m14.95 6.364l.707.707M5.343 6.343l-.707-.707m12.021 0l.707-.707M5.343 17.657l-.707.707"/></svg>
+          </button>
         </nav>
         <button id="menuBtn" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border text-hasseef-dark">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -72,6 +86,7 @@
           <a href="#sponsors" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">الرعاة</a>
           <a href="#stories" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">قصص نجاح</a>
           <a href="#contact" class="block px-2 py-2 rounded hover:bg-hasseef-graySoft">تواصل</a>
+          <button id="themeToggleMobile" class="mt-2 px-3 py-2 rounded-xl border">تبديل الوضع</button>
         </div>
       </div>
     </div>
@@ -104,25 +119,25 @@
         <div class="relative">
           <div class="rounded-3xl border bg-white shadow-soft p-6">
             <div class="grid grid-cols-3 gap-4">
-              <div class="col-span-3 text-sm font-bold">لوحات مؤشرات مدمجة</div>
+              <div class="col-span-3 text-sm font-bold">لوحات مؤشرات حية</div>
               <div class="rounded-2xl bg-hasseef-graySoft p-4">
                 <div class="text-xs text-hasseef-gray">التوظيف</div>
-                <div class="text-2xl font-extrabold">+18%</div>
+                <div class="text-2xl font-extrabold"><span id="kpi-employment">+18%</span></div>
               </div>
               <div class="rounded-2xl bg-hasseef-graySoft p-4">
                 <div class="text-xs text-hasseef-gray">التكامل</div>
-                <div class="text-2xl font-extrabold">92%</div>
+                <div class="text-2xl font-extrabold"><span id="kpi-integration">92%</span></div>
               </div>
               <div class="rounded-2xl bg-hasseef-graySoft p-4">
                 <div class="text-xs text-hasseef-gray">المشاريع</div>
-                <div class="text-2xl font-extrabold">1,240</div>
+                <div class="text-2xl font-extrabold"><span id="kpi-projects">1,240</span></div>
               </div>
               <div class="col-span-3 rounded-2xl bg-hasseef-goldSoft p-4">
                 <div class="text-xs text-hasseef-gray">محاذاة أهداف رؤية 2030</div>
-                <div class="flex items-center gap-2 mt-1">
-                  <div class="h-2 w-2/3 rounded bg-hasseef-green"></div>
-                  <div class="h-2 w-1/6 rounded bg-emerald-300"></div>
-                  <div class="h-2 w-1/6 rounded bg-emerald-100"></div>
+                <div class="flex items-center gap-2 mt-1 w-full">
+                  <div id="bar-1" class="h-2 rounded bg-hasseef-green" style="width:66%"></div>
+                  <div id="bar-2" class="h-2 rounded bg-emerald-300" style="width:17%"></div>
+                  <div id="bar-3" class="h-2 rounded bg-emerald-100" style="width:17%"></div>
                 </div>
               </div>
             </div>
@@ -167,7 +182,7 @@
             <div class="p-3 rounded-xl bg-hasseef-greenSoft">المانحون</div>
           </div>
           <div class="mt-6 text-xs text-hasseef-gray">
-            * تشمل هذه النسخة ربطًا بالشركاء الاستراتيجيين (مركز أداء، المركز الوطني لتنمية القطاع غير الربحي، وزارة الاقتصاد والتخطيط، وزارة المالية، وزارة الداخلية، وزارة الثقافة، وزارة التعليم، منشآت، وغيرها).
+            * تشمل هذه النسخة ربطًا بالشركاء الاستراتيجيين (مركز أداء، المركز الوطني لتنمية القطاع غير الربحي، وزارة الاقتصاد والتخطيط، وزارة المالية، وزارة الداخلية، وزارة الثقافة، وغيرها).
           </div>
         </div>
       </div>
@@ -189,7 +204,25 @@
       </div>
 
       <div class="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Account Card Template: repeat per account -->
+        <!-- Emirate Account (new) -->
+        <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="emirate">
+          <div class="flex items-center justify-between">
+            <h3 class="font-extrabold">حساب الإمارة</h3>
+            <span class="text-xs px-2 py-1 rounded bg-hasseef-goldSoft">إشراف مناطقي</span>
+          </div>
+          <p class="mt-2 text-sm text-hasseef-gray">استعراض مشاريع المنطقة، اعتماد الفعاليات، متابعة الفرص، والتكامل مع الشركاء.</p>
+          <ul class="mt-4 text-sm space-y-2">
+            <li>• لوحة مبادرات ومشاريع المنطقة</li>
+            <li>• متابعة الوظائف والتدريب والتطوع</li>
+            <li>• تقارير مؤشرات إقليمية وربط بالجهات</li>
+          </ul>
+          <div class="mt-4 flex gap-2">
+            <button class="hs-open px-4 py-2 rounded-xl bg-hasseef-green text-white text-sm" data-modal="modal-emirate">عرض التفاصيل</button>
+            <a href="#pricing" class="px-4 py-2 rounded-xl border text-sm">الاشتراك</a>
+          </div>
+        </div>
+
+        <!-- Other accounts -->
         <div class="rounded-2xl border p-6 hover:shadow-soft transition" data-account="individual">
           <div class="flex items-center justify-between">
             <h3 class="font-extrabold">حساب الأفراد</h3>
@@ -293,18 +326,68 @@
         </div>
       </div>
 
-      <!-- Strategic Partners -->
+      <!-- Strategic Partners logos -->
       <div class="mt-12">
         <h3 class="font-extrabold text-lg mb-4">الشركاء الاستراتيجيون</h3>
-        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-sm">
-          <div class="p-3 rounded-xl border text-center">المركز الوطني لتنمية القطاع غير الربحي</div>
-          <div class="p-3 rounded-xl border text-center">مركز أداء</div>
-          <div class="p-3 rounded-xl border text-center">وزارة الاقتصاد والتخطيط</div>
-          <div class="p-3 rounded-xl border text-center">وزارة المالية</div>
-          <div class="p-3 rounded-xl border text-center">وزارة الداخلية</div>
-          <div class="p-3 rounded-xl border text-center">وزارة الثقافة</div>
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-sm items-center">
+          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=NPOC" alt="المركز الوطني لتنمية القطاع غير الربحي"/><div class="sr-only">المركز الوطني لتنمية القطاع غير الربحي</div></div>
+          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=Adaa" alt="مركز أداء"/><div class="sr-only">مركز أداء</div></div>
+          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MEP" alt="وزارة الاقتصاد والتخطيط"/><div class="sr-only">وزارة الاقتصاد والتخطيط</div></div>
+          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MOF" alt="وزارة المالية"/><div class="sr-only">وزارة المالية</div></div>
+          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MOI" alt="وزارة الداخلية"/><div class="sr-only">وزارة الداخلية</div></div>
+          <div class="p-3 rounded-xl border text-center bg-white"><img class="mx-auto h-10" src="https://via.placeholder.com/160x40?text=MOC" alt="وزارة الثقافة"/><div class="sr-only">وزارة الثقافة</div></div>
         </div>
       </div>
+
+      <!-- Strategic partner accounts (new) -->
+      <div class="mt-10">
+        <h3 class="font-extrabold text-lg mb-4">حسابات الشركاء الاستراتيجيين</h3>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="rounded-2xl border p-6">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold">حساب المركز الوطني لتنمية القطاع غير الربحي</h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
+            </div>
+            <p class="mt-2 text-sm text-hasseef-gray">متابعة دعم القطاع، تقارير الأثر، وتكامل موافقات البرامج.</p>
+          </div>
+          <div class="rounded-2xl border p-6">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold">حساب مركز أداء</h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
+            </div>
+            <p class="mt-2 text-sm text-hasseef-gray">مؤشرات الأداء الوطني للمشاريع وتكامل القياس.</p>
+          </div>
+          <div class="rounded-2xl border p-6">
+            <div class="flex items-center justify_between">
+              <h4 class="font-bold">حساب وزارة الاقتصاد والتخطيط</h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
+            </div>
+            <p class="mt-2 text-sm text-hasseef-gray">مواءمة المبادرات مع الخطط الاقتصادية ومتابعة المؤشرات.</p>
+          </div>
+          <div class="rounded-2xl border p-6">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold">حساب وزارة المالية</h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
+            </div>
+            <p class="mt-2 text-sm text-hasseef-gray">إشراف مالي وتقارير الامتثال للمشاريع المدعومة.</p>
+          </div>
+          <div class="rounded-2xl border p-6">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold">حساب وزارة الداخلية</h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
+            </div>
+            <p class="mt-2 text-sm text-hasseef-gray">تكامل مناطقي مع إمارات المناطق ومؤشرات السلامة.</p>
+          </div>
+          <div class="rounded-2xl border p-6">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold">حساب وزارة الثقافة</h4>
+              <span class="text-xs px-2 py-1 rounded bg-hasseef-greenSoft">شريك</span>
+            </div>
+            <p class="mt-2 text-sm text-hasseef-gray">متابعة المشاريع الثقافية والفعاليات.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -360,7 +443,6 @@
         </div>
 
         <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="ideas">
-          <!-- Example idea cards -->
           <div class="rounded-xl border p-4">
             <div class="text-sm font-bold">دعم لوحة للمؤشرات الإقليمية</div>
             <p class="mt-1 text-xs text-hasseef-gray">عرض المقارنات بين المناطق وإبراز الشركات الأكثر مساهمة.</p>
@@ -399,7 +481,6 @@
       </div>
 
       <div class="mt-10 grid md:grid-cols-3 gap-6">
-        <!-- Basic -->
         <div class="rounded-3xl border p-6">
           <div class="text-sm font-bold text-hasseef-gray">أساسي</div>
           <div class="mt-1 text-3xl font-extrabold">مجاني</div>
@@ -410,7 +491,6 @@
           </ul>
           <a href="#contact" class="mt-6 inline-block px-4 py-2 rounded-xl border">جرّبه الآن</a>
         </div>
-        <!-- Pro -->
         <div class="rounded-3xl border p-6 bg-hasseef-goldSoft">
           <div class="text-sm font-bold text-hasseef-gray">متقدم</div>
           <div class="mt-1 text-3xl font-extrabold">299 ر.س / شهر</div>
@@ -421,7 +501,6 @@
           </ul>
           <a href="#contact" class="mt-6 inline-block px-4 py-2 rounded-xl bg-hasseef-green text-white">ابدأ الآن</a>
         </div>
-        <!-- Enterprise -->
         <div class="rounded-3xl border p-6">
           <div class="text-sm font-bold text-hasseef-gray">متميز</div>
           <div class="mt-1 text-3xl font-extrabold">مخصص</div>
@@ -499,15 +578,15 @@
       </div>
 
       <div class="mt-8 grid md:grid-cols-3 gap-6">
-        <div class="rounded-2xl border p-5">
+        <div class="rounded-2xl border p-5 bg-white">
           <div class="text-sm font-bold">منصة سجلها — اعتماد وطني</div>
           <p class="mt-2 text-xs text-hasseef-gray">أُدرجت ضمن منتج MVPLAB في البرنامج الوطني لتنمية تقنية المعلومات؛ أكثر من 400 منشأة مستفيدة.</p>
         </div>
-        <div class="rounded-2xl border p-5">
+        <div class="rounded-2xl border p-5 bg-white">
           <div class="text-sm font-bold">بودكاست الإعاقة — تمكين الوعي</div>
           <p class="mt-2 text-xs text-hasseef-gray">محتوى مرئي على يوتيوب، ملف تسويقي جاهز للشراكات والرعايات.</p>
         </div>
-        <div class="rounded-2xl border p-5">
+        <div class="rounded-2xl border p-5 bg-white">
           <div class="text-sm font-bold">معرض تلبية — حاضنة مجتمعية</div>
           <p class="mt-2 text-xs text-hasseef-gray">تطوير التشبيك وإتاحة فرص التدريب التعاوني لطلاب الجامعات والكليات.</p>
         </div>
@@ -525,7 +604,7 @@
           <div class="mt-6 grid grid-cols-2 gap-3 text-sm">
             <div class="rounded-2xl border bg-white p-4">
               <div class="font-bold">البريد</div>
-              <div class="text-hasseef-gray">info@hasseef.sa</div>
+              <div class="text-hasseef-gray"><a class="underline" href="mailto:info@talbiya.sa">info@talbiya.sa</a></div>
             </div>
             <div class="rounded-2xl border bg-white p-4">
               <div class="font-bold">الهاتف</div>
@@ -533,7 +612,7 @@
             </div>
           </div>
         </div>
-        <form class="rounded-3xl border bg-white p-6 shadow-soft grid gap-4" onsubmit="event.preventDefault(); alert('تم استلام رسالتك — شكرًا لك!'); this.reset();">
+        <form id="contactForm" class="rounded-3xl border bg-white p-6 shadow-soft grid gap-4">
           <div class="grid gap-2">
             <label class="text-sm">الاسم</label>
             <input required class="w-full rounded-xl border px-3 py-2" placeholder="اسمك الثلاثي">
@@ -551,6 +630,7 @@
               <option>الجامعات</option>
               <option>الحكومة</option>
               <option>المانحون</option>
+              <option>الإمارة</option>
             </select>
           </div>
           <div class="grid gap-2">
@@ -609,7 +689,7 @@
   <!-- Private Modal -->
   <div id="modal-private" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
     <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between">
+      <div class="flex items_center justify-between">
         <h3 class="font-extrabold">تفاصيل حساب القطاع الخاص</h3>
         <button class="hs-close text-hasseef-gray">إغلاق</button>
       </div>
@@ -637,7 +717,7 @@
   <!-- Nonprofit Modal -->
   <div id="modal-nonprofit" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
     <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between">
+      <div class="flex items_center justify-between">
         <h3 class="font-extrabold">تفاصيل حساب القطاع غير الربحي</h3>
         <button class="hs-close text-hasseef-gray">إغلاق</button>
       </div>
@@ -665,7 +745,7 @@
   <!-- University Modal -->
   <div id="modal-university" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
     <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between">
+      <div class="flex items_center justify-between">
         <h3 class="font-extrabold">تفاصيل حساب الجامعات</h3>
         <button class="hs-close text-hasseef-gray">إغلاق</button>
       </div>
@@ -691,7 +771,7 @@
   </div>
 
   <!-- Government Modal -->
-  <div id="modal-government" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+  <div id="modal-government" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify_center p-4">
     <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
       <div class="flex items-center justify-between">
         <h3 class="font-extrabold">تفاصيل حساب الحكومة</h3>
@@ -721,7 +801,7 @@
   <!-- Funder Modal -->
   <div id="modal-funder" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
     <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
-      <div class="flex items-center justify-between">
+      <div class="flex items_center justify-between">
         <h3 class="font-extrabold">تفاصيل حساب المانحين</h3>
         <button class="hs-close text-hasseef-gray">إغلاق</button>
       </div>
@@ -740,6 +820,34 @@
             <li>• اعتماد تمويل المشاريع</li>
             <li>• متابعة الأداء عبر مؤشرات مخصصة</li>
             <li>• تكامل مع أنظمة المحاسبة والتدقيق</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emirate Modal -->
+  <div id="modal-emirate" class="hs-modal hidden fixed inset-0 bg-black/40 items-center justify-center p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-soft">
+      <div class="flex items-center justify-between">
+        <h3 class="font-extrabold">تفاصيل حساب الإمارة</h3>
+        <button class="hs-close text-hasseef-gray">إغلاق</button>
+      </div>
+      <div class="mt-4 grid md:grid-cols-2 gap-6 text-sm">
+        <div>
+          <div class="font-bold mb-2">الخدمات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• اعتماد الفعاليات وإدارة المشاركات</li>
+            <li>• استعراض المشاريع والتمويلات في المنطقة</li>
+            <li>• تقارير داعمي المنطقة وأثرهم</li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-bold mb-2">الصلاحيات</div>
+          <ul class="space-y-1 text-hasseef-gray">
+            <li>• قبول/رفض الشراكات الاستراتيجية</li>
+            <li>• متابعة مؤشرات الأداء الإقليمية</li>
+            <li>• ربط مع الجهات الحكومية والجامعات</li>
           </ul>
         </div>
       </div>
@@ -773,12 +881,10 @@
 
     document.addEventListener('click', (e) => {
       const target = e.target;
-      // Close on close button
       if (target.closest && target.closest(closeSelector)) {
         const modal = target.closest('.' + modalClass);
         if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
       }
-      // Close on outside click
       const m = target.classList && target.classList.contains(modalClass);
       if (m) { target.classList.add('hidden'); target.classList.remove('flex'); }
     });
@@ -793,6 +899,57 @@
         btn.classList.add('opacity-50');
       });
     });
+
+    // THEME: persist with localStorage
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeToggleMobile = document.getElementById('themeToggleMobile');
+    function applyTheme(t){ t==='dark' ? root.classList.add('dark') : root.classList.remove('dark'); }
+    function toggleTheme(){ const t = localStorage.getItem('theme')==='dark' ? 'light' : 'dark'; localStorage.setItem('theme', t); applyTheme(t); }
+    applyTheme(localStorage.getItem('theme')||'light');
+    themeToggle?.addEventListener('click', toggleTheme);
+    themeToggleMobile?.addEventListener('click', toggleTheme);
+
+    // KPIs: simple live updates (demo)
+    function animateNumber(el, base, variance=5){
+      if(!el) return; let current = base;
+      setInterval(()=>{ const delta = (Math.random()*variance - variance/2); current = Math.max(0, current + delta);
+        if(el.id==='kpi-projects'){ el.textContent = Math.round(current).toLocaleString('en-US'); }
+        else if(el.id==='kpi-integration'){ el.textContent = (current).toFixed(1)+'%'; }
+        else { el.textContent = (current>0?'+':'') + current.toFixed(1)+'%'; }
+      }, 2500);
+    }
+    animateNumber(document.getElementById('kpi-employment'), 18);
+    animateNumber(document.getElementById('kpi-integration'), 92);
+    animateNumber(document.getElementById('kpi-projects'), 1240, 20);
+
+    // Bars update
+    function animateBars(){
+      const b1 = document.getElementById('bar-1');
+      const b2 = document.getElementById('bar-2');
+      const b3 = document.getElementById('bar-3');
+      setInterval(()=>{
+        const a = Math.floor(50 + Math.random()*30);
+        const b = Math.floor((100-a)/2);
+        const c = 100 - a - b;
+        if(b1) b1.style.width = a+'%';
+        if(b2) b2.style.width = b+'%';
+        if(b3) b3.style.width = c+'%';
+      }, 3000);
+    }
+    animateBars();
+
+    // Contact form -> mailto
+    const form = document.getElementById('contactForm');
+    if(form){
+      form.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const [name,email,account,message] = Array.from(form.querySelectorAll('input,select,textarea')).map(el=>encodeURIComponent(el.value));
+        const subject = `استفسار من ${decodeURIComponent(name)}`;
+        const body = `الحساب: ${decodeURIComponent(account)}%0D%0Aالبريد: ${decodeURIComponent(email)}%0D%0A%0D%0A${decodeURIComponent(message)}`;
+        window.location.href = `mailto:info@talbiya.sa?subject=${subject}&body=${body}`;
+      });
+    }
   </script>
 </body>
 </html>
